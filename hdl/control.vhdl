@@ -34,7 +34,7 @@ end control;
 
 architecture behavioural of control is
     signal s_count: integer range input_size - 1 downto 0;
-    type rd_enable_state is (s_rd_rst, s_rd_start, s_rd_cnt, s_rd_shift);
+    type rd_enable_state is (s_rd_rst, s_rd_cnt);
     signal s_rd_enable: rd_enable_state; 
 
 begin
@@ -44,52 +44,45 @@ begin
         data_loop: for tile_index in 1 to n_tiles loop
             o_data(tile_index * max_datatype_size - 1 downto (tile_index - 1) * max_datatype_size) <= i_data;
         end loop;
-        if rising_edge(i_clk) then
-            if i_rst = '1' then
-                s_count <= 0;
-            elsif i_control = '1' then
-                if s_count = input_size - 1 then
-                    s_count <= 0;
-                else
-                    s_count <= s_count + 1;
-                end if;
-            end if;
-        end if;
 
         if rising_edge(i_clk) then
             if i_rst = '1' then
+                s_count <= 0;
                 o_rd_enable <= (n_tiles - 1 downto 0 => '0');
                 s_rd_enable <= s_rd_rst;
                 o_start <= (n_tiles - 1 downto 0 => '0');
             else
                 case s_rd_enable is
                     when s_rd_rst =>
-                        o_rd_enable <= (n_tiles - 1 downto 0 => '0');
+                        s_count <= 0;
                         if i_control = '1' then
-                            s_rd_enable <= s_rd_start;
+                            s_rd_enable <= s_rd_cnt;
+                            o_rd_enable(col_split_tiles - 1 downto 0) <= (col_split_tiles - 1 downto 0 => '1');
+                        else
+                            s_rd_enable <= s_rd_rst;
+                            o_rd_enable <= (n_tiles - 1 downto 0 => '0');
                         end if;
                         o_start <= (n_tiles - 1 downto 0 => '0');
-                    when s_rd_start =>
-                        o_rd_enable(col_split_tiles - 1 downto 0) <= (col_split_tiles - 1 downto 0 => '1');
-                        s_rd_enable <= s_rd_cnt;
-                        o_start <= (n_tiles - 1 downto 0 => '0');
                     when s_rd_cnt =>
-                        o_rd_enable <= o_rd_enable;
-                        if s_count = tile_rows then
+                        if s_count = tile_rows - 1 then
+                            s_count <= s_count + 1;
                             o_start <= (n_tiles - 1 downto 0 => '0');
                             if o_rd_enable(n_tiles - 1 downto n_tiles - col_split_tiles) = (col_split_tiles - 1 downto 0 => '1') then
                                 s_rd_enable <= s_rd_rst;
                             else
-                                s_rd_enable <= s_rd_shift;
+                                o_rd_enable <= o_rd_enable sll col_split_tiles;
                             end if;
                         elsif s_count = input_size - 1 then
+                            s_count <= 0;
                             s_rd_enable <= s_rd_rst;
+                            o_rd_enable <= (n_tiles - 1 downto 0 => '0');
                             o_start <= (n_tiles - 1 downto 0 => '1');
+                        else
+                            o_rd_enable <= o_rd_enable;
+                            s_count <= s_count + 1;
+                            s_rd_enable <= s_rd_enable;
+                            o_start <= (n_tiles - 1 downto 0 => '0');
                         end if;
-                    when s_rd_shift =>
-                        s_rd_enable <= s_rd_cnt;
-                        o_rd_enable <= o_rd_enable sll col_split_tiles;
-                        o_start <= (n_tiles - 1 downto 0 => '0');
                 end case;                        
             end if;
         end if;

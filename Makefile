@@ -17,6 +17,9 @@ SIMDIR = simulation
 #GHDL_SIM_OPT = --assert-level=error
 #GHDL_SIM_OPT = --stop-time=$(STOP_TIME)
 
+#@$(GHDL_CMD) -r $(GHDL_FLAGS) $(TESTBENCHFILE) --vcdgz=$(SIMDIR)/$(TESTBENCHFILE).vcdgz
+#@gunzip --stdout $(SIMDIR)/$(TESTBENCHFILE).vcdgz | $(WAVEFORM_VIEWER) --vcd
+
 WAVEFORM_VIEWER = gtkwave
 
 .PHONY: clean
@@ -37,10 +40,10 @@ endif
 	make compile TESTBENCH=${TESTBENCH}
 
 run:
-	@$(GHDL_CMD) -r $(GHDL_FLAGS) $(TESTBENCHFILE) --vcdgz=$(SIMDIR)/$(TESTBENCHFILE).vcdgz
+	@$(GHDL_CMD) -r $(GHDL_FLAGS) $(TESTBENCHFILE) --wave=$(SIMDIR)/$(TESTBENCHFILE).ghw
 
 view:
-	@gunzip --stdout $(SIMDIR)/$(TESTBENCHFILE).vcdgz | $(WAVEFORM_VIEWER) --vcd
+	@$(WAVEFORM_VIEWER) $(SIMDIR)/$(TESTBENCHFILE).ghw
 
 clean:
 	@rm -rf $(SIMDIR)
