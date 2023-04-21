@@ -1,6 +1,7 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use IEEE.math_real.all;
+use ieee.numeric_std.all;
 
 entity control is
     generic(
@@ -19,8 +20,8 @@ entity control is
         i_rst: in std_logic;
 
         i_data: in std_logic_vector(max_datatype_size - 1 downto 0); -- Input data
-        i_control: in std_logic; -- Input control
-        o_control: out std_logic; -- Output control
+        i_control: in std_logic; -- Input control: Input buffer full, control consume data
+        o_control: out std_logic; -- Output control: Input buffer empty, control ready
         
         o_data: out std_logic_vector(max_datatype_size * n_tiles - 1 downto 0); -- Data per tile
         o_addr_rd_buf: out std_logic_vector(addr_rd_size * n_tiles - 1 downto 0); -- RD addr per tile
@@ -33,28 +34,37 @@ entity control is
 end control;
 
 architecture behavioural of control is
-    signal s_count: integer range input_size - 1 downto 0;
+    signal s_count: natural range input_size - 1 downto 0;
+    signal s_addr_count: natural range tile_rows - 1 downto 0;
     type rd_enable_state is (s_rd_rst, s_rd_cnt);
-    signal s_rd_enable: rd_enable_state; 
+    signal s_rd_enable: rd_enable_state;
 
 begin
 
-    clk_process: process(i_clk, i_rst) is
+    data_copy_proc: process(i_data, s_addr_count) is
     begin
         data_loop: for tile_index in 1 to n_tiles loop
             o_data(tile_index * max_datatype_size - 1 downto (tile_index - 1) * max_datatype_size) <= i_data;
+            o_addr_rd_buf(tile_index * addr_rd_size - 1 downto (tile_index - 1) * addr_rd_size) <= std_logic_vector(to_unsigned(s_addr_count, addr_rd_size));
         end loop;
+    end process;
 
+    clk_process: process(all) is
+    begin
         if rising_edge(i_clk) then
             if i_rst = '1' then
                 s_count <= 0;
+                s_addr_count <= 0;
                 o_rd_enable <= (n_tiles - 1 downto 0 => '0');
                 s_rd_enable <= s_rd_rst;
                 o_start <= (n_tiles - 1 downto 0 => '0');
+                o_control <= '1';
             else
+                o_control <= '0';
                 case s_rd_enable is
                     when s_rd_rst =>
                         s_count <= 0;
+                        s_addr_count <= 0;
                         if i_control = '1' then
                             s_rd_enable <= s_rd_cnt;
                             o_rd_enable(col_split_tiles - 1 downto 0) <= (col_split_tiles - 1 downto 0 => '1');
@@ -66,6 +76,7 @@ begin
                     when s_rd_cnt =>
                         if s_count = tile_rows - 1 then
                             s_count <= s_count + 1;
+                            s_addr_count <= 0;
                             o_start <= (n_tiles - 1 downto 0 => '0');
                             if o_rd_enable(n_tiles - 1 downto n_tiles - col_split_tiles) = (col_split_tiles - 1 downto 0 => '1') then
                                 s_rd_enable <= s_rd_rst;
@@ -74,12 +85,14 @@ begin
                             end if;
                         elsif s_count = input_size - 1 then
                             s_count <= 0;
+                            s_addr_count <= 0;
                             s_rd_enable <= s_rd_rst;
                             o_rd_enable <= (n_tiles - 1 downto 0 => '0');
                             o_start <= (n_tiles - 1 downto 0 => '1');
                         else
                             o_rd_enable <= o_rd_enable;
                             s_count <= s_count + 1;
+                            s_addr_count <= s_addr_count + 1;
                             s_rd_enable <= s_rd_enable;
                             o_start <= (n_tiles - 1 downto 0 => '0');
                         end if;
