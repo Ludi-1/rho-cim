@@ -1,2 +1,7 @@
 *.cf
 simulation
+*.xml
+__pycache__
+sim_build
+vcd
+wave

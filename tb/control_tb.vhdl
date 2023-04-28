@@ -24,6 +24,7 @@ architecture behavioural of control_tb is
     constant max_address_size: integer := 8;
     constant addr_rd_size: integer := integer(ceil(log2(real(n_tiles * tile_rows))));
     constant addr_out_buf_size: integer := integer(ceil(log2(real(n_tiles * tile_rows))));
+    constant count_vec_size: integer := integer(ceil(log2(real(input_size))));
 
     component control
         generic(
@@ -35,7 +36,8 @@ architecture behavioural of control_tb is
             col_split_tiles: integer; -- Column (neurons) split up in j tiles
             n_tiles: integer := integer(real(row_split_tiles * col_split_tiles)); -- Amount (n) of tiles
             addr_rd_size: integer := integer(ceil(log2(real(n_tiles * tile_rows)))); -- Bit length of rd buf addr
-            addr_out_buf_size: integer := integer(ceil(log2(real(n_tiles * tile_rows)))) -- Bit length output buf addr
+            addr_out_buf_size: integer := integer(ceil(log2(real(n_tiles * tile_rows)))); -- Bit length output buf addr
+            count_vec_size: integer := integer(ceil(log2(real(input_size))))
         );
         port(
             i_clk: in std_logic;
@@ -51,7 +53,8 @@ architecture behavioural of control_tb is
             o_start: out std_logic_vector(n_tiles - 1 downto 0); -- Start signal to all tiles 
             i_done: in std_logic_vector(n_tiles - 1 downto 0); -- Done signal from all tiles
             o_rd_enable: out std_logic_vector(n_tiles - 1 downto 0); -- Enable rd buf addr
-            o_out_buf_enable: out std_logic_vector(n_tiles - 1 downto 0) -- Enable output buf addr
+            o_out_buf_enable: out std_logic_vector(n_tiles - 1 downto 0); -- Enable output buf addr
+            o_inbuf_count: out std_logic_vector(count_vec_size - 1 downto 0)
         );
     end component;
 
@@ -67,6 +70,7 @@ architecture behavioural of control_tb is
     signal i_done: std_logic_vector(n_tiles - 1 downto 0);
     signal o_rd_enable: std_logic_vector(n_tiles - 1 downto 0);
     signal o_out_buf_enable: std_logic_vector(n_tiles - 1 downto 0);
+    signal o_inbuf_count: std_logic_vector(count_vec_size - 1 downto 0);
 
 begin
 
@@ -90,7 +94,8 @@ begin
         o_start => o_start,
         i_done => i_done,
         o_rd_enable => o_rd_enable,
-        o_out_buf_enable => o_out_buf_enable
+        o_out_buf_enable => o_out_buf_enable,
+        o_inbuf_count => o_inbuf_count
     );
 
     i_clk <= NOT i_clk after clk_period/2;
