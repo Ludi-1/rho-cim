@@ -89,6 +89,13 @@ async def func_test_1(dut):
     await FallingEdge(dut.i_clk)  # wait for falling edge/"negedge"
     dut.i_rst.value = 0
     dut.i_control.value = 1
+    dut.i_done.value = LogicArray("1" * n_tiles)
+    dut.i_next_layer_busy.value = 0
     await Timer(20, units="ns")
-    dut.i_control.value = 0
+    dut.i_control.value = 1
+    await Edge(dut.o_start)
+    dut.i_tiles_busy.value = LogicArray("1" * n_tiles)
+    await Timer(123.4, units="ns")
+    dut.i_tiles_busy.value = LogicArray("0" * n_tiles)
+    dut.i_done.value = LogicArray("1" * n_tiles)
     await Timer(10**4, units="ns")  # wait a bit

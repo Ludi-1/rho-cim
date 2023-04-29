@@ -13,8 +13,7 @@ entity func is
         row_split_tiles: integer := integer(ceil(real(input_size)/real(tile_rows))); -- Row (inputs) split up in i tiles
         col_split_tiles: integer := integer(ceil(real(neuron_size)/real(tile_columns))); -- Column (neurons) split up in j tiles
         n_tiles: integer := integer(real(row_split_tiles*col_split_tiles)); -- Amount (n) of tiles
-        count_vec_size: integer := integer(ceil(log2(real(tile_columns))));
-
+        addr_in_buf_size: integer := integer(ceil(log2(real(neuron_size)))); -- Addr size of inbuf from next layer
         addr_out_buf_size: integer := integer(ceil(log2(real(tile_columns)))) -- Bit length output buf addr
     );
     port(
@@ -22,26 +21,29 @@ entity func is
         i_rst: in std_logic;
 
         i_data: in std_logic_vector(max_datatype_size * n_tiles - 1 downto 0); -- Input data
-        o_data: in std_logic_vector(max_datatype_size - 1 downto 0); -- Output data
         o_addr_out_buf: out std_logic_vector(addr_out_buf_size - 1 downto 0); -- Output buf addr per tile
-        o_out_buf_enable: out std_logic_vector(n_tiles - 1 downto 0); -- Enable output buf addr
+        o_data: in std_logic_vector(max_datatype_size - 1 downto 0); -- Output data
+        o_write_enable: out std_logic; -- Write enable for inbuf of next layer
+        o_addr_inbuf: out std_logic_vector(addr_in_buf_size - 1 downto 0);
 
-        i_control: in std_logic; -- Next layer control busy if 1 || TODO: Don't write ibuf if 1
-        o_control: out std_logic; -- Next layer control start || TODO: set on 1 after act. unit
+        i_control: in std_logic; -- Start polling i_done signal
         i_done: in std_logic_vector(n_tiles - 1 downto 0); -- Done signal from all tiles + functional unit
         o_busy: out std_logic; -- Busy consuming obuf + act unit?
+        o_next_layer_start: out std_logic; -- Next layer control start || TODO: set on 1 after act. unit
+        i_next_layer_busy: in std_logic -- Next layer control busy if 1 || TODO: Don't write ibuf if 1
     );
 end func;
 
 architecture behavioural of func is
     signal s_obuf_count: natural range neuron_size - 1 downto 0;
     signal s_obuf_addr: natural range tile_columns - 1 downto 0;
-    type obuf_enable_state is (s_obuf_rst, s_obuf_cnt);
+    type obuf_enable_state is (s_obuf_rst, s_obuf_recv, s_obuf_cnt);
     signal s_obuf_enable: obuf_enable_state;
 
 begin
 
     o_addr_out_buf <= std_logic_vector(to_unsigned(s_obuf_addr, addr_out_buf_size));
+    o_addr_inbuf <= std_logic_vector(to_unsigned(s_obuf_count, addr_in_buf_size));
 
     -- Output buffer consume process
     obuf_count_proc: process(all) is
@@ -51,36 +53,50 @@ begin
                 s_obuf_count <= 0;
                 s_obuf_addr <= 0;
                 s_obuf_enable <= s_obuf_rst;
-                o_out_buf_enable <= (n_tiles - 1 downto 0 => '0');
-                o_busy <= 0;
+                o_busy <= '0';
+                o_next_layer_start <= '0';
             else
                 case s_obuf_enable is
                     when s_obuf_rst =>
+                        o_next_layer_start <= '0';
+                        s_obuf_count <= 0;
+                        s_obuf_addr <= 0;
+                        o_write_enable <= '0';
+                        if i_control = '1' and i_next_layer_busy <= '0' then
+                            o_busy <= '1';
+                            s_obuf_enable <= s_obuf_recv;
+                        else
+                            o_busy <= '0';
+                            s_obuf_enable <= s_obuf_rst;
+                        end if;
+                    when s_obuf_recv =>
+                        o_next_layer_start <= '0';
                         s_obuf_count <= 0;
                         s_obuf_addr <= 0;
                         if i_done = (n_tiles - 1 downto 0 => '1') then
                             o_busy <= '1';
+                            o_write_enable <= '1';
                             s_obuf_enable <= s_obuf_cnt;
-                            o_out_buf_enable(row_split_tiles - 1 downto 0) <= (row_split_tiles - 1 downto 0 => '1');
                         else
                             o_busy <= '0';
-                            s_obuf_enable <= s_obuf_rst;
-                            o_out_buf_enable <= (n_tiles - 1 downto 0 => '0');
+                            o_write_enable <= '0';
+                            s_obuf_enable <= s_obuf_recv;
                         end if;
                     when s_obuf_cnt =>
                         if s_obuf_addr = tile_columns - 1 then
+                            o_next_layer_start <= '0';
                             o_busy <= '1';
                             s_obuf_count <= s_obuf_count + 1;
                             s_obuf_addr <= 0;
-                            if o_out_buf_enable(n_tiles - 1 downto n_tiles - row_split_tiles) = (row_split_tiles - 1 downto 0 => '1') then
-                                s_obuf_enable <= s_obuf_rst;
-                            else
-                                o_out_buf_enable <= o_out_buf_enable sll row_split_tiles;
-                            end if;
+                            o_write_enable <= '1';
                         elsif s_obuf_count = neuron_size - 1 then
-                            s_obuf_count <= 0;
+                            s_obuf_count <= s_obuf_count;
                             s_obuf_addr <= 0;
-                            o_out_buf_enable <= (n_tiles - 1 downto 0 => '0');
+                            o_busy <= '1';
+                            o_write_enable <= '0';
+                            o_next_layer_start <= '1';
+                            s_obuf_enable <= s_obuf_rst;
+                            -- if i_next_layer_busy <= '0' then 
                             -- TODO
                             -- if next layer control not busy
                             --     s_obuf_enable <= s_obuf_rst;
@@ -90,8 +106,9 @@ begin
                             -- s_obuf_enable <= s_obuf_rst;
                             -- o_busy <= '1';
                         else
+                            o_next_layer_start <= '0';
                             o_busy <= '1';
-                            o_out_buf_enable <= o_out_buf_enable;
+                            o_write_enable <= '1';
                             s_obuf_count <= s_obuf_count + 1;
                             s_obuf_addr <= s_obuf_addr + 1;
                         end if;

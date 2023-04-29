@@ -39,7 +39,7 @@ end control;
 architecture behavioural of control is
     signal s_rd_count: natural range input_size - 1 downto 0;
     signal s_rd_addr: natural range tile_rows - 1 downto 0;
-    type rd_enable_state is (s_rd_rst, s_rd_cnt);
+    type rd_enable_state is (s_rd_rst, s_rd_cnt, s_rd_act_tiles);
     signal s_rd_enable: rd_enable_state;
 
 begin
@@ -59,27 +59,29 @@ begin
                 s_rd_count <= 0;
                 s_rd_addr <= 0;
                 o_rd_enable <= (n_tiles - 1 downto 0 => '0');
-                s_rd_enable <= s_rd_rst;
                 o_start <= (n_tiles - 1 downto 0 => '0');
                 o_control <= '0';
+                s_rd_enable <= s_rd_rst;
             else
-                case s_rd_enable is
+                case s_rd_enable is -- Idle
                     when s_rd_rst =>
                         s_rd_count <= 0;
                         s_rd_addr <= 0;
+                        o_start <= (n_tiles - 1 downto 0 => '0');
+                        -- Inbuf ready to be consumed, tiles not busy
                         if i_control = '1' and i_tiles_busy = (n_tiles - 1 downto 0 => '0') then
-                            s_rd_enable <= s_rd_cnt;
-                            o_rd_enable(col_split_tiles - 1 downto 0) <= (col_split_tiles - 1 downto 0 => '1');
                             o_control <= '1';
+                            o_rd_enable(col_split_tiles - 1 downto 0) <= (col_split_tiles - 1 downto 0 => '1');
+                            s_rd_enable <= s_rd_cnt;
                         else
                             o_control <= '0';
-                            s_rd_enable <= s_rd_rst;
                             o_rd_enable <= (n_tiles - 1 downto 0 => '0');
+                            s_rd_enable <= s_rd_rst;
                         end if;
+                    when s_rd_cnt => -- Start counting up, fill up rd buf
+                        o_control <= '1';
                         o_start <= (n_tiles - 1 downto 0 => '0');
-                    when s_rd_cnt =>
-                        if s_rd_addr = tile_rows - 1 then
-                            o_control <= '1';
+                        if s_rd_addr = tile_rows - 1 then -- Reset rd addr
                             s_rd_count <= s_rd_count + 1;
                             s_rd_addr <= 0;
                             if o_rd_enable(n_tiles - 1 downto n_tiles - col_split_tiles) = (col_split_tiles - 1 downto 0 => '1') then
@@ -87,28 +89,39 @@ begin
                             else
                                 o_rd_enable <= o_rd_enable sll col_split_tiles;
                             end if;
-                        elsif s_rd_count = input_size - 1 then
-                            o_control <= '1';
-                            s_rd_count <= s_rd_count;
+                        elsif s_rd_count = input_size - 1 then -- Done consuming, max input count
+                            s_rd_count <= s_rd_count; -- Freeze counter
                             s_rd_addr <= 0;
                             o_rd_enable <= (n_tiles - 1 downto 0 => '0');
-                            if i_func_busy = '0' then
-                                o_start <= (n_tiles - 1 downto 0 => '1');
+                            -- Ibuf and tiles not busy
+                            if i_func_busy = '0' and i_tiles_busy = (n_tiles - 1 downto 0 => '0') then
+                                o_start <= (n_tiles - 1 downto 0 => '1'); -- Start tiles
+                                s_rd_enable <= s_rd_act_tiles;
                             else 
                                 o_start <= (n_tiles - 1 downto 0 => '0');
-                            end if;
-                            if i_tiles_busy = (n_tiles - 1 downto 0 => '1') then
-                                s_rd_enable <= s_rd_rst;
-                            else
                                 s_rd_enable <= s_rd_cnt;
                             end if;
-                        else
+                        else -- Count up
                             o_control <= '1';
                             o_rd_enable <= o_rd_enable;
                             s_rd_count <= s_rd_count + 1;
                             s_rd_addr <= s_rd_addr + 1;
-                            s_rd_enable <= s_rd_enable;
+                            s_rd_enable <= s_rd_cnt;
                             o_start <= (n_tiles - 1 downto 0 => '0');
+                        end if;
+                    when s_rd_act_tiles =>
+                        s_rd_count <= 0;
+                        s_rd_addr <= 0;
+                        o_rd_enable <= (n_tiles - 1 downto 0 => '0');
+                        -- Wait until tiles busy
+                        if i_tiles_busy = (n_tiles - 1 downto 0 => '1') then
+                            o_control <= '0';
+                            o_start <= (n_tiles - 1 downto 0 => '0');
+                            s_rd_enable <= s_rd_rst;
+                        else
+                            o_start <= (n_tiles - 1 downto 0 => '1');
+                            o_control <= '1';
+                            s_rd_enable <= s_rd_act_tiles;
                         end if;
                 end case;                        
             end if;
