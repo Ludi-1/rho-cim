@@ -57,60 +57,49 @@ begin
                 o_next_layer_start <= '0';
             else
                 case s_obuf_enable is
-                    when s_obuf_rst =>
+                    when s_obuf_rst => -- Idle
                         o_next_layer_start <= '0';
                         s_obuf_count <= 0;
                         s_obuf_addr <= 0;
                         o_write_enable <= '0';
-                        if i_control = '1' and i_next_layer_busy <= '0' then
-                            o_busy <= '1';
-                            s_obuf_enable <= s_obuf_recv;
-                        else
-                            o_busy <= '0';
-                            s_obuf_enable <= s_obuf_rst;
-                        end if;
-                    when s_obuf_recv =>
-                        o_next_layer_start <= '0';
-                        s_obuf_count <= 0;
-                        s_obuf_addr <= 0;
-                        if i_done = (n_tiles - 1 downto 0 => '1') then
-                            o_busy <= '1';
-                            o_write_enable <= '1';
+                        o_busy <= '0';
+                        -- Done signal recv, next layer not busy
+                        if i_done = (n_tiles - 1 downto 0 => '1') and i_next_layer_busy <= '0' then
                             s_obuf_enable <= s_obuf_cnt;
                         else
-                            o_busy <= '0';
-                            o_write_enable <= '0';
-                            s_obuf_enable <= s_obuf_recv;
+                            s_obuf_enable <= s_obuf_rst;
                         end if;
-                    when s_obuf_cnt =>
+                    when s_obuf_cnt => -- Consuming output buffer
+                        o_next_layer_start <= '0';
+                        o_busy <= '1';
                         if s_obuf_addr = tile_columns - 1 then
-                            o_next_layer_start <= '0';
-                            o_busy <= '1';
                             s_obuf_count <= s_obuf_count + 1;
                             s_obuf_addr <= 0;
                             o_write_enable <= '1';
                         elsif s_obuf_count = neuron_size - 1 then
                             s_obuf_count <= s_obuf_count;
                             s_obuf_addr <= 0;
-                            o_busy <= '1';
                             o_write_enable <= '0';
-                            o_next_layer_start <= '1';
-                            s_obuf_enable <= s_obuf_rst;
-                            -- if i_next_layer_busy <= '0' then 
-                            -- TODO
-                            -- if next layer control not busy
-                            --     s_obuf_enable <= s_obuf_rst;
-                            --     o_busy <= '1';
-                            --     -- start write next ibuf
-                            -- -- else
-                            -- s_obuf_enable <= s_obuf_rst;
-                            -- o_busy <= '1';
+                            if i_next_layer_busy = '0' then
+                                s_obuf_enable <= s_obuf_recv;
+                            else
+                                s_obuf_enable <= s_obuf_cnt;
+                            end if;
                         else
-                            o_next_layer_start <= '0';
-                            o_busy <= '1';
                             o_write_enable <= '1';
                             s_obuf_count <= s_obuf_count + 1;
                             s_obuf_addr <= s_obuf_addr + 1;
+                        end if;
+                    when s_obuf_recv =>
+                        s_obuf_count <= 0;
+                        s_obuf_addr <= 0;
+                        o_write_enable <= '0';
+                        o_busy <= '0';
+                        o_next_layer_start <= '1';
+                        if i_next_layer_busy = '1' then
+                            s_obuf_enable <= s_obuf_rst;
+                        else
+                            s_obuf_enable <= s_obuf_recv;
                         end if;
                 end case;
             end if;

@@ -7,7 +7,7 @@ entity control is
     generic(
         neuron_size: integer := 1500;
         input_size: integer := 784;
-        max_datatype_size: integer := 32; -- Amount of bits datatype size
+        max_datatype_size: integer := 32; -- Input & Weight datatype
         tile_rows: integer := 512; -- Row length per tile
         tile_columns: integer := 512; -- Column length per tile
         row_split_tiles: integer := integer(ceil(real(input_size)/real(tile_rows))); -- Row (inputs) split up in i tiles
@@ -21,11 +21,11 @@ entity control is
         i_rst: in std_logic;
 
         -- Ctrl: Control signals
-        i_control: in std_logic; -- Control: Start consume
-        o_control: out std_logic; -- Control: Busy if 1
-        o_start: out std_logic_vector(n_tiles - 1 downto 0); -- Start CIM tiles
-        i_tiles_busy: in std_logic_vector(n_tiles - 1 downto 0); -- CIM tiles: busy
-        i_func_busy: in std_logic; -- Func: Busy
+        i_control: in std_logic; -- control_start
+        o_control: out std_logic; -- control_busy
+        o_start: out std_logic_vector(n_tiles - 1 downto 0); -- Start tile
+        i_tiles_ready: in std_logic_vector(n_tiles - 1 downto 0); -- Tile ready
+        i_func_busy: in std_logic; -- Obuf busy
 
         -- Ctrl: Data signals
         i_data: in std_logic_vector(max_datatype_size - 1 downto 0); -- Input data
@@ -63,42 +63,43 @@ begin
                 o_control <= '0';
                 s_rd_enable <= s_rd_rst;
             else
-                case s_rd_enable is -- Idle
-                    when s_rd_rst =>
+                case s_rd_enable is
+                    when s_rd_rst => -- Idle
                         s_rd_count <= 0;
                         s_rd_addr <= 0;
+                        o_control <= '0';
                         o_start <= (n_tiles - 1 downto 0 => '0');
-                        -- Inbuf ready to be consumed, tiles not busy
-                        if i_control = '1' and i_tiles_busy = (n_tiles - 1 downto 0 => '0') then
-                            o_control <= '1';
+                        -- control_start recv, tiles ready
+                        if i_control = '1' and i_tiles_ready = (n_tiles - 1 downto 0 => '1') then
                             o_rd_enable(col_split_tiles - 1 downto 0) <= (col_split_tiles - 1 downto 0 => '1');
                             s_rd_enable <= s_rd_cnt;
                         else
-                            o_control <= '0';
                             o_rd_enable <= (n_tiles - 1 downto 0 => '0');
                             s_rd_enable <= s_rd_rst;
                         end if;
                     when s_rd_cnt => -- Start counting up, fill up rd buf
-                        o_control <= '1';
                         o_start <= (n_tiles - 1 downto 0 => '0');
-                        if s_rd_addr = tile_rows - 1 then -- Reset rd addr
+                        if s_rd_addr = tile_rows - 1 then -- Reset RD addr
+                            o_control <= '1';
                             s_rd_count <= s_rd_count + 1;
                             s_rd_addr <= 0;
+                            -- Should never be reached
                             if o_rd_enable(n_tiles - 1 downto n_tiles - col_split_tiles) = (col_split_tiles - 1 downto 0 => '1') then
                                 s_rd_enable <= s_rd_rst;
-                            else
+                            else -- Select next tiles to fill RD
                                 o_rd_enable <= o_rd_enable sll col_split_tiles;
                             end if;
-                        elsif s_rd_count = input_size - 1 then -- Done consuming, max input count
+                        elsif s_rd_count = input_size - 1 then -- Done filling, max input count
+                            o_control <= '0';
                             s_rd_count <= s_rd_count; -- Freeze counter
                             s_rd_addr <= 0;
-                            o_rd_enable <= (n_tiles - 1 downto 0 => '0');
-                            -- Ibuf and tiles not busy
-                            if i_func_busy = '0' and i_tiles_busy = (n_tiles - 1 downto 0 => '0') then
-                                o_start <= (n_tiles - 1 downto 0 => '1'); -- Start tiles
+                            o_rd_enable <= (n_tiles - 1 downto 0 => '0'); -- Stop filling RD (deselect tiles)
+                            -- Tiles ready, func not busy
+                            if i_func_busy = '0' and i_tiles_ready = (n_tiles - 1 downto 0 => '1') then
+                                o_start <= (n_tiles - 1 downto 0 => '1'); -- Activate tiles
                                 s_rd_enable <= s_rd_act_tiles;
                             else 
-                                o_start <= (n_tiles - 1 downto 0 => '0');
+                                o_start <= (n_tiles - 1 downto 0 => '0'); -- Wait until condition
                                 s_rd_enable <= s_rd_cnt;
                             end if;
                         else -- Count up
@@ -110,17 +111,16 @@ begin
                             o_start <= (n_tiles - 1 downto 0 => '0');
                         end if;
                     when s_rd_act_tiles =>
+                        o_control <= '0';
                         s_rd_count <= 0;
                         s_rd_addr <= 0;
                         o_rd_enable <= (n_tiles - 1 downto 0 => '0');
-                        -- Wait until tiles busy
-                        if i_tiles_busy = (n_tiles - 1 downto 0 => '1') then
-                            o_control <= '0';
+                        -- Wait until tiles busy -- change to obuf busy?
+                        if i_tiles_ready = (n_tiles - 1 downto 0 => '0') then
                             o_start <= (n_tiles - 1 downto 0 => '0');
                             s_rd_enable <= s_rd_rst;
                         else
                             o_start <= (n_tiles - 1 downto 0 => '1');
-                            o_control <= '1';
                             s_rd_enable <= s_rd_act_tiles;
                         end if;
                 end case;                        

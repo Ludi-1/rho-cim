@@ -23,7 +23,7 @@ async def layer_test_1(dut):
     dut.i_rst.value = 1
     dut.i_write_enable.value = 1
     dut.i_ctrl_start.value = 0
-    dut.i_tiles_busy.value = 0
+    dut.i_tiles_ready.value = LogicArray("1" * n_tiles)
     dut.i_next_layer_busy.value = 0
     dut.i_done.value = LogicArray("0" * n_tiles)
     await RisingEdge(dut.i_clk)
@@ -38,9 +38,9 @@ async def layer_test_1(dut):
     await RisingEdge(dut.o_ctrl_busy)
     dut.i_ctrl_start.value = 0
     await Edge(dut.o_tiles_start)
-    dut.i_tiles_busy.value = LogicArray("1" * n_tiles)
+    dut.i_tiles_ready.value = LogicArray("0" * n_tiles)
     await Timer(123.4, units="ns")
-    dut.i_tiles_busy.value = LogicArray("0" * n_tiles)
+    dut.i_tiles_ready.value = LogicArray("1" * n_tiles)
     dut.i_done.value = LogicArray("1" * n_tiles)
     await Timer(10**4, units="ns")  # wait a bit
 

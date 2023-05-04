@@ -1,0 +1,28 @@
+{
+	signal: [
+    	{name: 'fpga_clk', wave: 'P..............'},
+      {name: 'control_start', wave: '01.0...|...........|...1.0.....|.......1', node:'.h..j....................k..m', period: 1/3},
+      {name: 'fpga_control_busy', wave: '01|0..|..1|.0..', node:'.i.......l'},
+        {name: 'fpga_start_tile', wave: '0.|1.0|...|.1.0', node:'...a.c'},
+      {name: 'tile_ready', wave: '1......|.....0.....|.1.........|......0...', node:'.............b', period: 1/3},
+      {name: 'tile_done', wave:'0......|...........|..1...0....|...........', node:'......................d....f', period: 1/3},
+      {name: 'fpga_obuf_busy', wave:'0.|...|.1.|.0..', node:'........e'},
+      {name: 'fpga_next_layer_start', wave:'0.|...|...|10..'},
+      {name: 'fpga_next_layer_control_busy', wave:'0.|...|...|1...'},
+	],
+  	edge: [
+    	'a~b', 'b~c',
+      	'd~e', 'e~f',
+      	'h~i', 'i~j',
+      	'k~l', 'l~m'
+      
+  	],
+	foot: {
+      text: [
+        'tspan', {dx: -20}, 'Fill RD buffer',
+        ['tspan', {dx: 80}, 'Tiles busy'],
+        ['tspan', {dx: 60}, 'Consume out buffer']
+      ],
+      tock: 0
+	}
+}

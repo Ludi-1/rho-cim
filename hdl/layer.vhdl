@@ -23,33 +23,39 @@ entity layer is
         i_clk: in std_logic;
         i_rst: in std_logic;
 
-        -- Ibuf
+        -- Input
         i_write_enable: in std_logic; -- Write enable
         i_write_addr: in std_logic_vector(ibuf_addr_size - 1 downto 0); -- Write addr of ibuf
         i_data: in std_logic_vector(max_datatype_size - 1 downto 0); -- Data from func unit of layer before
 
-        -- Ctrl: Control signals
-        i_ctrl_start: in std_logic; -- Control: Start consuming input buffer
-        o_ctrl_busy: out std_logic; -- Control: Busy consuming input buffer
-        o_tiles_start: out std_logic_vector(n_tiles - 1 downto 0); -- Start signal to CIM Tiles
-        i_tiles_busy: in std_logic_vector(n_tiles - 1 downto 0); -- Busy signal from CIM Tiles
+        -- -- Control
+        i_ctrl_start: in std_logic; -- Start consuming input buffer
+        o_ctrl_busy: out std_logic; -- Busy consuming input buffer
 
-        -- Ctrl: Data signals
+        -- Tiles
+        -- -- Ctrl: Control signals
+        o_tiles_start: out std_logic_vector(n_tiles - 1 downto 0); -- Start signal to CIM Tiles
+        i_tiles_ready: in std_logic_vector(n_tiles - 1 downto 0); -- Busy signal from CIM Tiles
+
+        -- -- Ctrl: Data signals
         o_addr_rd_buf: out std_logic_vector(addr_rd_size * n_tiles - 1 downto 0); -- RD addr per tile
         o_rd_enable: out std_logic_vector(n_tiles - 1 downto 0); -- Enable rd buf addr
         o_data: out std_logic_vector(max_datatype_size * n_tiles - 1 downto 0); -- Data per tile
 
-        -- Func: Control signals
+        -- -- Func: Control signals
         i_done: in std_logic_vector(n_tiles - 1 downto 0); -- Done signal from all tiles + functional unit
+
+        -- -- Func: Data signals
+        i_tile_data: in std_logic_vector(max_datatype_size * n_tiles - 1 downto 0);
+        o_addr_out_buf: out std_logic_vector(addr_out_buf_size - 1 downto 0); -- Output buf addr per tile
+
+        -- Next layer
         o_next_layer_start: out std_logic; -- Next layer control start || TODO: set on 1 after act. unit
         i_next_layer_busy: in std_logic; -- Next layer control busy if 1 || TODO: Don't write ibuf if 1
 
-        -- Func: Data signals
-        i_tile_data: in std_logic_vector(max_datatype_size * n_tiles - 1 downto 0);
-        o_addr_out_buf: out std_logic_vector(addr_out_buf_size - 1 downto 0); -- Output buf addr per tile
         o_data_next_layer: in std_logic_vector(max_datatype_size - 1 downto 0); -- Output data next layer
-        o_write_enable: out std_logic; -- Write enable for inbuf of next layer
-        o_addr_next_layer: out std_logic_vector(addr_in_buf_size - 1 downto 0)
+        o_addr_next_layer: out std_logic_vector(addr_in_buf_size - 1 downto 0);
+        o_write_enable: out std_logic -- Write enable for inbuf of next layer
     );
 end layer;
 
@@ -76,7 +82,7 @@ component control is
         i_control: in std_logic; -- Control: Start consume
         o_control: out std_logic; -- Control: Busy if 1
         o_start: out std_logic_vector(n_tiles - 1 downto 0); -- Start CIM tiles
-        i_tiles_busy: in std_logic_vector(n_tiles - 1 downto 0); -- CIM tiles: busy
+        i_tiles_ready: in std_logic_vector(n_tiles - 1 downto 0); -- CIM tiles: busy
         i_func_busy: in std_logic; -- Func: Busy
 
         -- Ctrl: Data signals
@@ -165,7 +171,7 @@ begin
         i_control => i_ctrl_start,
         o_control => o_ctrl_busy,
         o_start => o_tiles_start,
-        i_tiles_busy => i_tiles_busy,
+        i_tiles_ready => i_tiles_ready,
         i_func_busy => s_func_busy,
 
         i_data => s_ibuf_data,
