@@ -7,11 +7,11 @@ entity control is
     generic(
         neuron_size: integer := 1500;
         input_size: integer := 784;
-        max_datatype_size: integer := 32; -- Input & Weight datatype
+        max_datatype_size: integer := 8; -- Input & Weight datatype
         tile_rows: integer := 512; -- Row length per tile
         tile_columns: integer := 512; -- Column length per tile
         row_split_tiles: integer := integer(ceil(real(input_size)/real(tile_rows))); -- Row (inputs) split up in i tiles
-        col_split_tiles: integer := integer(ceil(real(neuron_size)/real(tile_columns))); -- Column (neurons) split up in j tiles
+        col_split_tiles: integer := integer(ceil(real(neuron_size)*real(max_datatype_size)/real(tile_columns))); -- Column (neurons) split up in j tiles
         n_tiles: integer := integer(real(row_split_tiles*col_split_tiles)); -- Amount (n) of tiles
         count_vec_size: integer := integer(ceil(log2(real(input_size))));
         addr_rd_size: integer := integer(ceil(log2(real(tile_rows)))) -- Bit length of rd buf addr

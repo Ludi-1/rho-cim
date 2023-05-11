@@ -7,7 +7,7 @@ entity ibuf is
     generic(
         ibuf_size: integer := 784;
         addr_size: integer := integer(ceil(log2(real(ibuf_size))));
-        max_datatype_size: integer := 32
+        max_datatype_size: integer := 8
     );
     port (
         i_clk : in std_logic;

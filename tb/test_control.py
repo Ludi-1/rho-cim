@@ -68,7 +68,7 @@ async def control_test_1(dut):
     n_tiles = dut.n_tiles.value.integer
     in_buf = []
     for i in range(0, input_size):
-        in_buf.append(i)
+        in_buf.append(i % 2**8)
         #in_buf.append(randint(0, max_datatype_size**2 - 1))
 
     cocotb.start_soon(Clock(dut.i_clk, 1, units='ns').start())

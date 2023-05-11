@@ -7,26 +7,27 @@ entity func is
     generic(
         input_size: integer := 784;
         neuron_size: integer := 1500; -- Number of neurons
-        max_datatype_size: integer := 32; -- (d+d) + log2(R)
+        max_datatype_size: integer := 8; -- (d+d) + log2(R)
+        out_buf_datatype_size: integer := 25; -- (d+d) + log2(R)
         tile_rows: integer := 512; -- Row length per tile
         tile_columns: integer := 512; -- Column length per tile
         row_split_tiles: integer := integer(ceil(real(input_size)/real(tile_rows))); -- Row (inputs) split up in i tiles
-        col_split_tiles: integer := integer(ceil(real(neuron_size)/real(tile_columns))); -- Column (neurons) split up in j tiles
+        col_split_tiles: integer := integer(ceil(real(neuron_size)*real(max_datatype_size)/real(tile_columns))); -- Column (neurons) split up in j tiles
         n_tiles: integer := integer(real(row_split_tiles*col_split_tiles)); -- Amount (n) of tiles
         addr_in_buf_size: integer := integer(ceil(log2(real(neuron_size)))); -- Addr size of inbuf from next layer
-        addr_out_buf_size: integer := integer(ceil(log2(real(tile_columns)))) -- Bit length output buf addr
+        obuf_addr_max: integer := integer(ceil(real(tile_columns)/real(max_datatype_size)));
+        addr_out_buf_size: integer := integer(ceil(log2(real(obuf_addr_max)))) -- Bit length output buf addr
     );
     port(
         i_clk: in std_logic;
         i_rst: in std_logic;
 
-        i_data: in std_logic_vector(max_datatype_size * n_tiles - 1 downto 0); -- Input data
+        i_data: in std_logic_vector(out_buf_datatype_size * n_tiles - 1 downto 0); -- Input data
         o_addr_out_buf: out std_logic_vector(addr_out_buf_size - 1 downto 0); -- Output buf addr per tile
         o_data: in std_logic_vector(max_datatype_size - 1 downto 0); -- Output data
         o_write_enable: out std_logic; -- Write enable for inbuf of next layer
         o_addr_inbuf: out std_logic_vector(addr_in_buf_size - 1 downto 0);
 
-        i_control: in std_logic; -- Start polling i_done signal
         i_done: in std_logic_vector(n_tiles - 1 downto 0); -- Done signal from all tiles + functional unit
         o_busy: out std_logic; -- Busy consuming obuf + act unit?
         o_next_layer_start: out std_logic; -- Next layer control start || TODO: set on 1 after act. unit
@@ -36,7 +37,7 @@ end func;
 
 architecture behavioural of func is
     signal s_obuf_count: natural range neuron_size - 1 downto 0;
-    signal s_obuf_addr: natural range tile_columns - 1 downto 0;
+    signal s_obuf_addr: natural range obuf_addr_max - 1 downto 0;
     type obuf_enable_state is (s_obuf_rst, s_obuf_recv, s_obuf_cnt);
     signal s_obuf_enable: obuf_enable_state;
 
@@ -72,7 +73,7 @@ begin
                     when s_obuf_cnt => -- Consuming output buffer
                         o_next_layer_start <= '0';
                         o_busy <= '1';
-                        if s_obuf_addr = tile_columns - 1 then
+                        if s_obuf_addr = obuf_addr_max - 1 then
                             s_obuf_count <= s_obuf_count + 1;
                             s_obuf_addr <= 0;
                             o_write_enable <= '1';

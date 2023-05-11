@@ -7,14 +7,14 @@ entity layer is
     generic(
         neuron_size: integer := 1500; -- Number of neurons
         input_size: integer := 784;
-        max_datatype_size: integer := 32; -- (d+d) + log2(R)
+        max_datatype_size: integer := 8; -- (d+d) + log2(R)
+        out_buf_datatype_size: integer := 25; -- (d+d) + log2(R)
         tile_rows: integer := 512; -- Row length per tile
         tile_columns: integer := 512; -- Column length per tile
         row_split_tiles: integer := integer(ceil(real(input_size)/real(tile_rows))); -- Row (inputs) split up in i tiles
-        col_split_tiles: integer := integer(ceil(real(neuron_size)/real(tile_columns))); -- Column (neurons) split up in j tiles
+        col_split_tiles: integer := integer(ceil(real(neuron_size)*real(max_datatype_size)/real(tile_columns))); -- Column (neurons) split up in j tiles
         n_tiles: integer := integer(real(row_split_tiles*col_split_tiles)); -- Amount (n) of tiles
-        count_vec_size: integer := integer(ceil(log2(real(tile_columns))));
-        addr_out_buf_size: integer := integer(ceil(log2(real(tile_columns)))); -- Bit length output buf addr
+        addr_out_buf_size: integer := integer(ceil(log2(real(tile_columns)/real(max_datatype_size)))); -- Bit length output buf addr
         ibuf_addr_size: integer := integer(ceil(log2(real(input_size)))); -- addr size input buffer
         addr_in_buf_size: integer := integer(ceil(log2(real(neuron_size)))); -- addr size ibuf of next layer
         addr_rd_size: integer := integer(ceil(log2(real(tile_rows))))
@@ -29,11 +29,9 @@ entity layer is
         i_data: in std_logic_vector(max_datatype_size - 1 downto 0); -- Data from func unit of layer before
 
         -- -- Control
+        -- -- Ctrl: Control signals
         i_ctrl_start: in std_logic; -- Start consuming input buffer
         o_ctrl_busy: out std_logic; -- Busy consuming input buffer
-
-        -- Tiles
-        -- -- Ctrl: Control signals
         o_tiles_start: out std_logic_vector(n_tiles - 1 downto 0); -- Start signal to CIM Tiles
         i_tiles_ready: in std_logic_vector(n_tiles - 1 downto 0); -- Busy signal from CIM Tiles
 
@@ -43,10 +41,10 @@ entity layer is
         o_data: out std_logic_vector(max_datatype_size * n_tiles - 1 downto 0); -- Data per tile
 
         -- -- Func: Control signals
-        i_done: in std_logic_vector(n_tiles - 1 downto 0); -- Done signal from all tiles + functional unit
+        i_done: in std_logic_vector(n_tiles - 1 downto 0); -- Done signal from all tiles
 
         -- -- Func: Data signals
-        i_tile_data: in std_logic_vector(max_datatype_size * n_tiles - 1 downto 0);
+        i_tile_data: in std_logic_vector(out_buf_datatype_size * n_tiles - 1 downto 0);
         o_addr_out_buf: out std_logic_vector(addr_out_buf_size - 1 downto 0); -- Output buf addr per tile
 
         -- Next layer
@@ -65,11 +63,11 @@ component control is
     generic(
         neuron_size: integer := 1500;
         input_size: integer := 784;
-        max_datatype_size: integer := 32; -- Amount of bits datatype size
+        max_datatype_size: integer := 8; -- Input & Weight datatype
         tile_rows: integer := 512; -- Row length per tile
         tile_columns: integer := 512; -- Column length per tile
         row_split_tiles: integer := integer(ceil(real(input_size)/real(tile_rows))); -- Row (inputs) split up in i tiles
-        col_split_tiles: integer := integer(ceil(real(neuron_size)/real(tile_columns))); -- Column (neurons) split up in j tiles
+        col_split_tiles: integer := integer(ceil(real(neuron_size)*real(max_datatype_size)/real(tile_columns))); -- Column (neurons) split up in j tiles
         n_tiles: integer := integer(real(row_split_tiles*col_split_tiles)); -- Amount (n) of tiles
         count_vec_size: integer := integer(ceil(log2(real(input_size))));
         addr_rd_size: integer := integer(ceil(log2(real(tile_rows)))) -- Bit length of rd buf addr
@@ -98,26 +96,27 @@ component func is
     generic(
         input_size: integer := 784;
         neuron_size: integer := 1500; -- Number of neurons
-        max_datatype_size: integer := 32; -- (d+d) + log2(R)
+        max_datatype_size: integer := 8; -- (d+d) + log2(R)
+        out_buf_datatype_size: integer := 25; -- (d+d) + log2(R)
         tile_rows: integer := 512; -- Row length per tile
         tile_columns: integer := 512; -- Column length per tile
         row_split_tiles: integer := integer(ceil(real(input_size)/real(tile_rows))); -- Row (inputs) split up in i tiles
-        col_split_tiles: integer := integer(ceil(real(neuron_size)/real(tile_columns))); -- Column (neurons) split up in j tiles
+        col_split_tiles: integer := integer(ceil(real(neuron_size)*real(max_datatype_size)/real(tile_columns))); -- Column (neurons) split up in j tiles
         n_tiles: integer := integer(real(row_split_tiles*col_split_tiles)); -- Amount (n) of tiles
         addr_in_buf_size: integer := integer(ceil(log2(real(neuron_size)))); -- Addr size of inbuf from next layer
-        addr_out_buf_size: integer := integer(ceil(log2(real(tile_columns)))) -- Bit length output buf addr
+        obuf_addr_max: integer := integer(ceil(real(tile_columns)/real(max_datatype_size)));
+        addr_out_buf_size: integer := integer(ceil(log2(real(obuf_addr_max)))) -- Bit length output buf addr
     );
     port(
         i_clk: in std_logic;
         i_rst: in std_logic;
 
-        i_data: in std_logic_vector(max_datatype_size * n_tiles - 1 downto 0); -- Input data
+        i_data: in std_logic_vector(out_buf_datatype_size * n_tiles - 1 downto 0); -- Input data
         o_addr_out_buf: out std_logic_vector(addr_out_buf_size - 1 downto 0); -- Output buf addr per tile
         o_data: in std_logic_vector(max_datatype_size - 1 downto 0); -- Output data
         o_write_enable: out std_logic; -- Write enable for inbuf of next layer
         o_addr_inbuf: out std_logic_vector(addr_in_buf_size - 1 downto 0);
 
-        i_control: in std_logic; -- Start polling i_done signal
         i_done: in std_logic_vector(n_tiles - 1 downto 0); -- Done signal from all tiles + functional unit
         o_busy: out std_logic; -- Busy consuming obuf + act unit?
         o_next_layer_start: out std_logic; -- Next layer control start || TODO: set on 1 after act. unit
@@ -129,7 +128,7 @@ component ibuf is
     generic(
         ibuf_size: integer := 784;
         addr_size: integer := integer(ceil(log2(real(ibuf_size))));
-        max_datatype_size: integer := 32
+        max_datatype_size: integer := 8
     );
     port (
         i_clk : in std_logic;
@@ -185,6 +184,7 @@ begin
         input_size => input_size,
         neuron_size => neuron_size,
         max_datatype_size => max_datatype_size,
+        out_buf_datatype_size => out_buf_datatype_size,
         tile_rows => tile_rows,
         tile_columns => tile_columns
     ) port map(
@@ -197,7 +197,6 @@ begin
         o_write_enable => o_write_enable,
         o_addr_inbuf => o_addr_next_layer,
 
-        i_control => o_tiles_start(0),
         i_done => i_done,
         o_busy => s_func_busy,
         o_next_layer_start => o_next_layer_start,
