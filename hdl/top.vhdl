@@ -5,33 +5,36 @@ use ieee.numeric_std.all;
 
 entity top is
     generic(
-        max_datatype_size: integer := 8; -- (d+d) + log2(R)
-        out_buf_datatype_size: integer := 25; -- (d+d) + log2(R)
         tile_rows: integer := 512; -- Row length per tile
         tile_columns: integer := 512; -- Column length per tile
-
-        addr_out_buf_size: integer := integer(ceil(log2(real(tile_columns)/real(max_datatype_size)))); -- Bit length output buf addr
         addr_rd_size: integer := integer(ceil(log2(real(tile_rows))));
+        addr_out_buf_size: integer := integer(ceil(log2(real(tile_columns)))); -- Bit length output buf addr
 
-        -- Input
+        -- Input layer
         input_size: integer := 784; -- Input layer
         ibuf_addr_size: integer := integer(ceil(log2(real(input_size)))); -- addr size input buffer
+        max_datatype_size: integer := 8; -- (d+d) + log2(R)
+        out_buf_datatype_size: integer := 25; -- (d+d) + log2(R)
+        func_datatype_size: integer := 1;
+        row_split_tiles: integer := integer(ceil(real(input_size)/real(tile_rows))); -- Row (inputs) split up in i tiles
+        col_split_tiles: integer := integer(ceil(real(input_size)*real(max_datatype_size)/real(tile_columns))); -- Column (neurons) split up in j tiles
 
         -- L1
-        neuron_size1: integer := 1500; -- Number of neurons layer 1
-        row_split_tiles: integer := integer(ceil(real(input_size)/real(tile_rows))); -- Row (inputs) split up in i tiles
-        col_split_tiles: integer := integer(ceil(real(neuron_size1)/real(tile_columns))); -- Column (neurons) split up in j tiles
-        n_tiles1: integer := integer(real(row_split_tiles1*col_split_tiles1)); -- Tile count layer 1
+        neuron_size1: integer := 1500*2; -- Number of neurons layer 1 (* 2 for BNN) -- 1500 -> 3000
+        max_datatype_size_l1: integer := 1;
+        out_buf_datatype_size_l1: integer := 10; -- (d) + log2(R)
+        func_datatype_size_l1: integer := 1;
+        n_tiles1: integer := integer(real(row_split_tiles*col_split_tiles)); -- Tile count layer 1
 
         -- L2
-        neuron_size2: integer := 1000; -- Layer 2 neuron count
+        neuron_size2: integer := 2000; -- Layer 2 neuron count - 1000 -> 2000
         addr_in_buf_size_l2: integer := integer(ceil(log2(real(neuron_size1))));
         row_split_tiles2: integer := integer(ceil(real(neuron_size1)/real(tile_rows))); -- Row (inputs) split up in i tiles
-        col_split_tiles2: integer := integer(ceil(real(neuron_size2)/real(tile_columns))); -- Column (neurons) split up in j tiles
+        col_split_tiles2: integer := integer(ceil(real(neuron_size2)*real(max_datatype_size)/real(tile_columns))); -- Column (neurons) split up in j tiles
         n_tiles2: integer := integer(real(row_split_tiles2*col_split_tiles2)); -- Tile count layer 2
 
-        neuron_size3: integer := 500; -- Layer 3 neuron count
-        neuron_size4: integer := 10; -- Layer 4 neuron count
+        neuron_size3: integer := 1000; -- Layer 3 neuron count - 500 -> 1000
+        neuron_size4: integer := 20; -- Layer 4 neuron count - 10 -> 20
 
         -- Output
         addr_in_buf_size: integer := integer(ceil(log2(real(neuron_size2)))) -- addr size ibuf of last layer
@@ -64,7 +67,7 @@ entity top is
         o_data: out std_logic_vector(max_datatype_size * n_tiles1 - 1 downto 0); -- Data per tile
 
         -- -- Func: Control signals
-        i_done: in std_logic_vector(n_tiles - 1 downto 0); -- Done signal from all tiles + functional unit
+        i_done: in std_logic_vector(n_tiles1 - 1 downto 0); -- Done signal from all tiles + functional unit
 
         -- -- Func: Data signals
         i_tile_data: in std_logic_vector(out_buf_datatype_size * n_tiles1 - 1 downto 0);
@@ -76,19 +79,19 @@ entity top is
 
         -- Tiles
         -- -- Ctrl: Control signals
-        o_tiles_start2: out std_logic_vector(n_tiles1 - 1 downto 0); -- Start signal to CIM Tiles
-        i_tiles_ready2: in std_logic_vector(n_tiles1 - 1 downto 0); -- Busy signal from CIM Tiles
+        o_tiles_start2: out std_logic_vector(n_tiles2 - 1 downto 0); -- Start signal to CIM Tiles
+        i_tiles_ready2: in std_logic_vector(n_tiles2 - 1 downto 0); -- Busy signal from CIM Tiles
 
         -- -- Ctrl: Data signals
-        o_addr_rd_buf2: out std_logic_vector(addr_rd_size * n_tiles1 - 1 downto 0); -- RD addr per tile
-        o_rd_enable2: out std_logic_vector(n_tiles1 - 1 downto 0); -- Enable rd buf addr
-        o_data2: out std_logic_vector(max_datatype_size * n_tiles1 - 1 downto 0); -- Data per tile
+        o_addr_rd_buf2: out std_logic_vector(addr_rd_size * n_tiles2 - 1 downto 0); -- RD addr per tile
+        o_rd_enable2: out std_logic_vector(n_tiles2 - 1 downto 0); -- Enable rd buf addr
+        o_data2: out std_logic_vector(max_datatype_size * n_tiles2 - 1 downto 0); -- Data per tile
 
         -- -- Func: Control signals
-        i_done2: in std_logic_vector(n_tiles - 1 downto 0); -- Done signal from all tiles + functional unit
+        i_done2: in std_logic_vector(n_tiles2 - 1 downto 0); -- Done signal from all tiles + functional unit
 
         -- -- Func: Data signals
-        i_tile_data2: in std_logic_vector(out_buf_datatype_size * n_tiles1 - 1 downto 0);
+        i_tile_data2: in std_logic_vector(out_buf_datatype_size * n_tiles2 - 1 downto 0);
         o_addr_out_buf2: out std_logic_vector(addr_out_buf_size - 1 downto 0); -- Output buf addr per tile
 
         ---
@@ -98,7 +101,7 @@ entity top is
         o_next_layer_start: out std_logic; -- Next layer control start || TODO: set on 1 after act. unit
         i_next_layer_busy: in std_logic; -- Next layer control busy if 1 || TODO: Don't write ibuf if 1
 
-        o_data_next_layer: in std_logic_vector(max_datatype_size - 1 downto 0); -- Output data next layer
+        o_data_next_layer: out std_logic_vector(max_datatype_size - 1 downto 0); -- Output data next layer
         o_addr_next_layer: out std_logic_vector(addr_in_buf_size - 1 downto 0);
         o_write_enable: out std_logic -- Write enable for inbuf of next layer
     );
@@ -154,7 +157,7 @@ component layer is
         o_next_layer_start: out std_logic; -- Next layer control start || TODO: set on 1 after act. unit
         i_next_layer_busy: in std_logic; -- Next layer control busy if 1 || TODO: Don't write ibuf if 1
 
-        o_data_next_layer: in std_logic_vector(max_datatype_size - 1 downto 0); -- Output data next layer
+        o_data_next_layer: out std_logic_vector(max_datatype_size - 1 downto 0); -- Output data next layer
         o_addr_next_layer: out std_logic_vector(addr_in_buf_size - 1 downto 0);
         o_write_enable: out std_logic -- Write enable for inbuf of next layer
     );
@@ -167,7 +170,7 @@ end component;
     signal s_l2_write_enable: std_logic;
 
 begin
-    layer1: layer generic map(
+    input_layer: layer generic map(
         neuron_size => neuron_size1,
         input_size => input_size,
         max_datatype_size => max_datatype_size,
@@ -200,11 +203,11 @@ begin
         o_write_enable => s_l2_write_enable
     );
 
-    layer2: layer generic map(
+    hidden_layer1: layer generic map(
         neuron_size => neuron_size2,
         input_size => neuron_size1,
-        max_datatype_size => max_datatype_size,
-        out_buf_datatype_size => out_buf_datatype_size,
+        max_datatype_size => max_datatype_size_l1,
+        out_buf_datatype_size => out_buf_datatype_size_l1,
         tile_rows => tile_rows,
         tile_columns => tile_columns
     ) port map(
@@ -217,14 +220,14 @@ begin
 
         i_ctrl_start => s_l1_start_l2,
         o_ctrl_busy => s_l2_busy,
-        o_tiles_start => o_tiles_start,
-        i_tiles_ready => i_tiles_ready,
-        o_addr_rd_buf => o_addr_rd_buf,
-        o_rd_enable => o_rd_enable,
-        o_data => o_data,
-        i_done => i_done,
-        i_tile_data => i_tile_data,
-        o_addr_out_buf => o_addr_out_buf,
+        o_tiles_start => o_tiles_start2,
+        i_tiles_ready => i_tiles_ready2,
+        o_addr_rd_buf => o_addr_rd_buf2,
+        o_rd_enable => o_rd_enable2,
+        o_data => o_data2,
+        i_done => i_done2,
+        i_tile_data => i_tile_data2,
+        o_addr_out_buf => o_addr_out_buf2,
 
         o_next_layer_start => o_next_layer_start,
         i_next_layer_busy => i_next_layer_busy,

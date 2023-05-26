@@ -3,13 +3,12 @@ use ieee.std_logic_1164.all;
 use IEEE.math_real.all;
 use ieee.numeric_std.all;
 
-entity func is
+entity quant_func is
     generic(
         input_size: integer := 784;
         neuron_size: integer := 1500; -- Number of neurons
         max_datatype_size: integer := 8; -- (d+d) + log2(R)
         out_buf_datatype_size: integer := 25; -- (d+d) + log2(R)
-        func_datatype_size: integer := 8;
         tile_rows: integer := 512; -- Row length per tile
         tile_columns: integer := 512; -- Column length per tile
         row_split_tiles: integer := integer(ceil(real(input_size)/real(tile_rows))); -- Row (inputs) split up in i tiles
@@ -25,7 +24,7 @@ entity func is
 
         i_data: in std_logic_vector(out_buf_datatype_size * n_tiles - 1 downto 0); -- Input data
         o_addr_out_buf: out std_logic_vector(addr_out_buf_size - 1 downto 0); -- Output buf addr per tile
-        o_data: out std_logic_vector(func_datatype_size - 1 downto 0); -- Output data
+        o_data: out std_logic_vector(max_datatype_size - 1 downto 0); -- Output data
         o_write_enable: out std_logic; -- Write enable for inbuf of next layer
         o_addr_inbuf: out std_logic_vector(addr_in_buf_size - 1 downto 0);
 
@@ -34,9 +33,9 @@ entity func is
         o_next_layer_start: out std_logic; -- Next layer control start || TODO: set on 1 after act. unit
         i_next_layer_busy: in std_logic -- Next layer control busy if 1 || TODO: Don't write ibuf if 1
     );
-end func;
+end quant_func;
 
-architecture behavioural of func is
+architecture behavioural of quant_func is
     signal s_obuf_count: natural range neuron_size - 1 downto 0;
     signal s_obuf_addr: natural range obuf_addr_max - 1 downto 0;
     signal s_vert_tile_count : natural range col_split_tiles - 1 downto 0;
@@ -51,7 +50,6 @@ begin
 
     o_data_sum: process(all) is
         variable sum_v	: signed(out_buf_datatype_size - 1 downto 0);
-        variable data_v : std_logic_vector(out_buf_datatype_size - 1 downto 0);
     begin
         sum_v := to_signed(0, out_buf_datatype_size);
         for vertical_tile_set in 0 to row_split_tiles - 1 loop -- accumulate
@@ -60,13 +58,10 @@ begin
                     out_buf_datatype_size * vertical_tile_set + s_vert_tile_count * row_split_tiles));
         end loop;
         sum_s <= shift_left(sum_v, 1) - input_size;
-        if sum_s > 2**func_datatype_size - 1 then -- Sign function
-            o_data <= (others => '1');
-        elsif sum_s <= 0 then
-            o_data <= (others => '0');
+        if sum_s > 0 then -- Sign function
+            o_data <= (0=>'1',others => '0');
         else
-            data_v := std_logic_vector(sum_s);
-            o_data <= data_v(func_datatype_size - 1 downto 0);
+            o_data <= (others => '0');
         end if;
     end process;
 

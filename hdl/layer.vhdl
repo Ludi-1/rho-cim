@@ -9,6 +9,7 @@ entity layer is
         input_size: integer := 784;
         max_datatype_size: integer := 8; -- (d+d) + log2(R)
         out_buf_datatype_size: integer := 25; -- (d+d) + log2(R)
+        func_datatype_size: integer := 25;
         tile_rows: integer := 512; -- Row length per tile
         tile_columns: integer := 512; -- Column length per tile
         row_split_tiles: integer := integer(ceil(real(input_size)/real(tile_rows))); -- Row (inputs) split up in i tiles
@@ -51,7 +52,7 @@ entity layer is
         o_next_layer_start: out std_logic; -- Next layer control start || TODO: set on 1 after act. unit
         i_next_layer_busy: in std_logic; -- Next layer control busy if 1 || TODO: Don't write ibuf if 1
 
-        o_data_next_layer: in std_logic_vector(max_datatype_size - 1 downto 0); -- Output data next layer
+        o_data_next_layer: out std_logic_vector(func_datatype_size - 1 downto 0); -- Output data next layer
         o_addr_next_layer: out std_logic_vector(addr_in_buf_size - 1 downto 0);
         o_write_enable: out std_logic -- Write enable for inbuf of next layer
     );
@@ -100,6 +101,7 @@ component func is
         out_buf_datatype_size: integer := 25; -- (d+d) + log2(R)
         tile_rows: integer := 512; -- Row length per tile
         tile_columns: integer := 512; -- Column length per tile
+        func_datatype_size: integer := 25;
         row_split_tiles: integer := integer(ceil(real(input_size)/real(tile_rows))); -- Row (inputs) split up in i tiles
         col_split_tiles: integer := integer(ceil(real(neuron_size)*real(max_datatype_size)/real(tile_columns))); -- Column (neurons) split up in j tiles
         n_tiles: integer := integer(real(row_split_tiles*col_split_tiles)); -- Amount (n) of tiles
@@ -113,7 +115,7 @@ component func is
 
         i_data: in std_logic_vector(out_buf_datatype_size * n_tiles - 1 downto 0); -- Input data
         o_addr_out_buf: out std_logic_vector(addr_out_buf_size - 1 downto 0); -- Output buf addr per tile
-        o_data: in std_logic_vector(max_datatype_size - 1 downto 0); -- Output data
+        o_data: out std_logic_vector(func_datatype_size - 1 downto 0); -- Output data
         o_write_enable: out std_logic; -- Write enable for inbuf of next layer
         o_addr_inbuf: out std_logic_vector(addr_in_buf_size - 1 downto 0);
 
@@ -185,6 +187,7 @@ begin
         neuron_size => neuron_size,
         max_datatype_size => max_datatype_size,
         out_buf_datatype_size => out_buf_datatype_size,
+        func_datatype_size => func_datatype_size,
         tile_rows => tile_rows,
         tile_columns => tile_columns
     ) port map(

@@ -18,7 +18,7 @@ GHDL_ARGS+= --std=08
 TOPLEVEL ?= control
 
 ifeq ($(TOPLEVEL),control)
-	SIM_ARGS+= -ginput_size=784
+	SIM_ARGS+= -ginput_size=1026
 	SIM_ARGS+= -gneuron_size=1500
 	SIM_ARGS+= -gmax_datatype_size=8
 	SIM_ARGS+= -gtile_rows=512

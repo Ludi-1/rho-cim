@@ -6,7 +6,7 @@ use ieee.numeric_std.all;
 entity control is
     generic(
         neuron_size: integer := 1500;
-        input_size: integer := 784;
+        input_size: integer := 1026;
         max_datatype_size: integer := 8; -- Input & Weight datatype
         tile_rows: integer := 512; -- Row length per tile
         tile_columns: integer := 512; -- Column length per tile
