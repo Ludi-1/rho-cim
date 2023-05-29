@@ -104,7 +104,9 @@ begin
                             s_obuf_count <= s_obuf_count + 1;
                             s_obuf_addr <= 0;
                             o_write_enable <= '1';
-                            s_vert_tile_count <= s_vert_tile_count + 1;
+                            if s_vert_tile_count < col_split_tiles - 1 then
+                                s_vert_tile_count <= s_vert_tile_count + 1;
+                            end if;
                         elsif s_obuf_count = neuron_size - 1 then
                             s_obuf_count <= s_obuf_count;
                             s_obuf_addr <= 0;
