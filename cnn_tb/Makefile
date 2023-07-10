@@ -20,9 +20,9 @@ TOPLEVEL ?= cnn_ibuf
 ifeq ($(TOPLEVEL),cnn_ibuf)
 	SIM_ARGS+= -gkernel_size=3
 	SIM_ARGS+= -gdatatype_size=8
-	SIM_ARGS+= -gkernels=3
 	SIM_ARGS+= -gimage_size=28
 	SIM_ARGS+= --wave=wave/cnn_ibuf_tb.ghw
+	SIM_ARGS+= --vcd=vcd/cnn_ibuf_tb.vcd
     MODULE = test_cnn_ibuf
 # else ifeq ($(TOPLEVEL),func)
 # 	SIM_ARGS+= -ginput_size=784
