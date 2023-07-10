@@ -3,17 +3,17 @@ use ieee.std_logic_1164.all;
 use IEEE.math_real.all;
 use ieee.numeric_std.all;
 
-entity top is
+entity mlp_l is
     generic(
-        tile_rows: integer := 512; -- Row length per tile
-        tile_columns: integer := 512; -- Column length per tile
+        tile_rows: integer := 128; -- Row length per tile
+        tile_columns: integer := 128; -- Column length per tile
         addr_rd_size: integer := integer(ceil(log2(real(tile_rows))));
 
         -- Input layer
         input_size: integer := 784; -- Input layer
         ibuf_addr_size: integer := integer(ceil(log2(real(input_size)))); -- addr size input buffer
         max_datatype_size: integer := 8; -- (d+d) + log2(R)
-        out_buf_datatype_size: integer := 25; -- (d+d) + log2(R)
+        out_buf_datatype_size: integer := 23; -- (d+d) + log2(R)
         -- func_datatype_size: integer := 1;
         -- row_split_tiles: integer := integer(ceil(real(input_size)/real(tile_rows))); -- Row (inputs) split up in i tiles
         -- col_split_tiles: integer := integer(ceil(real(input_size)*real(max_datatype_size)/real(tile_columns))); -- Column (neurons) split up in j tiles
@@ -173,9 +173,9 @@ entity top is
         o_addr_next_layer: out std_logic_vector(addr_in_buf_size - 1 downto 0);
         o_write_enable: out std_logic -- Write enable for inbuf of next layer
     );
-end top;
+end mlp_l;
 
-architecture behavioural of top is
+architecture behavioural of mlp_l is
 
 component layer is
     generic(

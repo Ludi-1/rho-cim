@@ -27,11 +27,12 @@ ifeq ($(TOPLEVEL),control)
     MODULE = test_control
 else ifeq ($(TOPLEVEL),func)
 	SIM_ARGS+= -ginput_size=784
-	SIM_ARGS+= -gneuron_size=1500
+	SIM_ARGS+= -gneuron_size=500
+	SIM_ARGS+= -gtile_rows=128
+	SIM_ARGS+= -gtile_columns=128
+	SIM_ARGS+= -gfunc_datatype_size=1
 	SIM_ARGS+= -gmax_datatype_size=8
 	SIM_ARGS+= -gout_buf_datatype_size=25
-	SIM_ARGS+= -gtile_rows=512
-	SIM_ARGS+= -gtile_columns=512
 	SIM_ARGS+= --wave=wave/func_tb.ghw
     MODULE = test_func
 else ifeq ($(TOPLEVEL), ibuf)

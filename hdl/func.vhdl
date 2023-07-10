@@ -6,12 +6,12 @@ use ieee.numeric_std.all;
 entity func is
     generic(
         input_size: integer := 784;
-        neuron_size: integer := 1500; -- Number of neurons
+        neuron_size: integer := 500; -- Number of neurons
         max_datatype_size: integer := 8; -- (d+d) + log2(R)
         out_buf_datatype_size: integer := 25; -- (d+d) + log2(R)
         func_datatype_size: integer := 8;
-        tile_rows: integer := 512; -- Row length per tile
-        tile_columns: integer := 512; -- Column length per tile
+        tile_rows: integer := 128; -- Row length per tile
+        tile_columns: integer := 128; -- Column length per tile
         row_split_tiles: integer := integer(ceil(real(input_size)/real(tile_rows))); -- Row (inputs) split up in i tiles
         col_split_tiles: integer := integer(ceil(real(neuron_size)*real(max_datatype_size)/real(tile_columns))); -- Column (neurons) split up in j tiles
         n_tiles: integer := integer(real(row_split_tiles*col_split_tiles)); -- Amount (n) of tiles
@@ -56,10 +56,10 @@ begin
         sum_v := to_signed(0, out_buf_datatype_size);
         for vertical_tile_set in 0 to row_split_tiles - 1 loop -- accumulate
             sum_v := sum_v + signed(
-                i_data((out_buf_datatype_size * (vertical_tile_set + 1) + (s_vert_tile_count * row_split_tiles) - 1) downto 
-                    out_buf_datatype_size * vertical_tile_set + s_vert_tile_count * row_split_tiles));
+                i_data(out_buf_datatype_size * (vertical_tile_set + 1 + (s_vert_tile_count * row_split_tiles)) - 1 downto 
+                    out_buf_datatype_size * (vertical_tile_set + s_vert_tile_count * row_split_tiles)) );
         end loop;
-        sum_s <= shift_left(sum_v, 1) - input_size;
+        sum_s <= shift_right(sum_v, 1) - input_size;
         if sum_s > 2**func_datatype_size - 1 then -- Sign function
             o_data <= (others => '1');
         elsif sum_s <= 0 then
@@ -106,6 +106,8 @@ begin
                             o_write_enable <= '1';
                             if s_vert_tile_count < col_split_tiles - 1 then
                                 s_vert_tile_count <= s_vert_tile_count + 1;
+                            else
+                                s_vert_tile_count <= 0;
                             end if;
                         elsif s_obuf_count = neuron_size - 1 then
                             s_obuf_count <= s_obuf_count;
