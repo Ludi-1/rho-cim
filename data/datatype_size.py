@@ -52,7 +52,7 @@ plt.show()
 fig, ax = plt.subplots(figsize=(9, 8.5))
 ax.set_xlabel('Network model')
 ax.set_ylabel('Register count')
-ax.set_title('Register count for different datatype sizes')
+ax.set_title('Power for different datatype sizes')
 
 bar_width = 0.2
 x = np.arange(len(categories))
