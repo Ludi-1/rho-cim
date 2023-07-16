@@ -24,15 +24,15 @@ ifeq ($(TOPLEVEL),cnn_ibuf)
 	SIM_ARGS+= --wave=wave/cnn_ibuf_tb.ghw
 	SIM_ARGS+= --vcd=vcd/cnn_ibuf_tb.vcd
     MODULE = test_cnn_ibuf
-# else ifeq ($(TOPLEVEL),func)
-# 	SIM_ARGS+= -ginput_size=784
-# 	SIM_ARGS+= -gneuron_size=1500
-# 	SIM_ARGS+= -gmax_datatype_size=8
-# 	SIM_ARGS+= -gout_buf_datatype_size=25
-# 	SIM_ARGS+= -gtile_rows=512
-# 	SIM_ARGS+= -gtile_columns=512
-# 	SIM_ARGS+= --wave=wave/func_tb.ghw
-#     MODULE = test_func
+else ifeq ($(TOPLEVEL),cnn_func)
+	SIM_ARGS+= -ginput_channels=5
+	SIM_ARGS+= -goutput_channels=10
+	SIM_ARGS+= -gdatatype_size=8
+	SIM_ARGS+= -gcrossbar_size=512
+	SIM_ARGS+= -gobuf_datatype_size=25
+	SIM_ARGS+= --wave=wave/cnn_func_tb.ghw
+	SIM_ARGS+= --vcd=vcd/cnn_func_tb.vcd
+    MODULE = test_cnn_func
 else
     $(error Given TOPLEVEL '$(TOPLEVEL)' not supported)
 endif
