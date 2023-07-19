@@ -26,12 +26,12 @@ entity cnn_func is
         i_next_layer_busy: in std_logic; -- Next layer busy signal
 
         o_func_busy: out std_logic; -- Functional unit busy
-        o_write_enable : out std_logic; -- Write data to next layer
+        o_write_enable : out std_logic_vector(output_channels - 1 downto 0); -- Write data to next layer
         
         i_data : in std_logic_vector(obuf_datatype_size * n_tiles - 1 downto 0); -- Data from output buffer tiles
         o_tile_addr: out std_logic_vector(addr_out_buf_size - 1 downto 0);
 
-        o_data: out std_logic_vector(func_datatype_size * output_channels - 1 downto 0) -- Data to the next layer
+        o_data: out std_logic_vector(func_datatype_size - 1 downto 0) -- Data to the next layer
     );
 end cnn_func;
 
@@ -76,14 +76,14 @@ begin
             if i_rst = '1' then
                 s_func_state <= s_func_idle;
                 s_vert_tile_count <= 0;
-                o_write_enable <= '0';
+                o_write_enable <= (others => '0');
                 o_func_busy <= '0';
                 s_obuf_count <= 0;
                 s_obuf_addr <= 0;
             else
                 case s_func_state is
                     when s_func_idle =>
-                        o_write_enable <= '0';
+                        o_write_enable <= (others => '0');
                         o_func_busy <= '0';
                         s_obuf_count <= 0;
                         s_obuf_addr <= 0;
@@ -95,7 +95,8 @@ begin
                         end if;
                     when s_func_cnt => -- Try to send data
                         o_func_busy <= '1';
-                        o_write_enable <= '1';
+                        o_write_enable <= (others => '0');
+                        o_write_enable(s_obuf_count) <= '1';
                         if i_next_layer_busy <= '1' then -- If busy, go to next state
                             s_func_state <= s_func_act;
                         else
@@ -103,7 +104,7 @@ begin
                         end if;
                     when s_func_act => -- Increment address, and wait till not busy
                         o_func_busy <= '1';
-                        o_write_enable <= '0';
+                        o_write_enable <= (others => '0');
                         if i_next_layer_busy <= '0' then -- Next layer is done
                             if s_obuf_count = output_channels - 1 then -- Done consuming obuf
                                 s_func_state <= s_func_idle; -- Reset func
