@@ -13,9 +13,11 @@ entity cnn_ibuf is
     );
     port (
         i_clk : in std_logic;
-        i_write_enable : in std_logic;
-        
-        i_data : in std_logic_vector(datatype_size - 1 downto 0);
+        i_rst: in std_logic;
+
+        i_write_enable: in std_logic;
+        o_ibuf_full: out std_logic;
+        i_data: in std_logic_vector(datatype_size - 1 downto 0);
         -- o_data : out data_array(kernel_size**2 - 1 downto 0)(datatype_size - 1 downto 0)
         o_data: out std_logic_vector(datatype_size * kernel_size**2 - 1 downto 0)
     );
@@ -26,6 +28,7 @@ architecture behavioral of cnn_ibuf is
  
     signal s_data: data_array(kernel_size**2 - 1 downto 0)(datatype_size - 1 downto 0);
     signal s_ibuf_mem: fifo_mem;
+    signal s_count: natural range (kernel_size - 1) * image_size + kernel_size - 1 downto 0;
 begin
 
     data_proc: process(all)
@@ -37,10 +40,27 @@ begin
                 s_ibuf_mem(0) <= i_data;
                 g_ibuf_shift: for fifo_index in (kernel_size - 1) * image_size + kernel_size - 1 downto 1 loop
                         s_ibuf_mem(fifo_index) <= s_ibuf_mem(fifo_index - 1);
-                end loop g_ibuf_shift;   
+                end loop g_ibuf_shift;
             end if;
         end if;
 
+        -- FIFO generate 'full' signal
+        if rising_edge(i_clk) then
+            if i_rst = '1' then
+                s_count <= 0;
+                o_ibuf_full <= '0';
+            else
+                if i_write_enable = '1' then
+                    if s_count = (kernel_size - 1) * image_size + kernel_size - 1 then
+                        s_count <= s_count;
+                        o_ibuf_full <= '1';
+                    else
+                        s_count <= s_count + 1;
+                        o_ibuf_full <= '0';
+                    end if;
+                end if;
+            end if;
+        end if;
         -- Route data from Input buffer to RD buffers
         g_ibuf_kernel_route: for kernel_num in 0 to kernel_size - 2 loop
             g_ibuf_kernel_idx: for kernel_idx in 0 to kernel_size - 1 loop
