@@ -8,7 +8,7 @@ use work.cnn_package.all;
 entity cnn_layer is
     generic(
         input_channels: integer := 5;
-        output_channels: integer := 65; -- num of output channels
+        output_channels: integer := 10; -- num of output channels
 
         kernel_size: integer := 3; -- 5x5 kernel
         image_size: integer := 28; -- mnist 28x28 image
@@ -29,7 +29,7 @@ entity cnn_layer is
         i_write_enable: in std_logic_vector(input_channels - 1 downto 0);
         o_ibuf_full: out std_logic_vector(input_channels - 1 downto 0);
         i_ibuf_data: in std_logic_vector(datatype_size * input_channels - 1 downto 0); -- Input data for input buffers
-        o_tile_rd_data: out std_logic_vector(datatype_size * kernel_size**2 * input_channels - 1 downto 0);
+        o_tile_rd_data: out std_logic_vector(datatype_size * kernel_size**2 * input_channels downto 0);
 
         i_tiles_done: in std_logic_vector(n_tiles - 1 downto 0); -- Done signal from tiles
         i_tile_data : in std_logic_vector(obuf_datatype_size * n_tiles - 1 downto 0); -- Data from output buffer tiles

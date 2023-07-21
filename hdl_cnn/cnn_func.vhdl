@@ -3,7 +3,7 @@ use ieee.std_logic_1164.all;
 use IEEE.math_real.all;
 use ieee.numeric_std.all;
 
-use work.cnn_pkg.all;
+use work.cnn_package.all;
 
 entity cnn_func is
     generic(
