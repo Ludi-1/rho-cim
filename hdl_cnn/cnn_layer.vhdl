@@ -16,7 +16,7 @@ entity cnn_layer is
         crossbar_size: integer := 512; -- RxR Crossbar size
         obuf_datatype_size: integer := 25; -- 2d + log2(R) = 2*8+9
         func_datatype_size: integer := 1;
-        row_split_tiles: integer := integer(ceil(real(input_channels)/real(crossbar_size)));
+        row_split_tiles: integer := integer(ceil(real(kernel_size**2*input_channels)/real(crossbar_size)));
         col_split_tiles: integer := integer(ceil(real(output_channels)*real(datatype_size)/real(crossbar_size)));
         n_tiles: integer := integer(real(row_split_tiles*col_split_tiles));
         obuf_addr_max: integer := integer(ceil(real(crossbar_size)/real(datatype_size))); -- Amount of entries output buffer
@@ -29,16 +29,18 @@ entity cnn_layer is
         i_write_enable: in std_logic_vector(input_channels - 1 downto 0);
         o_ibuf_full: out std_logic_vector(input_channels - 1 downto 0);
         i_ibuf_data: in std_logic_vector(datatype_size * input_channels - 1 downto 0); -- Input data for input buffers
-        o_tile_rd_data: out std_logic_vector(datatype_size * kernel_size**2 * input_channels - 1 downto 0);
 
-        i_tiles_done: in std_logic_vector(n_tiles - 1 downto 0); -- Done signal from tiles
-        i_tile_data : in std_logic_vector(obuf_datatype_size * n_tiles - 1 downto 0); -- Data from output buffer tiles
-        o_tile_addr: out std_logic_vector(addr_out_buf_size - 1 downto 0);
+        o_tile_rd_data: out std_logic_vector(datatype_size - 1 downto 0); -- Data to RD buffer
+        i_tiles_done: in std_logic_vector(n_tiles - 1 downto 0); -- Done/Ready signal from tiles
+        i_tile_data: in std_logic_vector(obuf_datatype_size * n_tiles - 1 downto 0); -- Data from output buffer tiles
+        o_tile_addr: out std_logic_vector(addr_out_buf_size - 1 downto 0); -- Address to RD buffer
+        o_rd_write_enable: out std_logic_vector(n_tiles - 1 downto 0);
+        o_tile_start: out std_logic_vector(n_tiles - 1 downto 0);
 
-        i_next_ibuf_full: in std_logic_vector(output_channels - 1 downto 0);
-        i_start: in std_logic;
+        i_next_ibuf_full: in std_logic_vector(output_channels - 1 downto 0); -- Next layer FIFO ibuf full
+        i_start: in std_logic; -- Start consuming input buffer
         i_next_layer_busy: in std_logic; -- Next layer busy signal
-        o_func_busy: out std_logic; -- Functional unit busy
+        o_layer_busy: out std_logic; -- This Layer busy
         o_write_enable : out std_logic_vector(output_channels - 1 downto 0); -- Write data to next layer
         o_data: out std_logic_vector(func_datatype_size - 1 downto 0); -- Data to the next layer
         o_start: out std_logic
@@ -97,6 +99,15 @@ component cnn_func is
     );
 end component;
 
+    signal s_func_start: std_logic;
+    signal s_ctrl_busy, s_func_busy: std_logic;
+    signal s_tile_rd_data: data_array(kernel_size**2 * input_channels - 1 downto 0)(datatype_size - 1 downto 0); -- All kernel data
+    signal s_ctrl_count: natural range kernel_size**2 * input_channels - 1 downto 0; -- Iterate over all kernel elements
+    signal s_rd_addr: natural range tile_rows - 1 downto 0; -- RD buf addr
+
+    type t_ctrl_state is (t_ctrl_idle, t_ctrl_write, t_ctrl_start);
+    signal s_ctrl_state: t_ctrl_state;
+
 begin
 
     g_ibuf: for input_channel in 0 to input_channels - 1 generate
@@ -112,7 +123,7 @@ begin
                 o_ibuf_full => o_ibuf_full(input_channel),
                 i_write_enable => i_write_enable(input_channel),
                 i_data => i_ibuf_data(datatype_size*(input_channel + 1) - 1 downto datatype_size*input_channel),
-                o_data => o_tile_rd_data(datatype_size * kernel_size**2 * (input_channel + 1) - 1 downto datatype_size * kernel_size**2 * input_channel)
+                o_data => s_tile_rd_data(datatype_size * kernel_size**2 * (input_channel + 1) - 1 downto datatype_size * kernel_size**2 * input_channel)
             );
     end generate;
 
@@ -137,12 +148,50 @@ begin
             i_data => i_tile_data,
             o_tile_addr => o_tile_addr,
             i_next_ibuf_full => i_next_ibuf_full,
-            i_start => i_start,
+            i_start => s_func_start,
             i_next_layer_busy => i_next_layer_busy,
-            o_func_busy => o_func_busy,
+            o_func_busy => s_func_busy,
             o_write_enable => o_write_enable,
             o_data => o_data,
             o_start => o_start
         );
 
+    o_layer_busy <= s_ctrl_busy or s_func_busy;
+    o_tile_addr <= std_logic_vector(s_rd_addr);
+
+    ctrl_proc: process(all) is
+    begin
+        if rising_edge(i_clk) then
+            if i_rst = '1' then
+                s_ctrl_busy <= '0';
+                s_ctrl_count <= 0;
+                s_rd_addr <= 0;
+                o_rd_write_enable <= (others => '0');
+                o_tile_start <= (others => '0');
+                s_func_start <= '0';
+            else
+                case s_ctrl_state is
+                    when t_ctrl_idle =>
+                        s_ctrl_busy <= '0';
+                        s_ctrl_count <= 0;
+                        s_rd_addr <= 0;
+                        o_rd_write_enable <= (others => '0');
+                        o_tile_start <= (others => '0');
+                        s_func_start <= '0';
+                        if i_start = '1' then
+                            s_ctrl_state <= t_ctrl_write;
+                        end if;
+                    when t_ctrl_write =>
+                        if s_ctrl_count = kernel_size**2 * input_channels - 1 then
+                            s_ctrl_state <= t_ctrl_start;
+                        end if;
+                    when t_ctrl_start =>
+                        s_func_start <= '1';
+                        if i_tiles_done = (n_tiles - 1 downto 0 => '0') then
+                            s_ctrl_state <= t_ctrl_idle;
+                        end if;
+                end case;
+            end if;
+        end if;
+    end process;
 end behavioral;
