@@ -61,9 +61,10 @@ begin
                 end if;
             end if;
         end if;
+
         -- Route data from Input buffer to RD buffers
-        g_ibuf_kernel_route: for kernel_num in 0 to kernel_size - 2 loop
-            g_ibuf_kernel_idx: for kernel_idx in 0 to kernel_size - 1 loop
+        g_ibuf_kernel_route: for kernel_num in 0 to kernel_size - 2 loop -- Vertical index
+            g_ibuf_kernel_idx: for kernel_idx in 0 to kernel_size - 1 loop -- Horizontal index
                 s_data(kernel_num*kernel_size + kernel_idx) <= s_ibuf_mem(kernel_num*image_size + kernel_idx);
             end loop g_ibuf_kernel_idx;
         end loop g_ibuf_kernel_route;
@@ -72,6 +73,7 @@ begin
             s_data(kernel_size**2 - 1 - kernel_num) <= s_ibuf_mem((kernel_size - 1) * image_size + kernel_size - 1 - kernel_num);
         end loop g_ibuf_rest_kernel;
 
+        -- Unroll 2D vector into 1D vector
         g_output_data: for kernel_num in 0 to kernel_size**2 - 1 loop
             o_data((kernel_num + 1) * datatype_size - 1 downto kernel_num * datatype_size) <= s_data(kernel_num);
         end loop g_output_data;

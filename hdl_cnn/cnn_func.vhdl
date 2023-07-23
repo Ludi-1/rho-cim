@@ -50,7 +50,7 @@ begin
 
     o_tile_addr <= std_logic_vector(to_unsigned(s_obuf_addr, addr_out_buf_size));
 
-    o_data_sum: process(all) is
+    data_sum_proc: process(all) is
         variable sum_v	: signed(obuf_datatype_size - 1 downto 0);
         variable data_v : std_logic_vector(obuf_datatype_size - 1 downto 0);
     begin
