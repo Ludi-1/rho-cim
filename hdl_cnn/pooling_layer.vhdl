@@ -17,15 +17,15 @@ entity pooling_layer is
         i_clk : in std_logic;
         i_rst: in std_logic;
 
-        i_write_enable: in std_logic_vector(input_channels - 1 downto 0);
-        o_ibuf_full: out std_logic_vector(input_channels - 1 downto 0);
-        i_ibuf_data: in std_logic_vector(datatype_size * input_channels - 1 downto 0); -- Input data for input buffers
+        i_write_enable: in std_logic_vector(channels - 1 downto 0);
+        o_ibuf_full: out std_logic_vector(channels - 1 downto 0);
+        i_ibuf_data: in std_logic_vector(datatype_size * channels - 1 downto 0); -- Input data for input buffers
 
-        i_next_ibuf_full: in std_logic_vector(output_channels - 1 downto 0); -- Next layer FIFO ibuf full
+        i_next_ibuf_full: in std_logic_vector(channels - 1 downto 0); -- Next layer FIFO ibuf full
         i_start: in std_logic; -- Start consuming input buffer
         i_next_layer_busy: in std_logic; -- Next layer busy signal
         o_layer_busy: out std_logic; -- This Layer busy
-        o_write_enable : out std_logic_vector(output_channels - 1 downto 0); -- Write data to next layer
+        o_write_enable: out std_logic_vector(channels - 1 downto 0); -- Write data to next layer
         o_data: out std_logic_vector(datatype_size * channels - 1 downto 0); -- Data to the next layer
         o_start: out std_logic
     );
@@ -50,20 +50,39 @@ component cnn_ibuf is
     );
 end component;
 
-    signal s_func_start: std_logic;
-    signal s_ctrl_busy, s_func_busy: std_logic;
-
-    signal s_ibuf_data: data_array(input_channels - 1 downto 0)(datatype_size*kernel_size**2 - 1 downto 0);
-
-    signal s_ctrl_count: natural range kernel_size**2 * input_channels - 1 downto 0; -- Iterate over all kernel elements
-    signal s_rd_addr: natural range crossbar_size - 1 downto 0; -- RD buf addr
-
-    type t_ctrl_state is (t_ctrl_idle, t_ctrl_write, t_ctrl_start);
-    signal s_ctrl_state: t_ctrl_state;
+    signal s_layer_busy: std_logic;
+    signal s_write_enable: std_logic_vector(channels - 1 downto 0);
+    signal s_ibuf_data: data_array(channels - 1 downto 0)(datatype_size*kernel_size**2 - 1 downto 0);
 
 begin
 
-    g_ibuf: for input_channel in 0 to input_channels - 1 generate
+    o_layer_busy <= i_next_layer_busy or s_layer_busy;
+    o_write_enable <= s_write_enable;
+
+    process(all) is
+    begin
+        if rising_edge(i_clk) then
+            if i_rst = '1' then
+                s_layer_busy <= '0';
+            else
+                if i_start = '1' then
+                    s_layer_busy <= '1';
+                    if s_write_enable = (channels - 1 downto 0 => '1') then
+                        s_write_enable <= (others => '0');
+                        o_start <= '1';
+                    else
+                        s_write_enable <= (others => '1');
+                        o_start <= '0';
+                    end if;
+                else
+                    o_start <= '0';
+                    s_layer_busy <= '0';
+                end if;
+            end if;
+        end if;
+    end process;
+
+    g_ibuf: for input_channel in 0 to channels - 1 generate
         ibuf: cnn_ibuf
             generic map(
                 kernel_size => kernel_size,
@@ -80,87 +99,24 @@ begin
             );
     end generate;
 
-    -- -- Unroll s_tile_rd_data for easier indexing
-    -- g_unroll_data_input_channels: for input_channel in 0 to input_channels - 1 generate
-    --     g_unroll_data_kernel: for kernel_element in 0 to kernel_size**2 - 1 generate
-    --         s_unrolled_rd_data(input_channel*kernel_size**2 + kernel_element) <= s_tile_rd_data(input_channel)((kernel_element + 1)*datatype_size - 1 downto kernel_element*datatype_size);
-    --     end generate;
-    -- end generate;
-
     pooling_proc: process(all) is
-        variable v_max_value: data_array(input_channels - 1 downto 0)(datatype_size - 1 downto 0);
+        variable v_max_value: data_array(channels - 1 downto 0)(datatype_size - 1 downto 0);
     begin
         for input_channel in 0 to channels - 1 loop
-            v_max_value(input_channel) := 0;
+
+            -- Perform max pooling on ibuf of this layer
+            v_max_value(input_channel) := (others => '0');
             for kernel_idx in 0 to kernel_size**2 - 1 loop
-                if s_ibuf_data(input_channel)((kernel_idx+1)*datatype_size downto kernel_idx*datatype_size) > v_max_value then
-                    v_max_value(input_channel) := s_ibuf_data(input_channel)((kernel_idx+1)*datatype_size downto kernel_idx*datatype_size);
+                if signed(s_ibuf_data(input_channel)((kernel_idx+1)*datatype_size - 1 downto kernel_idx*datatype_size)) > signed(v_max_value(input_channel)) then
+                    v_max_value(input_channel) :=
+                        s_ibuf_data(input_channel)((kernel_idx+1)*datatype_size - 1 downto kernel_idx*datatype_size);
                 end if;
             end loop;
+
+            -- Route max pooling value to ibuf of next layer
+            o_data((input_channel + 1)*datatype_size - 1 downto input_channel*datatype_size)
+                <= v_max_value(input_channel);
         end loop;
     end process;
-
-    -- o_layer_busy <= s_ctrl_busy or s_func_busy;
-    -- o_tile_rd_data <= s_unrolled_rd_data(s_ctrl_count);
-    -- o_tile_rd_addr <= std_logic_vector(to_unsigned(s_rd_addr, addr_rd_size));
-
-    -- ctrl_proc: process(all) is
-    -- begin
-    --     if rising_edge(i_clk) then
-    --         if i_rst = '1' then
-    --             s_ctrl_busy <= '0';
-    --             s_ctrl_count <= 0;
-    --             s_rd_addr <= 0;
-    --             o_rd_write_enable <= (others => '0');
-    --             o_tile_start <= (others => '0');
-    --             s_func_start <= '0';
-    --         else
-    --             case s_ctrl_state is
-    --                 when t_ctrl_idle =>
-    --                     s_ctrl_busy <= '0';
-    --                     s_ctrl_count <= 0;
-    --                     s_rd_addr <= 0;
-    --                     o_rd_write_enable <= (others => '0');
-    --                     o_tile_start <= (others => '0');
-    --                     s_func_start <= '0';
-    --                     if i_start = '1' then
-    --                         o_rd_write_enable(col_split_tiles - 1 downto 0) <= (col_split_tiles - 1 downto 0 => '1');
-    --                         s_ctrl_state <= t_ctrl_write;
-    --                     end if;
-    --                 when t_ctrl_write =>
-    --                     s_ctrl_busy <= '1';
-    --                     s_func_start <= '0';
-    --                     o_tile_start <= (others => '0');
-
-    --                     if s_ctrl_count = kernel_size**2 * input_channels - 1 then -- Consumed all ibufs
-    --                         s_ctrl_state <= t_ctrl_start;
-    --                     else
-    --                         s_ctrl_count <= s_ctrl_count + 1;
-    --                         if s_rd_addr = crossbar_size - 1 then -- Iterated over a complete RD buffer
-    --                             s_rd_addr <= 0; -- Reset the addr
-    --                             if o_rd_write_enable(n_tiles - 1) = '1' then -- Set write enable back to beginning (should never happen)
-    --                                 o_rd_write_enable <= (others => '0');
-    --                                 o_rd_write_enable(col_split_tiles - 1 downto 0) <= (col_split_tiles - 1 downto 0 => '1');
-    --                             else -- Shift left the RD write enable signal
-    --                                 o_rd_write_enable <= o_rd_write_enable sll col_split_tiles;
-    --                             end if;
-    --                         else -- Count addr up
-    --                             s_rd_addr <= s_rd_addr + 1;
-    --                         end if;
-    --                     end if;
-    --                 when t_ctrl_start => -- Try to start tiles
-    --                     s_func_start <= '1';
-    --                     s_ctrl_busy <= '0';
-    --                     s_ctrl_count <= 0;
-    --                     s_rd_addr <= 0;
-    --                     o_rd_write_enable <= (others => '0');
-    --                     o_tile_start <= (others => '1');
-    --                     if i_tiles_done = (n_tiles - 1 downto 0 => '0') then -- Poll 'busy' signal of tiles
-    --                         s_ctrl_state <= t_ctrl_idle;
-    --                     end if;
-    --             end case;
-    --         end if;
-    --     end if;
-    -- end process;
 
 end behavioral;

@@ -44,6 +44,14 @@ else ifeq ($(TOPLEVEL),cnn_layer)
 	SIM_ARGS+= --wave=wave/cnn_layer_tb.ghw
 	SIM_ARGS+= --vcd=vcd/cnn_layer_tb.vcd
     MODULE = test_cnn_layer
+else ifeq ($(TOPLEVEL),pooling_layer)
+	SIM_ARGS+= -gchannels=5
+	SIM_ARGS+= -gkernel_size=3
+	SIM_ARGS+= -gimage_size=28
+	SIM_ARGS+= -gdatatype_size=8
+	SIM_ARGS+= --wave=wave/pooling_layer_tb.ghw
+	SIM_ARGS+= --vcd=vcd/pooling_layer_tb.vcd
+    MODULE = test_pooling_layer
 else
     $(error Given TOPLEVEL '$(TOPLEVEL)' not supported)
 endif
