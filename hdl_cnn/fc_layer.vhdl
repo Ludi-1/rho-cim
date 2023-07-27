@@ -187,22 +187,22 @@ begin
                         s_ctrl_busy <= '1';
                         s_func_start <= '0';
                         o_tile_start <= (others => '0');
+                        s_ctrl_count <= s_ctrl_count + 1;
 
-                        if s_ctrl_count = inputs - 1 then -- Consumed all ibufs
+                        if s_ctrl_count + 1 = inputs - 1 then -- Consumed all ibufs
                             s_ctrl_state <= t_ctrl_start;
-                        else
-                            s_ctrl_count <= s_ctrl_count + 1;
-                            if s_rd_addr = crossbar_size - 1 then -- Iterated over a complete RD buffer
-                                s_rd_addr <= 0; -- Reset the addr
-                                if o_rd_write_enable(n_tiles - 1) = '1' then -- Set write enable back to beginning (should never happen)
-                                    o_rd_write_enable <= (others => '0');
-                                    o_rd_write_enable(col_split_tiles - 1 downto 0) <= (col_split_tiles - 1 downto 0 => '1');
-                                else -- Shift left the RD write enable signal
-                                    o_rd_write_enable <= o_rd_write_enable sll col_split_tiles;
-                                end if;
-                            else -- Count addr up
-                                s_rd_addr <= s_rd_addr + 1;
+                        end if;
+
+                        if s_rd_addr = crossbar_size - 1 then -- Iterated over a complete RD buffer
+                            s_rd_addr <= 0; -- Reset the addr
+                            if o_rd_write_enable(n_tiles - 1) = '1' then -- Set write enable back to beginning (should never happen)
+                                o_rd_write_enable <= (others => '0');
+                                o_rd_write_enable(col_split_tiles - 1 downto 0) <= (col_split_tiles - 1 downto 0 => '1');
+                            else -- Shift left the RD write enable signal
+                                o_rd_write_enable <= o_rd_write_enable sll col_split_tiles;
                             end if;
+                        else -- Count addr up
+                            s_rd_addr <= s_rd_addr + 1;
                         end if;
                     when t_ctrl_start => -- Try to start tiles
                         s_func_start <= '1';
