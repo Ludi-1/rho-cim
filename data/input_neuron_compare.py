@@ -1,3 +1,7 @@
+"""
+Script for generating graphs
+for the comparison of the 1layer.py results
+"""
 import numpy as np
 import matplotlib.pyplot as plt
 

@@ -1,3 +1,5 @@
+-- CNN input buffer, implemented as a FIFO
+-- Only the relevant kernel elements are routed to o_data
 library ieee;
 use ieee.std_logic_1164.all;
 use IEEE.math_real.all;

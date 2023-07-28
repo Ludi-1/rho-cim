@@ -1,3 +1,4 @@
+-- HDL model for a single convolutional layer
 library ieee;
 use ieee.std_logic_1164.all;
 use IEEE.math_real.all;

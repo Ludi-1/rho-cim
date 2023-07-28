@@ -1,3 +1,9 @@
+"""
+Script for generating graphs
+of the CNN HDL synthesis results for CNN-1 and CNN-2
+for each crossbar size and layer
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd

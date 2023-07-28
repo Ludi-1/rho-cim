@@ -1,3 +1,5 @@
+-- Input buffer for fully connected layer of CNN implementation
+-- Every element of FIFO is routed to o_data
 library ieee;
 use ieee.std_logic_1164.all;
 use IEEE.math_real.all;

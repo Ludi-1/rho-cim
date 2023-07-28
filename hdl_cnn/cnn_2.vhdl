@@ -1,3 +1,9 @@
+-- HDL module for the CNN-2 model
+
+-- Change crossbar_size for crossbar size
+
+-- Change datatype size, obuf_datatype_size, func_datatype_size for almost EVERY layer
+-- when parameterizing the datatype size
 library ieee;
 use ieee.std_logic_1164.all;
 use IEEE.math_real.all;

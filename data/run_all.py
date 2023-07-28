@@ -1,3 +1,7 @@
+"""
+Run this to generate ALL graphs
+(all scripts are run)
+"""
 import subprocess
 
 # Run the other script

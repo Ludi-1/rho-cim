@@ -1,3 +1,9 @@
+-- HDL module for the MLP-M model
+
+-- Change tile_rows and tile_columns for crossbar size
+
+-- Change max_datatype size, out_buf_datatype_size, func_datatype_size for almost EVERY layer
+-- when parameterizing the datatype size
 library ieee;
 use ieee.std_logic_1164.all;
 use IEEE.math_real.all;

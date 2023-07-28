@@ -1,3 +1,8 @@
+"""
+Script for generating graphs
+of the MLP HDL synthesis results for MLP-S, MLP-M, MLP-L
+for each crossbar size
+"""
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
