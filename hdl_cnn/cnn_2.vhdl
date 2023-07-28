@@ -5,15 +5,15 @@ use ieee.numeric_std.all;
 
 use work.cnn_package.all;
 
-entity cnn_1 is
+entity cnn_2 is
     generic(
         crossbar_size: integer := 512;
         addr_rd_size: integer := integer(ceil(log2(real(crossbar_size))));
 
-        -- LAYER 1: CONV 5x5 kernel size, 5 output? channels
+        -- LAYER 1: CONV 7x7 kernel size, 10 output? channels
         l1_input_channels: integer := 1; -- grayscale
-        l1_output_channels: integer := 5; -- 5 output channels
-        l1_kernel_size: integer := 5; -- 5x5 conv
+        l1_output_channels: integer := 10; -- 10 output channels
+        l1_kernel_size: integer := 7; -- 7x7 conv
         l1_image_size: integer := 28; -- 28x28 MNIST
         l1_datatype_size: integer := 2; -- datatype size l1
         l1_obuf_datatype_size: integer := 13; -- 2d + log2(R)
@@ -25,15 +25,15 @@ entity cnn_1 is
         l1_n_tiles: integer := integer(real(l1_row_split_tiles*l1_col_split_tiles));
 
         -- LAYER 2: POOL 2x2 kernel size
-        l2_channels: integer := 5;
+        l2_channels: integer := 10;
         l2_kernel_size: integer := 2; -- 2x2 kernel size of pooling
-        l2_image_size: integer := 24; -- convolved img size: img_size-kernel_size+1= 28-5+1= 24
+        l2_image_size: integer := 22; -- convolved img size: img_size-kernel_size+1= 28-7+1= 22
         l2_datatype_size: integer := 1; -- datatype size input
 
-        -- LAYER 3: (P2)FC layer, 720 neurons
-        l3_input_channels: integer := 5; -- Amount of input channels: Should be equal to the output channels of prev. layer
-        l3_image_size: integer := 23; -- Max-pooled image size: 24 - 2 + 1 = 23
-        l3_neurons: integer := 720; -- Amount of neurons in FC layer
+        -- LAYER 3: (P2)FC layer, 1210 neurons
+        l3_input_channels: integer := 10; -- Amount of input channels: Should be equal to the output channels of prev. layer
+        l3_image_size: integer := 21; -- Max-pooled image size: 22 - 2 + 1 = 21
+        l3_neurons: integer := 1210; -- Amount of neurons in FC layer
         l3_datatype_size: integer := 1; -- datatype size of input
         l3_obuf_datatype_size: integer := 10; -- for d=1: d+log2(R)
         l3_func_datatype_size: integer := 1;
@@ -43,9 +43,9 @@ entity cnn_1 is
         l3_col_split_tiles: integer := integer(ceil(real(l3_neurons)*real(l3_datatype_size)/real(crossbar_size)));
         l3_n_tiles: integer := integer(real(l3_row_split_tiles*l3_col_split_tiles));
 
-        -- LAYER 4: FC layer, 70 neurons
-        l4_inputs: integer := 720;
-        l4_neurons: integer := 70; -- Amount of neurons in FC layer
+        -- LAYER 4: FC layer, 1210 neurons
+        l4_inputs: integer := 1210;
+        l4_neurons: integer := 1210; -- Amount of neurons in FC layer
         l4_datatype_size: integer := 1; -- datatype size of input
         l4_obuf_datatype_size: integer := 10; -- if d>1: 2d + log2(R), else: d+log2(R)
         l4_func_datatype_size: integer := 1;
@@ -56,11 +56,11 @@ entity cnn_1 is
         l4_n_tiles: integer := integer(real(l4_row_split_tiles*l4_col_split_tiles));
  
         -- LAYER 5: FC layer, 10 neurons
-        l5_inputs: integer := 70;
+        l5_inputs: integer := 1210;
         l5_neurons: integer := 10; -- Amount of neurons in FC layer
         l5_datatype_size: integer := 1; -- datatype size of input
         l5_obuf_datatype_size: integer := 10; -- if d>1: 2d + log2(R), else: d+log2(R)
-        l5_func_datatype_size: integer := 2; -- int8/int4/int2 output
+        l5_func_datatype_size: integer := 2; -- int8 output
         l5_obuf_addr_max: integer := integer(ceil(real(crossbar_size)/real(l5_datatype_size))); -- Amount of entries output buffer
         l5_addr_out_buf_size: integer := integer(ceil(log2(real(l5_obuf_addr_max)))); -- Addr size output buffer
         l5_row_split_tiles: integer := integer(ceil(real(l5_inputs)/real(crossbar_size)));
@@ -114,9 +114,9 @@ entity cnn_1 is
         o_l5_rd_write_enable: out std_logic_vector(l5_n_tiles - 1 downto 0);
         o_l5_tile_start: out std_logic_vector(l5_n_tiles - 1 downto 0)        
     );
-end cnn_1;
+end cnn_2;
 
-architecture behavioral of cnn_1 is
+architecture behavioral of cnn_2 is
 
 component cnn_layer is
     generic(
