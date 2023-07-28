@@ -45,7 +45,7 @@ for i, var in enumerate(variables):
 ax.set_xticks(x + (bar_width * (len(variables) - 1) / 2))
 ax.set_xticklabels(categories)
 ax.legend()
-plt.savefig('plots/cnn_1_datatype_regs.svg', format='svg')
+plt.savefig('plots/cnn_1_crossbar_regs.svg', format='svg')
 plt.show()
 
 # Sample data CNN-2
@@ -73,7 +73,7 @@ for i, var in enumerate(variables):
 ax.set_xticks(x + (bar_width * (len(variables) - 1) / 2))
 ax.set_xticklabels(categories)
 ax.legend()
-plt.savefig('plots/cnn_2_crossbarluts.svg', format='svg')
+plt.savefig('plots/cnn_2_crossbar_luts.svg', format='svg')
 plt.show()
 
 ### REGISTER COUNT
@@ -91,5 +91,5 @@ for i, var in enumerate(variables):
 ax.set_xticks(x + (bar_width * (len(variables) - 1) / 2))
 ax.set_xticklabels(categories)
 ax.legend()
-plt.savefig('plots/cnn_2_datatype_regs.svg', format='svg')
+plt.savefig('plots/cnn_2_crossbar_regs.svg', format='svg')
 plt.show()
