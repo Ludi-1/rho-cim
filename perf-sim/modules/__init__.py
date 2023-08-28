@@ -1,1 +1,1 @@
-__all__ = ["agent", "mlp_ibuf", "module"]
+__all__ = ["agent", "mlp_ibuf", "module", "mlp_ctrl"]
