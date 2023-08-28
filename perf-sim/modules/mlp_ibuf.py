@@ -13,6 +13,8 @@ class MLP_Input_Buffer(Module):
     def start(self, time):
         print(f"{self.name}: Started at {time}")
         if time >= self.current_time: # Should always be true
+            if self.current_time < self.next_module.current_time:
+                self.current_time = self.next_module.current_time
             self.current_time = time + self.delay
         else:
             raise Exception(f"Module {self.name} started in the past: {time}")
