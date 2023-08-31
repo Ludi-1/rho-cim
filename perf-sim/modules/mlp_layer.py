@@ -44,7 +44,7 @@ class MLP_Layer(Module):
             f"({self.name}, ctrl)",
             next_module=self.cim,
             clk_freq=self.fpga_clk_freq,
-            inputs=self.inputs
+            inputs=self.inputs,
         )
         # self.ibuf = MLP_Input_Buffer(
         #     f"({self.name}, ibuf)",

@@ -15,13 +15,14 @@ class Module(ABC):
         self.name: str = name
         pass
 
-    @abstractmethod
-    def start(self):
-        """Start this module\n
-        Add intended behaviour\n
-        Call start_next() after a delay
-        """
-        pass
+    def start(self, time):
+        print(f"{self.name}: Started at {time}")
+        if time >= self.current_time:  # Should always be true
+            self.current_time = time + self.total_latency
+        else:
+            raise Exception(f"Module {self.name} started in the past: {time}")
+
+        self.start_next()
 
     def start_next(self):
         """Start the next module that it is connected to\n
