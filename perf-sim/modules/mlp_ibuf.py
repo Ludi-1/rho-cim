@@ -1,3 +1,7 @@
+"""Input buffer class
+This class is meant for the MLP implementation
+"""
+
 from modules.module import Module
 
 

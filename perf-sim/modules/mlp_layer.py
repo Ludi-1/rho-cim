@@ -1,3 +1,8 @@
+"""MLP Layer class
+Bundles a set of modules together that make up a fully connected layer
+This layer should be connected to another layer or None if it is the last layer
+"""
+
 from modules.module import Module
 from modules.mlp_ibuf import MLP_Input_Buffer
 from modules.mlp_ctrl import MLP_Control
@@ -5,7 +10,7 @@ from modules.mlp_func import MLP_Func
 from modules.cim import CIM
 
 
-class Layer(Module):
+class MLP_Layer(Module):
     def __init__(
         self,
         name: str,

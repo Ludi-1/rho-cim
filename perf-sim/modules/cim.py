@@ -13,15 +13,12 @@ class CIM(Module):
         name: str,
         next_module: Module,
         clk_freq: float,
-        datatype_size: int = 8,
-        inputs: int = 1,
-        neurons: int = 1,
+        total_latency: int
     ):
         self.next_module: Module = next_module
         self.clk_freq: float = clk_freq
         self.current_time: float = 0
-        self.tile_count = ceil(neurons / datatype_size) * inputs
-        self.delay = (1 / clk_freq) * 10  # CIM Tile delay should be filled in manually
+        self.total_latency = (1 / clk_freq) * total_latency  # CIM Tile delay should be filled in manually
         self.name: str = name
 
     def start(self, time):
