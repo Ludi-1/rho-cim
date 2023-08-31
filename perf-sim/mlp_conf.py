@@ -9,40 +9,30 @@ from itertools import pairwise
 
 
 class MLP_conf:
-    def __init__(
-        self,
-        fpga_clk_freq: float,
-        cim_clk_freq: float,
-        inputs: int,
-        neurons: list[int],
-        start_times: list[float] = [0],
-    ):
-        self.fpga_clk_freq: float = fpga_clk_freq
-        self.cim_clk_freq = cim_clk_freq
-        self.layers: list[MLP_Layer] = [None]
+    def __init__(self, param_dict: dict):
 
-        neurons.insert(0, inputs)
-        n = len(neurons) - 1
-        neuron_pairs = pairwise(reversed(neurons))
+        self.neuron_count_list: list[int] = param_dict["neuron_count_list"]
+        self.neuron_count_list.insert(0, param_dict["input_count"])
+        n = len(self.neuron_count_list) - 1
+        neuron_pairs = pairwise(reversed(self.neuron_count_list))
+        self.layer_list: list[MLP_Layer] = [None]
         for neuron_pair in neuron_pairs:
-            self.layers.insert(
+            layer_dict: dict = param_dict
+            layer_dict["input_neurons"]: int = neuron_pair[1]
+            layer_dict["output_neurons"]: int = neuron_pair[0]
+            self.layer_list.insert(
                 0,
                 MLP_Layer(
-                    name=f"Layer {n}",
-                    next_layer=self.layers[0],
-                    fpga_clk_freq=self.fpga_clk_freq,
-                    cim_clk_freq=cim_clk_freq,
-                    inputs=neuron_pair[1],
-                    neurons=neuron_pair[0],
+                    name=f"Layer {n}", next_layer=self.layer_list[0], param_dict=layer_dict
                 ),
             )
             n -= 1
 
         # Connect agent to first module of configuration
         self.agent = Agent(
-            clk_freq=self.fpga_clk_freq,
-            first_module=self.layers[0].ibuf,
-            start_times=start_times,
+            clk_freq=param_dict["fpga_clk_freq"],
+            first_module=self.layer_list[0].ctrl,
+            start_times=param_dict["start_times"],
         )
 
     def start(self):

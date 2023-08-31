@@ -11,49 +11,53 @@ from modules.cim import CIM
 
 
 class MLP_Layer(Module):
-    def __init__(
-        self,
-        name: str,
-        next_layer: Module,
-        fpga_clk_freq: float,
-        cim_clk_freq: float,
-        inputs: int,
-        neurons: int,
-    ):
+    def __init__(self, name: str, next_layer: Module, param_dict: dict):
         if next_layer is not None:
             self.next_module = next_layer.ctrl
         else:
             self.next_module = None
-
-        self.fpga_clk_freq: float = fpga_clk_freq
-        self.cim_clk_freq: float = cim_clk_freq
-        self.inputs: int = inputs
-        self.neurons: int = neurons
         self.name: str = name
+
+        self.fpga_clk_freq: float = param_dict["fpga_clk_freq"]  # Clock frequency
+        self.input_neurons: int = param_dict["input_neurons"]
+        self.output_neurons: int = param_dict["output_neurons"]
+        self.datatype_size: int = param_dict[
+            "datatype_size"
+        ]  # Datatype size of input buffer
+        self.bus_width: int = param_dict["bus_width"]  # Bus width
+        self.bus_latency: int = param_dict[
+            "bus_latency"
+        ]  # Latency to transfer data in cycles
+        self.crossbar_size: int = param_dict["crossbar_size"]
+
+        self.ibuf_ports: int = param_dict["ibuf_ports"]
+        self.ibuf_read_latency: int = param_dict[
+            "ibuf_read_latency"
+        ]  # Latency for reading from ibuf, incorporated in operation freq
+
+        self.func_ports: int = param_dict["func_ports"]
+        self.operation_latency: int = param_dict[
+            "operation_latency"
+        ]  # Latency for post-processing
+        self.ibuf_write_latency: int = param_dict[
+            "ibuf_write_latency"
+        ]  # Latency for writing to ibuf, incorporated in operation freq
 
         self.func = MLP_Func(
             f"({self.name}, func)",
             next_module=self.next_module,
-            clk_freq=self.fpga_clk_freq,
-            neurons=self.neurons,
+            param_dict=param_dict
         )
         self.cim = CIM(
-            f"({self.name}, cim)", next_module=self.func, clk_freq=self.cim_clk_freq
+            f"({self.name}, cim)", next_module=self.func, param_dict=param_dict["cim_param_dict"]
         )
         self.ctrl = MLP_Control(
             f"({self.name}, ctrl)",
             next_module=self.cim,
-            clk_freq=self.fpga_clk_freq,
-            inputs=self.inputs,
+            param_dict=param_dict
         )
-        # self.ibuf = MLP_Input_Buffer(
-        #     f"({self.name}, ibuf)",
-        #     next_module=self.ctrl,
-        #     clk_freq=self.fpga_clk_freq,
-        #     size=self.inputs,
-        # )
 
-        self.current_time = self.ibuf.current_time
+        self.current_time = self.ctrl.current_time
 
     def start(self, time):
-        self.ibuf.start(time)
+        self.ctrl.start(time)

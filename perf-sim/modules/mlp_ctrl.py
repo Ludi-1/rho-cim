@@ -7,7 +7,7 @@ class MLP_Control(Module):
         self,
         name: str,
         next_module: Module,  # Should always be a CIM module
-        param_dict: dict
+        param_dict: dict,
     ):
         self.next_module: Module = next_module
         self.current_time: float = 0
@@ -31,16 +31,12 @@ class MLP_Control(Module):
         self.num_writes: int = ceil(
             ceil(self.input_neurons / self.crossbar_rows) / self.ibuf_ports
         )  # Amount of writes to the RD buffers
-        self.transfer_latency: int = ceil(self.datatype_size / self.bus_width) * self.bus_latency
+        self.transfer_latency: int = (
+            ceil(self.datatype_size / self.bus_width) * self.bus_latency
+        )
         self.total_latency = (
-            (1 / self.clk_freq) * self.num_writes * self.transfer_latency * self.ibuf_read_latency
+            (1 / self.clk_freq)
+            * self.num_writes
+            * self.transfer_latency
+            * self.ibuf_read_latency
         )  # Time to consume input buffer
-
-    def start(self, time):
-        print(f"{self.name}: Started at {time}")
-        if time >= self.current_time:  # Should always be true
-            self.current_time = time + self.delay
-        else:
-            raise Exception(f"Module {self.name} started in the past: {time}")
-
-        self.start_next()
