@@ -23,7 +23,9 @@ class MLP_conf:
             self.layer_list.insert(
                 0,
                 MLP_Layer(
-                    name=f"Layer {n}", next_layer=self.layer_list[0], param_dict=layer_dict
+                    name=f"Layer {n}",
+                    next_layer=self.layer_list[0],
+                    param_dict=layer_dict,
                 ),
             )
             n -= 1

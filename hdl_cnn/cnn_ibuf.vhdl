@@ -27,7 +27,7 @@ end cnn_ibuf;
 
 architecture behavioral of cnn_ibuf is
     type fifo_mem is array((kernel_size - 1) * image_size + kernel_size - 1 downto 0) of std_logic_vector(datatype_size - 1 downto 0);
- 
+
     signal s_data: data_array(kernel_size**2 - 1 downto 0)(datatype_size - 1 downto 0);
     signal s_ibuf_mem: fifo_mem;
     signal s_count: natural range (kernel_size - 1) * image_size + kernel_size - 1 downto 0;

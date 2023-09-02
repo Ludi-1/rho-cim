@@ -26,7 +26,7 @@ def main():
         "func_ports": 10,
         "operation_latency": 1,
         "ibuf_write_latency": 0,
-        "cim_param_dict": cim_param_dict
+        "cim_param_dict": cim_param_dict,
     }
     mlp_conf = MLP_conf(param_dict=param_dict)
     mlp_conf.start()

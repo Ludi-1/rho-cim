@@ -44,17 +44,15 @@ class MLP_Layer(Module):
         ]  # Latency for writing to ibuf, incorporated in operation freq
 
         self.func = MLP_Func(
-            f"({self.name}, func)",
-            next_module=self.next_module,
-            param_dict=param_dict
+            f"({self.name}, func)", next_module=self.next_module, param_dict=param_dict
         )
         self.cim = CIM(
-            f"({self.name}, cim)", next_module=self.func, param_dict=param_dict["cim_param_dict"]
+            f"({self.name}, cim)",
+            next_module=self.func,
+            param_dict=param_dict["cim_param_dict"],
         )
         self.ctrl = MLP_Control(
-            f"({self.name}, ctrl)",
-            next_module=self.cim,
-            param_dict=param_dict
+            f"({self.name}, ctrl)", next_module=self.cim, param_dict=param_dict
         )
 
         self.current_time = self.ctrl.current_time
