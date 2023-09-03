@@ -34,15 +34,18 @@ class CNN_Control(Module):
             "ibuf_read_latency"
         ]  # Latency for reading from ibuf, incorporated in operation freq
 
-        # self.num_writes: int = ceil(
-        #     ceil(self.image_size**2 / self.crossbar_rows) / self.ibuf_ports
-        # )  # Amount of writes to the RD buffers
-        # self.transfer_latency: int = (
-        #     ceil(self.datatype_size / self.bus_width) * self.bus_latency
-        # )
-        # self.total_latency = (
-        #     (1 / self.clk_freq)
-        #     * self.num_writes
-        #     * self.transfer_latency
-        #     * self.ibuf_read_latency
-        # )  # Time to consume input buffer
+        self.entry_count: int = 0
+        self.fifo_size: int = self.image_size * (self.kernel_size - 1) + self.kernel_size
+        self.total_latency = self.kernel_size**2 / self.clk_freq
+
+    def start(self, time):
+        print(f"{self.name}: Started at {time}")
+        if time >= self.current_time:  # Should always be true
+            if self.entry_count == self.fifo_size:
+                self.current_time = time + self.total_latency
+                self.start_next()
+            else:
+                self.entry_count += 1
+                self.current_time = time + 1/self.clk_freq
+        else:
+            raise Exception(f"Module {self.name} started in the past: {time}")
