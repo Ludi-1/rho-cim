@@ -9,9 +9,9 @@ class CNN_Func(Module):
         self.name: str = name
 
         self.clk_freq: float = param_dict["fpga_clk_freq"]  # Clock frequency
-        self.input_neurons: int = param_dict["input_neurons"]
-        self.output_neurons: int = param_dict["output_neurons"]
-        self.crossbar_cols: int = param_dict["crossbar_size"]
+        self.input_neurons: int = param_dict["input_channels"]
+        self.output_neurons: int = param_dict["output_channels"]
+        self.crossbar_rows: int = param_dict["crossbar_size"]
         self.func_ports: int = param_dict["func_ports"]
         self.datatype_size: int = param_dict[
             "datatype_size"
@@ -28,7 +28,7 @@ class CNN_Func(Module):
         ]  # Latency for writing to ibuf, incorporated in operation freq
 
         self.num_operations: int = self.output_neurons * ceil(
-            ceil(self.input_neurons / self.crossbar_cols) / self.func_ports
+            ceil(self.input_channels / self.crossbar_rows) / self.func_ports
         )  # Operations required to consume output buffer
         self.transfer_latency: int = (
             ceil(self.datatype_size / self.bus_width) * self.bus_latency

@@ -26,7 +26,7 @@ ifeq ($(TOPLEVEL),cnn_ibuf)
     MODULE = test_cnn_ibuf
 else ifeq ($(TOPLEVEL),cnn_func)
 	SIM_ARGS+= -ginput_channels=5
-	SIM_ARGS+= -goutput_channels=10
+	SIM_ARGS+= -goutput_channels=15
 	SIM_ARGS+= -gdatatype_size=8
 	SIM_ARGS+= -gcrossbar_size=512
 	SIM_ARGS+= -gobuf_datatype_size=25
