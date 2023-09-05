@@ -3,9 +3,10 @@ from cocotb.triggers import FallingEdge, Timer, Edge, RisingEdge
 from cocotb.clock import Clock
 from cocotb.types import LogicArray
 
+
 @cocotb.test()
 async def p2fc_layer_test_1(dut):
-    cocotb.start_soon(Clock(dut.i_clk, 1, units='ns').start())
+    cocotb.start_soon(Clock(dut.i_clk, 1, units="ns").start())
     dut.i_rst.value = 1
     dut.i_next_layer_busy.value = 0
     await RisingEdge(dut.i_clk)

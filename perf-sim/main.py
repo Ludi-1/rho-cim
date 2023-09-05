@@ -3,6 +3,7 @@ Main script to instantiate configurations
 """
 
 from mlp_conf import MLP_conf
+from modules.cnn_ctrl import CNN_Control
 
 
 def main():
@@ -28,8 +29,12 @@ def main():
         "ibuf_write_latency": 0,
         "cim_param_dict": cim_param_dict,
     }
-    mlp_conf = MLP_conf(param_dict=param_dict)
-    mlp_conf.start()
+    # mlp_conf = MLP_conf(param_dict=param_dict)
+    # mlp_conf.start()
+    param_dict["image_size"] = 10
+    param_dict["kernel_size"] = 10
+    param_dict["input_channels"] = 10
+    control_test = CNN_Control("control_test", None, param_dict)
 
 
 if __name__ == "__main__":

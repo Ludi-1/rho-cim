@@ -7,13 +7,12 @@ from abc import ABC, abstractmethod
 
 
 class Module(ABC):
-    @abstractmethod
-    def __init__(self, name: str, next_module=None, time: float = 0):
+    def __init__(self, name: str, next_module=None):
         """Add all user configurable parameters"""
-        self.current_time = time
+        self.current_time = 0
         self.next_module: Module = next_module
         self.name: str = name
-        pass
+        self.total_latency: int = 0
 
     def start(self, time):
         print(f"{self.name}: Started at {time}")

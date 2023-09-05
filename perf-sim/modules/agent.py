@@ -13,7 +13,7 @@ class Agent(Module):
         self.next_module: Module = first_module
         self.start_times = start_times
         self.name = "Agent"
-        print(f"Agent first module:{self.next_module.name}")
+        # print(f"Agent first module:{self.next_module.name}")
 
     def start(self):
         for start_time in self.start_times:

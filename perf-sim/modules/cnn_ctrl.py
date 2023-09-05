@@ -1,50 +1,28 @@
 from modules.module import Module
+from modules.ctrl import Control
 from math import ceil
 
 
-class CNN_Control(Module):
+class CNN_Control(Control):
     def __init__(
         self,
         name: str,
         next_module: Module,  # Should always be a CIM module
         param_dict: dict,
     ):
-        self.next_module: Module = next_module
-        self.current_time: float = 0
-        self.name: str = name
-
         self.image_size: int = param_dict["image_size"]  # CNN input square image size
         self.kernel_size: int = param_dict[
             "kernel_size"
         ]  # CNN kernel size applied over image
-        self.datatype_size: int = param_dict[
-            "datatype_size"
-        ]  # Datatype size of input buffer
+        self.input_channels = param_dict["input_channels"]
+        param_dict["input_size"] = self.kernel_size**2 * self.input_channels
 
-        self.clk_freq: float = param_dict["fpga_clk_freq"]  # Clock frequency
-        self.crossbar_rows: int = param_dict["crossbar_size"]
-
-        self.bus_width: int = param_dict["bus_width"]  # Bus width
-        self.bus_latency: int = param_dict[
-            "bus_latency"
-        ]  # Latency to transfer data in cycles
-
-        self.ibuf_ports: int = param_dict["kernel_size"]
-        self.ibuf_read_latency: int = param_dict[
-            "ibuf_read_latency"
-        ]  # Latency for reading from ibuf, incorporated in operation freq
+        super().__init__(name, next_module, param_dict)
 
         self.entry_count: int = 0
         self.fifo_size: int = (
             self.image_size * (self.kernel_size - 1) + self.kernel_size
         )
-        self.num_writes = ceil(
-            ceil(self.kernel_size ** 2 / self.crossbar_rows) / self.ibuf_ports
-        )
-        self.transfer_latency: int = (
-            ceil(self.datatype_size / self.bus_width) * self.bus_latency
-        )
-        self.total_latency = self.num_writes * self.transfer_latency / self.clk_freq
 
     def start(self, time):
         print(f"{self.name}: Started at {time}")

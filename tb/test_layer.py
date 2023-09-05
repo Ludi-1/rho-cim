@@ -9,12 +9,15 @@ from random import randint
 
 seed(1)
 
+
 @cocotb.test()
 async def layer_test_1(dut):
     """Try accessing the design."""
 
     ibuf_size: int = dut.input_size.value.integer  # Number of inputs for full layer
-    max_datatype_size: int = dut.max_datatype_size.value.integer  # Max size of data (bits)
+    max_datatype_size: int = (
+        dut.max_datatype_size.value.integer
+    )  # Max size of data (bits)
     addr_out_buf_size: int = dut.addr_out_buf_size.value.integer
     n_tiles: int = dut.n_tiles.value.integer
     # dut._log.info(dut.neuron_size.value.integer)
@@ -48,16 +51,14 @@ async def layer_test_1(dut):
         await RisingEdge(dut.i_clk)
     dut.i_write_enable.value = 0
     dut.i_ctrl_start.value = 1
-    #dut._log.info("pause")
+    # dut._log.info("pause")
     await RisingEdge(dut.o_ctrl_busy)
     dut.i_ctrl_start.value = 0
-    #dut._log.info("pause2")
+    # dut._log.info("pause2")
     await Edge(dut.o_tiles_start)
     dut.i_tiles_ready.value = LogicArray("0" * n_tiles)
-    #dut._log.info("pause3")
+    # dut._log.info("pause3")
     await Timer(123.4, units="ns")
     dut.i_tiles_ready.value = LogicArray("1" * n_tiles)
     dut.i_done.value = LogicArray("1" * n_tiles)
     await Timer(10**4, units="ns")  # wait a bit
-
-
