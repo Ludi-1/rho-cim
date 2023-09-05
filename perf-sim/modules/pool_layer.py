@@ -6,7 +6,7 @@ This layer should be connected to another layer or None if it is the last layer
 from modules.module import Module
 
 
-class CNN_Layer(Module):
+class Pool_Layer(Module):
     def __init__(self, name: str, next_layer: Module, param_dict: dict):
         if next_layer is not None:
             self.next_module = next_layer.ctrl
