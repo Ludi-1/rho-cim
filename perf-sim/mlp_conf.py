@@ -24,7 +24,7 @@ class MLP_conf:
                 0,
                 MLP_Layer(
                     name=f"Layer {n}",
-                    next_layer=self.layer_list[0],
+                    next_module=self.layer_list[0],
                     param_dict=layer_dict,
                 ),
             )
@@ -33,7 +33,7 @@ class MLP_conf:
         # Connect agent to first module of configuration
         self.agent = Agent(
             clk_freq=param_dict["fpga_clk_freq"],
-            first_module=self.layer_list[0].ctrl,
+            first_module=self.layer_list[0],
             start_times=param_dict["start_times"],
         )
 

@@ -9,8 +9,17 @@ from modules.cnn_ctrl import CNN_Control
 def main():
 
     cim_param_dict: dict = {
-        "cim_clk_freq": 1,
-        "total_latency": 1,
+        "num_of_adc": 32,
+        "adc_resolution": 8,
+        "datatype_size": 8,
+        "xbar_latency": 100 * 10**-9,
+        "adc_latency": 1 * 10**-9,
+        "LRS": 5000,
+        "HRS": 10**6,
+        "adc_energy": 2 * 10**-12,
+        "technology_node": "15 nm",
+        "total_energy": 10 * 10**-6,
+        "total_latency": 774 * 10**-9,
     }
 
     param_dict: dict = {
@@ -29,12 +38,8 @@ def main():
         "ibuf_write_latency": 0,
         "cim_param_dict": cim_param_dict,
     }
-    # mlp_conf = MLP_conf(param_dict=param_dict)
-    # mlp_conf.start()
-    param_dict["image_size"] = 10
-    param_dict["kernel_size"] = 10
-    param_dict["input_channels"] = 10
-    control_test = CNN_Control("control_test", None, param_dict)
+    mlp_conf = MLP_conf(param_dict=param_dict)
+    mlp_conf.start()
 
 
 if __name__ == "__main__":
