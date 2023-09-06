@@ -37,3 +37,17 @@ class Func(Module):
             * (self.operation_latency + self.ibuf_write_latency)
             * self.transfer_latency
         )  # Time this module is busy
+
+        self.fpga_power = param_dict["fpga_power"]
+
+        self.start_count = 0
+
+    def start(self, time):
+        self.start_count += 1
+        super().start(time)
+
+    def __del__(self):
+        if self.next_module is None:
+            print(
+                f"{self.name}: FPGA total power consumption = {self.total_latency * self.fpga_power}J"
+            )

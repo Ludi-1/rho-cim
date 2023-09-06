@@ -3,7 +3,6 @@ Main script to instantiate configurations
 """
 
 from mlp_conf import MLP_conf
-from modules.cnn_ctrl import CNN_Control
 
 
 def main():
@@ -11,7 +10,7 @@ def main():
     cim_param_dict: dict = {
         "num_of_adc": 32,
         "adc_resolution": 8,
-        "datatype_size": 8,
+        "max_datatype_size": 8,
         "xbar_latency": 100 * 10**-9,
         "adc_latency": 1 * 10**-9,
         "LRS": 5000,
@@ -30,12 +29,13 @@ def main():
         "datatype_size": 8,
         "bus_width": 8,
         "bus_latency": 1,
-        "crossbar_size": 512,
+        "crossbar_size": 256,
         "ibuf_ports": 10,
         "ibuf_read_latency": 1,
         "func_ports": 10,
         "operation_latency": 1,
         "ibuf_write_latency": 0,
+        "fpga_power": 0.114,
         "cim_param_dict": cim_param_dict,
     }
     mlp_conf = MLP_conf(param_dict=param_dict)

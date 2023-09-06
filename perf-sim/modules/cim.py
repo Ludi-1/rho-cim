@@ -14,10 +14,14 @@ class CIM(Module):
             "total_latency"
         ]  # CIM Tile delay should be filled in manually
         self.start_count = 0
+        self.total_energy = param_dict["total_energy"]
+        self.num_tiles = param_dict["num_tiles"]
 
     def start(self, time):
         self.start_count += 1
         super().start(time)
 
     def __del__(self):
-        print(f"{self.name}, called {self.start_count} times")
+        print(
+            f"{self.name}, total energy consumption: {self.total_energy*self.start_count*self.num_tiles}J"
+        )

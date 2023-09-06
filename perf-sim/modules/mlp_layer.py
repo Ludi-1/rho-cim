@@ -7,6 +7,7 @@ from modules.module import Module
 from modules.mlp_ctrl import MLP_Control
 from modules.mlp_func import MLP_Func
 from modules.cim import CIM
+from math import ceil
 
 
 class MLP_Layer(Module):
@@ -15,6 +16,13 @@ class MLP_Layer(Module):
 
         self.func = MLP_Func(
             f"({self.name}, func)", next_module=self.next_module, param_dict=param_dict
+        )
+
+        cim_dict = param_dict["cim_param_dict"]
+        cim_dict["num_tiles"] = param_dict["input_size"] * ceil(
+            param_dict["output_size"]
+            * param_dict["datatype_size"]
+            / param_dict["crossbar_size"]
         )
         self.cim = CIM(
             f"({self.name}, cim)",
