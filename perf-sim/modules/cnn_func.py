@@ -1,41 +1,12 @@
 from modules.module import Module
+from modules.func import Func
 from math import ceil
 
 
-class CNN_Func(Module):
+class CNN_Func(Func):
     def __init__(self, name: str, next_module: Module, param_dict: dict):
-        self.next_module: Module = next_module  # Next module to start
-        self.current_time: float = 0  # The time this module can be started
-        self.name: str = name
-
-        self.clk_freq: float = param_dict["fpga_clk_freq"]  # Clock frequency
-        self.input_neurons: int = param_dict["input_channels"]
-        self.output_neurons: int = param_dict["output_channels"]
-        self.crossbar_rows: int = param_dict["crossbar_size"]
-        self.func_ports: int = param_dict["func_ports"]
-        self.datatype_size: int = param_dict[
-            "datatype_size"
-        ]  # Datatype size of output buffers
-        self.bus_width: int = param_dict["bus_width"]  # Bus width
-        self.bus_latency: int = param_dict[
-            "bus_latency"
-        ]  # Latency to transfer data in cycles
-        self.operation_latency: int = param_dict[
-            "operation_latency"
-        ]  # Latency for post-processing
-        self.ibuf_write_latency: int = param_dict[
-            "ibuf_write_latency"
-        ]  # Latency for writing to ibuf, incorporated in operation freq
-
-        self.num_operations: int = self.output_neurons * ceil(
-            ceil(self.input_channels / self.crossbar_rows) / self.func_ports
-        )  # Operations required to consume output buffer
-        self.transfer_latency: int = (
-            ceil(self.datatype_size / self.bus_width) * self.bus_latency
-        )  # Latency for readfing from outpt buffers
-        self.total_latency: float = (
-            (1 / self.clk_freq)
-            * self.num_operations
-            * (self.operation_latency + self.ibuf_write_latency)
-            * self.transfer_latency
-        )  # Time this module is busy
+        param_dict["input_size"] = (
+            param_dict["input_channels"] * param_dict["kernel_size"]
+        )
+        param_dict["output_size"] = param_dict["output_channels"]
+        super().__init__(name, next_module, param_dict)

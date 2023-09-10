@@ -19,7 +19,9 @@ class MLP_Layer(Module):
         )
 
         cim_dict = param_dict["cim_param_dict"]
-        cim_dict["num_tiles"] = param_dict["input_size"] * ceil(
+        cim_dict["num_tiles"] = ceil(
+            param_dict["input_neurons"] / param_dict["crossbar_size"]
+        ) * ceil(
             param_dict["output_size"]
             * param_dict["datatype_size"]
             / param_dict["crossbar_size"]
@@ -33,8 +35,6 @@ class MLP_Layer(Module):
             f"({self.name}, ctrl)", next_module=self.cim, param_dict=param_dict
         )
 
-        self.current_time = self.ctrl.current_time
-
     def start(self, time):
-        # print(f"{self.name}: Started at {time}")
+        self.current_time = time
         self.ctrl.start(time)

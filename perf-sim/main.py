@@ -41,6 +41,31 @@ def main():
     mlp_conf = MLP_conf(param_dict=param_dict)
     mlp_conf.start()
 
+    # (Layer type, kernel size, input channels)
+    cnn_param_dict: dict = {
+        "start_times": [0, 1, 3],
+        "fpga_clk_freq": 1,
+        "input_image_size": 28,
+        "layer_list": [
+            ("conv", 5, 1),
+            ("pool", 2, 5),
+            ("fc", 720),
+            ("fc", 70),
+            ("fc", 10),
+        ],
+        "datatype_size": 8,
+        "bus_width": 8,
+        "bus_latency": 1,
+        "crossbar_size": 256,
+        "ibuf_ports": 10,
+        "ibuf_read_latency": 1,
+        "func_ports": 10,
+        "operation_latency": 1,
+        "ibuf_write_latency": 0,
+        "fpga_power": 0.114,
+        "cim_param_dict": cim_param_dict,
+    }
+
 
 if __name__ == "__main__":
     main()

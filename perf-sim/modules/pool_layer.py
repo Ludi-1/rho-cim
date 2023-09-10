@@ -4,49 +4,46 @@ This layer should be connected to another layer or None if it is the last layer
 """
 
 from modules.module import Module
+from math import ceil
 
 
 class Pool_Layer(Module):
-    def __init__(self, name: str, next_layer: Module, param_dict: dict):
-        if next_layer is not None:
-            self.next_module = next_layer.ctrl
-        else:
-            self.next_module = None
-        self.name: str = name
+    def __init__(self, name: str, next_module: Module, param_dict: dict):
+        super().__init__(name, next_module)
 
         self.fpga_clk_freq: float = param_dict["fpga_clk_freq"]  # Clock frequency
-
         self.image_size: int = param_dict["image_size"]
         self.kernel_size: int = param_dict["kernel_size"]
 
-        self.input_channels: int = param_dict["input_channels"]
-        self.output_channels: int = param_dict["output_channels"]
+        # self.ibuf_read_latency: int = param_dict[
+        #     "ibuf_read_latency"
+        # ]  # Latency for reading from ibuf, incorporated in operation freq
+        # self.operation_latency: int = param_dict[
+        #     "operation_latency"
+        # ]  # Latency for post-processing
+        # self.ibuf_write_latency: int = param_dict[
+        #     "ibuf_write_latency"
+        # ]  # Latency for writing to ibuf, incorporated in operation freq
 
-        self.datatype_size: int = param_dict[
-            "datatype_size"
-        ]  # Datatype size of input buffer
-        self.bus_width: int = param_dict["bus_width"]  # Bus width
-        self.bus_latency: int = param_dict[
-            "bus_latency"
-        ]  # Latency to transfer data in cycles
-        self.crossbar_size: int = param_dict["crossbar_size"]
+        self.total_latency: float = (
+            1
+            / self.clk_freq
+            # * (self.operation_latency + self.ibuf_write_latency)
+        )  # Time this module is busy
 
-        self.ibuf_ports: int = param_dict["ibuf_ports"]
-        self.ibuf_read_latency: int = param_dict[
-            "ibuf_read_latency"
-        ]  # Latency for reading from ibuf, incorporated in operation freq
-
-        self.func_ports: int = param_dict["func_ports"]
-        self.operation_latency: int = param_dict[
-            "operation_latency"
-        ]  # Latency for post-processing
-        self.ibuf_write_latency: int = param_dict[
-            "ibuf_write_latency"
-        ]  # Latency for writing to ibuf, incorporated in operation freq
-
-        self.ctrl = self
-
-        self.current_time = self.ctrl.current_time
+        self.entry_count: int = 0
+        self.fifo_size: int = (
+            self.image_size * (self.kernel_size - 1) + self.kernel_size
+        )
 
     def start(self, time):
-        self.ctrl.start(time)
+        print(f"{self.name}: Started at {time}")
+        if time >= self.current_time:  # Should always be true
+            if self.entry_count == self.fifo_size:
+                self.current_time = time + self.total_latency
+                self.start_next()
+            else:
+                self.entry_count += 1
+                self.current_time = time + 1 / self.clk_freq
+        else:
+            raise Exception(f"Module {self.name} started in the past: {time}")

@@ -1,6 +1,5 @@
 from modules.module import Module
 from modules.func import Func
-from math import ceil
 
 
 class MLP_Func(Func):
