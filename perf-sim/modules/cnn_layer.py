@@ -24,7 +24,7 @@ class CNN_Layer(Module):
             * param_dict["kernel_size"]
             / param_dict["crossbar_size"]
         ) * ceil(
-            param_dict["output_chanels"]
+            param_dict["output_channels"]
             * param_dict["datatype_size"]
             / param_dict["crossbar_size"]
         )
@@ -39,5 +39,6 @@ class CNN_Layer(Module):
         )
 
     def start(self, time):
+        print(f"{self.name}: Started at {time}")
         self.current_time = time
         self.ctrl.start(time)

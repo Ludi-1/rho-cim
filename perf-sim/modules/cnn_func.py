@@ -10,3 +10,4 @@ class CNN_Func(Func):
         )
         param_dict["output_size"] = param_dict["output_channels"]
         super().__init__(name, next_module, param_dict)
+        self.total_latency = self.total_latency * self.total_latency

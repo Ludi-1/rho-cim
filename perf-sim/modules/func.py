@@ -33,7 +33,7 @@ class Func(Module):
         )  # Latency for readfing from outpt buffers
         self.total_latency: float = (
             (1 / self.clk_freq)
-            * self.num_operations
+            # * self.num_operations
             * (self.operation_latency + self.ibuf_write_latency)
             * self.transfer_latency
         )  # Time this module is busy

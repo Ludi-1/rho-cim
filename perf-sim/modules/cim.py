@@ -22,6 +22,7 @@ class CIM(Module):
         super().start(time)
 
     def __del__(self):
+        print(f"{self.name}, Num of activations: {self.start_count*self.num_tiles}, #tiles: {self.num_tiles}")
         print(
             f"{self.name}, total energy consumption: {self.total_energy*self.start_count*self.num_tiles}J"
         )

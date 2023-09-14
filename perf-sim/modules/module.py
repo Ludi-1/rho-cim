@@ -19,6 +19,7 @@ class Module(ABC):
         if time >= self.current_time:  # Should always be true
             self.current_time = time + self.total_latency
         else:
+            print(f"Module {self.name} started in the past: {time}")
             raise Exception(f"Module {self.name} started in the past: {time}")
 
         self.start_next()

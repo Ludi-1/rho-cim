@@ -27,7 +27,7 @@ class Pool_Layer(Module):
 
         self.total_latency: float = (
             1
-            / self.clk_freq
+            / self.fpga_clk_freq
             # * (self.operation_latency + self.ibuf_write_latency)
         )  # Time this module is busy
 
@@ -44,6 +44,6 @@ class Pool_Layer(Module):
                 self.start_next()
             else:
                 self.entry_count += 1
-                self.current_time = time + 1 / self.clk_freq
+                self.current_time = time + 1 / self.fpga_clk_freq
         else:
             raise Exception(f"Module {self.name} started in the past: {time}")

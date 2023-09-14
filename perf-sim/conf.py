@@ -1,0 +1,74 @@
+"""Configuration class
+This configuration class bundles multiple layers together
+An Agent module is connected to the first module
+"""
+
+from modules.mlp_layer import MLP_Layer
+from modules.cnn_layer import CNN_Layer
+from modules.pool_layer import Pool_Layer
+from modules.agent import Agent
+from itertools import pairwise
+
+
+class Conf:
+    def __init__(self, param_dict: dict):
+        self.layer_list = []
+        next_layer = None
+        n = len(param_dict["layer_list"]) - 1
+        for layer in reversed(param_dict["layer_list"]):
+            print(layer)
+            match layer[0]:
+                case "conv":
+                    layer_dict = param_dict.copy()
+                    layer_dict["image_size"] = layer[1]
+                    layer_dict["kernel_size"] = layer[2]
+                    layer_dict["input_channels"] = layer[3]
+                    layer_dict["output_channels"] = layer[4]
+                    self.layer_list.append(
+                        CNN_Layer(
+                            name = f"Layer {n}: Conv",
+                            next_module = next_layer,
+                            param_dict=layer_dict
+                        )
+                    )
+                    next_layer = self.layer_list[-1]
+                case "pool":
+                    layer_dict = param_dict.copy()
+                    layer_dict["image_size"] = layer[1]
+                    layer_dict["kernel_size"] = layer[2]
+                    layer_dict["input_channels"] = layer[3]
+                    layer_dict["output_channels"] = layer[4]
+                    self.layer_list.append(
+                        Pool_Layer(
+                            name = f"Layer {n}: Pool",
+                            next_module = next_layer,
+                            param_dict=layer_dict
+                        )
+                    )
+                    next_layer = self.layer_list[-1]
+                case "fc":
+                    layer_dict: dict = param_dict.copy()
+                    layer_dict["input_neurons"]: int = layer[1]
+                    layer_dict["output_neurons"]: int = layer[2]
+                    self.layer_list.insert(
+                        0,
+                        MLP_Layer(
+                            name=f"Layer {n}: FC",
+                            next_module=next_layer,
+                            param_dict=layer_dict,
+                        ),
+                    )
+                    next_layer = self.layer_list[-1]
+                case _:
+                    raise ValueError(f"Bad layer type {layer[0]}")
+            n -= 1
+
+        # Connect agent to first module of configuration
+        self.agent = Agent(
+            clk_freq=param_dict["fpga_clk_freq"],
+            first_module=self.layer_list[-1],
+            start_times=param_dict["start_times"],
+        )
+
+    def start(self):
+        self.agent.start()
