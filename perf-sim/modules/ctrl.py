@@ -29,7 +29,7 @@ class Control(Module):
         self.ibuf_ports: int = param_dict["ibuf_ports"]
         self.ibuf_read_latency: int = param_dict[
             "ibuf_read_latency"
-        ]  # Latency for reading from ibuf, incorporated in operation freq
+        ]  # Latency for reading from ibuf, incorporated in operation latency
 
         self.num_writes: int = ceil(
             ceil(self.input_size / self.crossbar_rows) / self.ibuf_ports
@@ -39,13 +39,8 @@ class Control(Module):
             ceil(self.datatype_size / self.bus_width) * self.bus_latency
         )
 
-        self.total_latency = self.num_writes * self.transfer_latency / self.clk_freq
-
-    def start(self, time):
-
-        print(f"{self.name}: Started at {time}")
-        if time >= self.current_time:  # Should always be true
-            self.current_time = time + self.total_latency
-            self.start_next()
-        else:
-            raise Exception(f"Module {self.name} started in the past: {time}")
+        self.total_latency = (
+            self.num_writes
+            * (self.transfer_latency + self.ibuf_read_latency)
+            / self.clk_freq
+        )

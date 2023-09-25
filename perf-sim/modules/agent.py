@@ -15,6 +15,6 @@ class Agent(Module):
 
     def start(self):
         for start_time in self.start_times:
-            print(f"Agent started at time: {start_time}")
+            # print(f"Agent started at time: {start_time}")
             self.current_time = start_time
             self.start_next()

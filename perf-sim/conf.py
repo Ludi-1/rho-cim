@@ -24,11 +24,12 @@ class Conf:
                     layer_dict["kernel_size"] = layer[2]
                     layer_dict["input_channels"] = layer[3]
                     layer_dict["output_channels"] = layer[4]
+                    layer_dict["datatype_size"] = param_dict["datatype_size"][n]
                     self.layer_list.append(
                         CNN_Layer(
-                            name = f"Layer {n}: Conv",
-                            next_module = next_layer,
-                            param_dict=layer_dict
+                            name=f"Layer {n}: Conv",
+                            next_module=next_layer,
+                            param_dict=layer_dict,
                         )
                     )
                     next_layer = self.layer_list[-1]
@@ -38,11 +39,12 @@ class Conf:
                     layer_dict["kernel_size"] = layer[2]
                     layer_dict["input_channels"] = layer[3]
                     layer_dict["output_channels"] = layer[4]
+                    layer_dict["datatype_size"] = param_dict["datatype_size"][n]
                     self.layer_list.append(
                         Pool_Layer(
-                            name = f"Layer {n}: Pool",
-                            next_module = next_layer,
-                            param_dict=layer_dict
+                            name=f"Layer {n}: Pool",
+                            next_module=next_layer,
+                            param_dict=layer_dict,
                         )
                     )
                     next_layer = self.layer_list[-1]
@@ -50,8 +52,8 @@ class Conf:
                     layer_dict: dict = param_dict.copy()
                     layer_dict["input_neurons"]: int = layer[1]
                     layer_dict["output_neurons"]: int = layer[2]
-                    self.layer_list.insert(
-                        0,
+                    layer_dict["datatype_size"] = param_dict["datatype_size"][n]
+                    self.layer_list.append(
                         MLP_Layer(
                             name=f"Layer {n}: FC",
                             next_module=next_layer,
@@ -69,6 +71,12 @@ class Conf:
             first_module=self.layer_list[-1],
             start_times=param_dict["start_times"],
         )
+
+        for layer in self.layer_list:
+            if layer.next_module is not None:
+                print(layer.name, layer.next_module.name)
+            else:
+                print(layer.name)
 
     def start(self):
         self.agent.start()

@@ -25,29 +25,19 @@ class Func(Module):
             "ibuf_write_latency"
         ]  # Latency for writing to ibuf, incorporated in operation freq
 
-        self.num_operations: int = self.output_size * ceil(
-            ceil(self.input_size / self.crossbar_rows) / self.func_ports
-        )  # Operations required to consume output buffer
         self.transfer_latency: int = (
             ceil(self.datatype_size / self.bus_width) * self.bus_latency
         )  # Latency for readfing from outpt buffers
         self.total_latency: float = (
             (1 / self.clk_freq)
-            # * self.num_operations
-            * (self.operation_latency + self.ibuf_write_latency)
-            * self.transfer_latency
-        )  # Time this module is busy
+            * (self.operation_latency + self.ibuf_write_latency + self.transfer_latency)
+            * ceil(ceil(self.input_size / self.crossbar_rows) / self.func_ports)
+        )  # Time to produce a single element of one output channel
 
         self.fpga_power = param_dict["fpga_power"]
-
-        self.start_count = 0
-
-    def start(self, time):
-        self.start_count += 1
-        super().start(time)
 
     def __del__(self):
         if self.next_module is None:
             print(
-                f"{self.name}: FPGA total power consumption = {self.total_latency * self.fpga_power}J"
+                f"{self.name}: FPGA total energy consumption = {self.current_time * self.fpga_power}J"
             )

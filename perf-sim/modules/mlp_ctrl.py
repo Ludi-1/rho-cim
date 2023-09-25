@@ -1,6 +1,6 @@
 from modules.ctrl import Control
 from modules.module import Module
-
+import math
 
 class MLP_Control(Control):
     def __init__(
@@ -16,7 +16,7 @@ class MLP_Control(Control):
         self.fifo_size: int = param_dict["input_neurons"]
 
     def start(self, time):
-        print(f"{self.name}: Started at {time}")
+        # print(f"{self.name}: Started at {time}")
         if time >= self.current_time:  # Should always be true
             if self.entry_count == self.fifo_size:
                 self.entry_count = 0
@@ -24,6 +24,7 @@ class MLP_Control(Control):
                 self.start_next()
             else:
                 self.entry_count += 1
+                # print(f"{self.name}: Entry count {self.entry_count}")
                 self.current_time = time + 1 / self.clk_freq
         else:
-            raise Exception(f"Module {self.name} started in the past: {time}")
+            raise Exception(f"Module {self.name} started in the past: {time}, {self.current_time}")

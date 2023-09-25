@@ -9,11 +9,11 @@ class MLP_Func(Func):
         super().__init__(name, next_module, param_dict)
 
     def start(self, time):
-        print(f"{self.name}: Started at {time}")
+        # print(f"{self.name}: Started at {time}")
         if time >= self.current_time:  # Should always be true
-            for i in range(self.num_operations):
+            for i in range(self.output_size):
                 self.current_time = time + self.total_latency
-                self.start_next()
+                self.start_next()  # Write 1 element to ibuf of next layer
         else:
             print(f"Module {self.name} started in the past: {time}")
             raise Exception(f"Module {self.name} started in the past: {time}")

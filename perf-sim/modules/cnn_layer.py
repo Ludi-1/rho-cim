@@ -37,8 +37,9 @@ class CNN_Layer(Module):
         self.ctrl = CNN_Control(
             f"({self.name}, ctrl)", next_module=self.cim, param_dict=param_dict
         )
+        self.current_time = 0
 
     def start(self, time):
-        print(f"{self.name}: Started at {time}")
-        self.current_time = time
+        # print(f"{self.name}: Started at {time}")
         self.ctrl.start(time)
+        self.current_time = self.ctrl.current_time

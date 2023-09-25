@@ -18,11 +18,14 @@ class CIM(Module):
         self.num_tiles = param_dict["num_tiles"]
 
     def start(self, time):
+        # print(f"{self.name}: Started at {time}")
         self.start_count += 1
         super().start(time)
 
     def __del__(self):
-        print(f"{self.name}, Num of activations: {self.start_count*self.num_tiles}, #tiles: {self.num_tiles}")
+        print(
+            f"{self.name}, Num of activations: {self.start_count}, #tiles: {self.num_tiles}"
+        )
         print(
             f"{self.name}, total energy consumption: {self.total_energy*self.start_count*self.num_tiles}J"
         )

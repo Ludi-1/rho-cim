@@ -36,5 +36,5 @@ class MLP_Layer(Module):
         )
 
     def start(self, time):
-        self.current_time = time
         self.ctrl.start(time)
+        self.current_time = self.ctrl.current_time

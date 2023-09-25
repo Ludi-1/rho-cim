@@ -15,12 +15,12 @@ class Module(ABC):
         self.total_latency: int = 0
 
     def start(self, time):
-        print(f"{self.name}: Started at {time}")
+        # print(f"{self.name}: Started at {time}")
         if time >= self.current_time:  # Should always be true
             self.current_time = time + self.total_latency
         else:
             print(f"Module {self.name} started in the past: {time}")
-            raise Exception(f"Module {self.name} started in the past: {time}")
+            raise Exception(f"Module {self.name} started in the past: {time}, {self.current_time}")
 
         self.start_next()
 
@@ -29,6 +29,7 @@ class Module(ABC):
         If the next module is busy, start the next module at the moment the next module is done
         """
         if self.next_module is not None:
+            # print(f"{self.name}->{self.next_module.name}, {self.current_time - self.next_module.current_time}")
             if self.next_module.current_time > self.current_time:  # Next module is busy
                 self.current_time = (
                     self.next_module.current_time

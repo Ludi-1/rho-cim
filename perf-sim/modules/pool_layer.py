@@ -37,7 +37,7 @@ class Pool_Layer(Module):
         )
 
     def start(self, time):
-        print(f"{self.name}: Started at {time}")
+        # print(f"{self.name}: Started at {time}")
         if time >= self.current_time:  # Should always be true
             if self.entry_count == self.fifo_size:
                 self.current_time = time + self.total_latency
