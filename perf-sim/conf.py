@@ -16,7 +16,6 @@ class Conf:
         next_layer = None
         n = len(param_dict["layer_list"]) - 1
         for layer in reversed(param_dict["layer_list"]):
-            print(layer)
             match layer[0]:
                 case "conv":
                     layer_dict = param_dict.copy()
@@ -72,11 +71,11 @@ class Conf:
             start_times=param_dict["start_times"],
         )
 
-        for layer in self.layer_list:
-            if layer.next_module is not None:
-                print(layer.name, layer.next_module.name)
-            else:
-                print(layer.name)
+        # for layer in self.layer_list:
+        #     if layer.next_module is not None:
+        #         print(layer.name, layer.next_module.name)
+        #     else:
+        #         print(layer.name)
 
     def start(self):
         self.agent.start()
