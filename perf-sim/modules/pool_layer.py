@@ -54,7 +54,7 @@ class Pool_Layer(Module):
             else:
                 self.col_count += 1
             self.current_time = time + 1 / self.fpga_clk_freq
-        elif self.entry_count >= self.image_size**2 - 1:
+        elif self.entry_count > self.image_size**2 - 1:
             print(f"complete: {self.name} {self.entry_count}, {self.col_count}")
             self.entry_count = 0
             if self.col_count >= self.image_size - 1:
