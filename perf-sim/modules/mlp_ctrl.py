@@ -16,15 +16,16 @@ class MLP_Control(Control):
         self.fifo_size: int = param_dict["input_neurons"]
 
     def start(self, time):
-        # print(f"{self.name}: {self.entry_count}")
-        if time >= self.current_time:  # Should always be true
-            self.entry_count += 1
-            if self.entry_count >= self.fifo_size:
-                self.entry_count = 0
-                self.current_time = time + self.total_latency
-                self.start_next()
-            else:
-                # print(f"{self.name}: Entry count {self.entry_count}")
-                self.current_time = time + 1 / self.clk_freq
-        else:
+        if time < self.current_time:  # Should always be false
             raise Exception(f"Module {self.name} started in the past: {time}, {self.current_time}")
+
+        # print(f"{self.name}: {self.entry_count}, {self.fifo_size}")
+        if self.entry_count == self.fifo_size - 1:
+            self.entry_count = 0
+            self.current_time = time + self.total_latency
+            # print(f"{self.name}: {self.entry_count}, {self.fifo_size}")
+            self.start_next()
+        else:
+            # print(f"{self.name}: Entry count {self.entry_count}")
+            self.current_time = time + 1 / self.clk_freq
+        self.entry_count += 1

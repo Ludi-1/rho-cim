@@ -31,9 +31,9 @@ def main():
             # image size = prev_image_size - kernel_size + 1
             ("pool", 24, 2, 5, 5),
             # (Layer type, input neurons, output neurons)
+            ("fc", 23**2 * 5, 720),
             ("fc", 720, 70),
             ("fc", 70, 10),
-            ("fc", 10, 10),
         ],
         "datatype_size": [8, 1, 1, 1, 8],
         "bus_width": 8,

@@ -21,7 +21,7 @@ class CNN_Control(Control):
 
         self.entry_count: int = 0
         self.col_count: int = 0
-        self.skip_count: int = 0
+        self.skip: bool = False
         self.fifo_size: int = (
             self.image_size * (self.kernel_size - 1) + self.kernel_size
         )
@@ -33,29 +33,29 @@ class CNN_Control(Control):
                 f"Module {self.name} at time {self.current_time} started in the past: {time}"
             )
 
-        self.entry_count += 1
-        # self.col_count += 1
-        if self.entry_count >= self.fifo_size - 1: # FIFO is full
-            if self.col_count >= self.image_size - 1:
-                if self.skip_count >= self.kernel_size - 2:
-                    self.skip_count = 0
-                    self.col_count = self.kernel_size - 2
-                else:
-                    self.skip_count += 1
+        # print(f"{self.name} {self.entry_count}, {self.col_count}")
+        if self.entry_count < self.fifo_size - 1:
+            # print(f"init: {self.name} {self.entry_count}, {self.col_count}")
+            self.current_time = time + 1 / self.clk_freq
+        else: # FIFO is full
+            if self.skip:
+                if self.col_count == self.kernel_size - 2:
+                    self.skip = False
                 # print(f"skip: {self.name} {self.entry_count}, {self.col_count}")
                 self.current_time = time + 1 / self.clk_freq
             else:
-                # print(f"{self.name}: {self.full_count}")
-                self.col_count += 1
+                if self.col_count == self.image_size - 1:
+                    self.skip = True
                 # print(f"act: {self.name} {self.entry_count}, {self.col_count}")
                 self.current_time = time + self.total_latency
                 self.start_next()
-        else: # Initialization
-                # if self.col_count == self.image_size:
-                #     self.col_count = 0
-                # self.entry_count += 1
-            if self.col_count >= self.image_size - 1:
-                self.col_count = 0
-            else:
-                self.col_count += 1
-            self.current_time = time + 1 / self.clk_freq
+
+        if self.entry_count == self.image_size**2 - 1:
+            self.entry_count = 0
+            self.skip = False
+        else:
+            self.entry_count += 1
+        if self.col_count == self.image_size - 1:
+            self.col_count = 0
+        else:
+            self.col_count += 1

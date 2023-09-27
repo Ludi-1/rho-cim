@@ -7,15 +7,14 @@ from modules.mlp_layer import MLP_Layer
 from modules.cnn_layer import CNN_Layer
 from modules.pool_layer import Pool_Layer
 from modules.agent import Agent
-from itertools import pairwise
-
+import itertools
 
 class Conf:
     def __init__(self, param_dict: dict):
         self.layer_list = []
         next_layer = None
         n = len(param_dict["layer_list"]) - 1
-        for layer in reversed(param_dict["layer_list"]):
+        for (layer, datatype_size) in reversed(list(zip(param_dict["layer_list"], param_dict["datatype_size"]))):
             match layer[0]:
                 case "conv":
                     layer_dict = param_dict.copy()
@@ -23,7 +22,7 @@ class Conf:
                     layer_dict["kernel_size"] = layer[2]
                     layer_dict["input_channels"] = layer[3]
                     layer_dict["output_channels"] = layer[4]
-                    layer_dict["datatype_size"] = param_dict["datatype_size"][n]
+                    layer_dict["datatype_size"] = datatype_size
                     self.layer_list.append(
                         CNN_Layer(
                             name=f"Layer {n}: Conv",
@@ -38,7 +37,7 @@ class Conf:
                     layer_dict["kernel_size"] = layer[2]
                     layer_dict["input_channels"] = layer[3]
                     layer_dict["output_channels"] = layer[4]
-                    layer_dict["datatype_size"] = param_dict["datatype_size"][n]
+                    layer_dict["datatype_size"] = datatype_size
                     self.layer_list.append(
                         Pool_Layer(
                             name=f"Layer {n}: Pool",
@@ -51,7 +50,7 @@ class Conf:
                     layer_dict: dict = param_dict.copy()
                     layer_dict["input_neurons"]: int = layer[1]
                     layer_dict["output_neurons"]: int = layer[2]
-                    layer_dict["datatype_size"] = param_dict["datatype_size"][n]
+                    layer_dict["datatype_size"] = datatype_size
                     self.layer_list.append(
                         MLP_Layer(
                             name=f"Layer {n}: FC",
@@ -71,11 +70,11 @@ class Conf:
             start_times=param_dict["start_times"],
         )
 
-        # for layer in self.layer_list:
-        #     if layer.next_module is not None:
-        #         print(layer.name, layer.next_module.name)
-        #     else:
-        #         print(layer.name)
+        for layer in self.layer_list:
+            if layer.next_module is not None:
+                print(layer.name, layer.next_module.name)
+            else:
+                print(layer.name)
 
     def start(self):
         self.agent.start()
