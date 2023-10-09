@@ -14,7 +14,7 @@ class Pool_Layer(Module):
         self.fpga_clk_freq: float = param_dict["fpga_clk_freq"]  # Clock frequency
         self.image_size: int = param_dict["image_size"]
         self.kernel_size: int = param_dict["kernel_size"]
-
+        self.stride: int = param_dict["stride"]
         # self.ibuf_read_latency: int = param_dict[
         #     "ibuf_read_latency"
         # ]  # Latency for reading from ibuf, incorporated in operation freq
@@ -33,6 +33,7 @@ class Pool_Layer(Module):
 
         self.entry_count: int = 0
         self.col_count: int = 0
+        self.stride_count: int = self.stride - 1
         self.skip: bool = False
         self.fifo_size: int = (
             self.image_size * (self.kernel_size - 1) + self.kernel_size
@@ -59,8 +60,12 @@ class Pool_Layer(Module):
                     # print(f"init skip: {self.name} {self.entry_count}, {self.col_count}")
                     self.skip = True
                 # print(f"act: {self.name} {self.entry_count}, {self.col_count}")
-                self.current_time = time + self.total_latency
-                self.start_next()
+                if self.stride_count == self.stride - 1:
+                    self.stride_count = 0
+                    self.current_time = time + self.total_latency
+                    self.start_next()
+                else:
+                    self.stride_count += 1
 
         if self.entry_count == self.image_size**2 - 1:
             self.entry_count = 0

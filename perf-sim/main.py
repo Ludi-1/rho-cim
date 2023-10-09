@@ -26,14 +26,14 @@ def main():
         "start_times": [i for i in range(28 ** 2)],
         "fpga_clk_freq": 1,
         "layer_list": [
-            # (Layer type, image size, kernel size, input channels, output_channels)
+            # (Layer type, image size, kernel size, input channels, output_channels, stride)
             ("conv", 28, 5, 1, 5),
             # image size = prev_image_size - kernel_size + 1
-            ("pool", 24, 2, 5, 5),
+            ("pool", 24, 2, 5, 5, 2),
             # (Layer type, input neurons, output neurons)
-            ("fc", 23**2 * 5, 720),
-            ("fc", 720, 70),
+            ("fc", 12**2 * 5, 70), # 12**2 * 5 = 720
             ("fc", 70, 10),
+            ("fc", 10, 10),
         ],
         "datatype_size": [8, 1, 1, 1, 8],
         "bus_width": 8,
