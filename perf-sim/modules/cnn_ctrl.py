@@ -6,6 +6,7 @@ from math import ceil
 class CNN_Control(Control):
     def __init__(
         self,
+        f,
         name: str,
         next_module: Module,  # Should always be a CIM module
         param_dict: dict,
@@ -17,7 +18,7 @@ class CNN_Control(Control):
         self.input_channels = param_dict["input_channels"]
         param_dict["input_size"] = self.kernel_size ** 2 * self.input_channels
 
-        super().__init__(name, next_module, param_dict)
+        super().__init__(f, name, next_module, param_dict)
 
         self.entry_count: int = 0
         self.col_count: int = 0
@@ -28,6 +29,7 @@ class CNN_Control(Control):
 
     def start(self, time):
         # print(f"{self.name}: Started at {time}")
+        self.fd.write(f"{self.name}: Started at {time}\n")
         if time < self.current_time:
             raise Exception(
                 f"Module {self.name} at time {self.current_time} started in the past: {time}"
@@ -37,7 +39,7 @@ class CNN_Control(Control):
         if self.entry_count < self.fifo_size - 1:
             # print(f"init: {self.name} {self.entry_count}, {self.col_count}")
             self.current_time = time + 1 / self.clk_freq
-        else: # FIFO is full
+        else:  # FIFO is full
             if self.skip:
                 if self.col_count == self.kernel_size - 2:
                     self.skip = False
@@ -48,9 +50,10 @@ class CNN_Control(Control):
                     self.skip = True
                 # print(f"act: {self.name} {self.entry_count}, {self.col_count}")
                 self.current_time = time + self.total_latency
+                self.fd.write(f"{self.name}: Current time {self.current_time}, {self.total_latency}\n")
                 self.start_next()
 
-        if self.entry_count == self.image_size**2 - 1:
+        if self.entry_count == self.image_size ** 2 - 1:
             self.entry_count = 0
             self.skip = False
         else:

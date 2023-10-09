@@ -7,20 +7,23 @@ from abc import ABC, abstractmethod
 
 
 class Module(ABC):
-    def __init__(self, name: str, next_module=None):
+    def __init__(self, f, name: str, next_module=None):
         """Add all user configurable parameters"""
+        self.fd = f
         self.current_time = 0
         self.next_module: Module = next_module
         self.name: str = name
         self.total_latency: int = 0
 
     def start(self, time):
-        # print(f"{self.name}: Started at {time}")
+        self.fd.write(f"{self.name}: Started at {time}\n")
         if time >= self.current_time:  # Should always be true
             self.current_time = time + self.total_latency
         else:
             print(f"Module {self.name} started in the past: {time}")
-            raise Exception(f"Module {self.name} started in the past: {time}, {self.current_time}")
+            raise Exception(
+                f"Module {self.name} started in the past: {time}, {self.current_time}"
+            )
 
         self.start_next()
 

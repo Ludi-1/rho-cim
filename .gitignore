@@ -6,3 +6,5 @@ sim_build
 vcd
 wave
 .venv
+output
+output/log.txt

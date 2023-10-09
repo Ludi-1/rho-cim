@@ -9,12 +9,15 @@ from modules.pool_layer import Pool_Layer
 from modules.agent import Agent
 import itertools
 
+
 class Conf:
-    def __init__(self, param_dict: dict):
+    def __init__(self, param_dict: dict, f):
         self.layer_list = []
         next_layer = None
         n = len(param_dict["layer_list"]) - 1
-        for (layer, datatype_size) in reversed(list(zip(param_dict["layer_list"], param_dict["datatype_size"]))):
+        for (layer, datatype_size) in reversed(
+            list(zip(param_dict["layer_list"], param_dict["datatype_size"]))
+        ):
             match layer[0]:
                 case "conv":
                     layer_dict = param_dict.copy()
@@ -28,6 +31,7 @@ class Conf:
                             name=f"Layer {n}: Conv",
                             next_module=next_layer,
                             param_dict=layer_dict,
+                            f=f,
                         )
                     )
                     next_layer = self.layer_list[-1]
@@ -43,6 +47,7 @@ class Conf:
                             name=f"Layer {n}: Pool",
                             next_module=next_layer,
                             param_dict=layer_dict,
+                            f=f,
                         )
                     )
                     next_layer = self.layer_list[-1]
@@ -56,6 +61,7 @@ class Conf:
                             name=f"Layer {n}: FC",
                             next_module=next_layer,
                             param_dict=layer_dict,
+                            f=f,
                         ),
                     )
                     next_layer = self.layer_list[-1]

@@ -3,8 +3,8 @@ from math import ceil
 
 
 class Func(Module):
-    def __init__(self, name: str, next_module: Module, param_dict: dict):
-        super().__init__(name, next_module)
+    def __init__(self, f, name: str, next_module: Module, param_dict: dict):
+        super().__init__(f, name, next_module)
 
         self.clk_freq: float = param_dict["fpga_clk_freq"]  # Clock frequency
         self.input_size: int = param_dict["input_size"]
@@ -38,6 +38,7 @@ class Func(Module):
 
     def __del__(self):
         if self.next_module is None:
+            print(f"{self.name}: Total latency = {self.current_time}s")
             print(
                 f"{self.name}: FPGA total energy consumption = {self.current_time * self.fpga_power}J"
             )

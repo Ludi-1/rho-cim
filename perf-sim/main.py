@@ -4,7 +4,7 @@ Main script to instantiate configurations
 
 from mlp_conf import MLP_conf
 from conf import Conf
-
+import os
 
 def main():
 
@@ -23,15 +23,15 @@ def main():
     }
 
     param_dict: dict = {
-        "start_times": [i for i in range(28 ** 2)],
-        "fpga_clk_freq": 1,
+        "start_times": [i / (100 * 10 ** 6) for i in range(28 ** 2)],
+        "fpga_clk_freq": 100 * 10 ** 6,
         "layer_list": [
             # (Layer type, image size, kernel size, input channels, output_channels)
             ("conv", 28, 5, 1, 5),
             # image size = prev_image_size - kernel_size + 1
             ("pool", 24, 2, 5, 5),
             # (Layer type, input neurons, output neurons)
-            ("fc", 23**2 * 5, 720),
+            ("fc", 23 ** 2 * 5, 720),
             ("fc", 720, 70),
             ("fc", 70, 10),
         ],
@@ -47,8 +47,12 @@ def main():
         "fpga_power": 0.114,
         "cim_param_dict": cim_param_dict,
     }
-    conf = Conf(param_dict)
+    if not os.path.exists("./output"):
+        os.mkdir("./output")
+    f = open("./output/log.txt", "w")
+    conf = Conf(param_dict, f)
     conf.start()
+
 
 if __name__ == "__main__":
     main()

@@ -11,28 +11,39 @@ from math import ceil
 
 
 class MLP_Layer(Module):
-    def __init__(self, name: str, next_module: Module, param_dict: dict):
-        super().__init__(name, next_module)
+    def __init__(self, name: str, next_module: Module, param_dict: dict, f):
+        super().__init__(f, name, next_module)
 
-        self.func = MLP_Func(
-            f"({self.name}, func)", next_module=self.next_module, param_dict=param_dict
-        )
-
-        cim_dict = param_dict["cim_param_dict"]
-        cim_dict["num_tiles"] = ceil(
+        param_dict["cim_param_dict"]["v_tiles"] = ceil(
             param_dict["input_neurons"] / param_dict["crossbar_size"]
-        ) * ceil(
-            param_dict["output_size"]
+        )
+        param_dict["cim_param_dict"]["h_tiles"] = ceil(
+            param_dict["output_neurons"]
             * param_dict["datatype_size"]
             / param_dict["crossbar_size"]
         )
+
+        param_dict["cim_param_dict"]["num_tiles"] = param_dict["cim_param_dict"]["v_tiles"] * param_dict["cim_param_dict"]["h_tiles"]
+
+        self.func = MLP_Func(
+            f=f,
+            name=f"({self.name}, func)",
+            next_module=self.next_module,
+            param_dict=param_dict,
+        )
+
         self.cim = CIM(
-            f"({self.name}, cim)",
+            f=f,
+            name=f"({self.name}, cim)",
             next_module=self.func,
             param_dict=param_dict["cim_param_dict"],
         )
+
         self.ctrl = MLP_Control(
-            f"({self.name}, ctrl)", next_module=self.cim, param_dict=param_dict
+            name=f"({self.name}, ctrl)",
+            next_module=self.cim,
+            param_dict=param_dict,
+            f=f,
         )
 
     def start(self, time):
