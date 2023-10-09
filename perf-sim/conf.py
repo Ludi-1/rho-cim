@@ -41,6 +41,7 @@ class Conf:
                     layer_dict["kernel_size"] = layer[2]
                     layer_dict["input_channels"] = layer[3]
                     layer_dict["output_channels"] = layer[4]
+                    layer_dict["stride"] = layer[5]
                     layer_dict["datatype_size"] = datatype_size
                     self.layer_list.append(
                         Pool_Layer(
