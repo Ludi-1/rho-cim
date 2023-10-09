@@ -11,14 +11,14 @@ class MLP_Control(Control):
         next_module: Module,  # Should always be a CIM module
         param_dict: dict,
     ):
-        param_dict["input_size"] = param_dict["input_neurons"]
+        param_dict["input_size"] = param_dict["input_neurons"] * param_dict["input_channels"]
         super().__init__(f, name, next_module, param_dict)
 
         self.entry_count: int = 0
         self.fifo_size: int = param_dict["input_neurons"]
 
     def start(self, time):
-        self.fd.write(f"{self.name}: Started at {time}\n")
+        self.fd.write(f"{self.name}: Started at {time}, {self.entry_count} - {self.fifo_size}\n")
         if time < self.current_time:  # Should always be false
             raise Exception(
                 f"Module {self.name} started in the past: {time}, {self.current_time}"

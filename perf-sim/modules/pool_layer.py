@@ -33,7 +33,7 @@ class Pool_Layer(Module):
 
         self.entry_count: int = 0
         self.col_count: int = 0
-        self.stride_count: int = self.stride - 1
+        self.row_count: int = 0
         self.skip: bool = False
         self.fifo_size: int = (
             self.image_size * (self.kernel_size - 1) + self.kernel_size
@@ -41,7 +41,7 @@ class Pool_Layer(Module):
 
     def start(self, time):
         # print(f"{self.name}: Started at {time}")
-        self.fd.write(f"{self.name} {self.current_time}, {time}\n")
+        self.fd.write(f"{self.name} {self.current_time}, {time}, {self.entry_count}\n")
         if time < self.current_time:
             raise Exception(
                 f"Module {self.name} at time {self.current_time} started in the past: {time}"
@@ -61,19 +61,22 @@ class Pool_Layer(Module):
                     # print(f"init skip: {self.name} {self.entry_count}, {self.col_count}")
                     self.skip = True
                 # print(f"act: {self.name} {self.entry_count}, {self.col_count}")
-                if self.stride_count == self.stride - 1:
+                if ((self.col_count + 1) % self.stride) == 0 and ((self.row_count + 1) % self.stride) == 0:
                     self.stride_count = 0
                     self.current_time = time + self.total_latency
                     self.start_next()
-                else:
-                    self.stride_count += 1
 
         if self.entry_count == self.image_size ** 2 - 1:
             self.entry_count = 0
             self.skip = False
         else:
             self.entry_count += 1
+    
         if self.col_count == self.image_size - 1:
             self.col_count = 0
+            if self.row_count == self.image_size - 1:
+                self.row_count = 0
+            else:
+                self.row_count += 1
         else:
             self.col_count += 1

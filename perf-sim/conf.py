@@ -25,6 +25,7 @@ class Conf:
                     layer_dict["kernel_size"] = layer[2]
                     layer_dict["input_channels"] = layer[3]
                     layer_dict["output_channels"] = layer[4]
+                    layer_dict["stride"] = layer[5]
                     layer_dict["datatype_size"] = datatype_size
                     self.layer_list.append(
                         CNN_Layer(
@@ -56,6 +57,7 @@ class Conf:
                     layer_dict: dict = param_dict.copy()
                     layer_dict["input_neurons"]: int = layer[1]
                     layer_dict["output_neurons"]: int = layer[2]
+                    layer_dict["input_channels"]: int = layer[3]
                     layer_dict["datatype_size"] = datatype_size
                     self.layer_list.append(
                         MLP_Layer(

@@ -2,7 +2,6 @@
 Main script to instantiate configurations
 """
 
-from mlp_conf import MLP_conf
 from conf import Conf
 import os
 
@@ -27,13 +26,13 @@ def main():
         "fpga_clk_freq": 100 * 10 ** 6,
         "layer_list": [
             # (Layer type, image size, kernel size, input channels, output_channels, stride)
-            ("conv", 28, 5, 1, 5),
+            ("conv", 28, 5, 1, 5, 1),
             # image size = prev_image_size - kernel_size + 1
-            ("pool", 24, 2, 5, 5, 2),
-            # (Layer type, input neurons, output neurons)
-            ("fc", 12**2 * 5, 70), # 12**2 * 5 = 720
-            ("fc", 70, 10),
-            ("fc", 10, 10),
+            ("pool", 24, 2, 5, 5, 2, 1),
+            # (Layer type, input neurons, output neurons, input channels)
+            ("fc", 12**2, 720, 5), # 12**2 * 5 = 720
+            ("fc", 720, 70, 1),
+            ("fc", 70, 10, 1),
         ],
         "datatype_size": [8, 1, 1, 1, 8],
         "bus_width": 8,
