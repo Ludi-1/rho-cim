@@ -41,7 +41,7 @@ class Pool_Layer(Module):
 
     def start(self, time):
         # print(f"{self.name}: Started at {time}")
-        self.fd.write(f"{self.name} {self.current_time}, {time}, {self.entry_count}\n")
+        self.fd.write(f"({self.name}): Started at {time}\n")
         if time < self.current_time:
             raise Exception(
                 f"Module {self.name} at time {self.current_time} started in the past: {time}"

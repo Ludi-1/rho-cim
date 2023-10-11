@@ -28,7 +28,7 @@ def main():
             # (Layer type, image size, kernel size, input channels, output_channels, stride)
             ("conv", 28, 5, 1, 5, 1),
             # image size = prev_image_size - kernel_size + 1
-            ("pool", 24, 2, 5, 5, 2, 1),
+            ("pool", 24, 2, 5, 5, 2),
             # (Layer type, input neurons, output neurons, input channels)
             ("fc", 12**2, 720, 5), # 12**2 * 5 = 720
             ("fc", 720, 70, 1),
@@ -38,7 +38,7 @@ def main():
         "bus_width": 8,
         "bus_latency": 1,
         "crossbar_size": 256,
-        "ibuf_ports": 1,
+        "ibuf_ports": 2,
         "ibuf_read_latency": 1,
         "func_ports": 1,
         "operation_latency": 1,

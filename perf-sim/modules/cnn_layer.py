@@ -15,7 +15,7 @@ class CNN_Layer(Module):
         super().__init__(f, name, next_module)
 
         param_dict["cim_param_dict"]["v_tiles"] = ceil(
-            param_dict["input_channels"] * param_dict["kernel_size"] / param_dict["crossbar_size"]
+            param_dict["input_channels"] * param_dict["kernel_size"]**2 / param_dict["crossbar_size"]
         )
         param_dict["cim_param_dict"]["h_tiles"] = ceil(
             param_dict["output_channels"]

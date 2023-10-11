@@ -36,10 +36,6 @@ class Control(Module):
 
         self.num_writes: int = ceil(self.input_size / min(self.v_cim_tiles, self.ibuf_ports)) # Amount of writes to the RD buffers
 
-        # print(
-        #     f"{self.name} - Input size: {self.input_size}, #v.xbars: {self.v_cim_tiles}, Ibuf ports: {self.ibuf_ports}"
-        # )
-
         self.transfer_latency: int = (
             ceil(self.datatype_size / self.bus_width) * self.bus_latency
         )
