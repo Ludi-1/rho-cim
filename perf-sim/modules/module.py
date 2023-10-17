@@ -16,7 +16,7 @@ class Module(ABC):
         self.total_latency: int = 0
 
     def start(self, time):
-        self.fd.write(f"{self.name}: Started at {time}\n")
+        self.fd.write(f"{self.name}: Started at {time}, prev time = {self.current_time}\n")
         if time >= self.current_time:  # Should always be true
             self.current_time = time + self.total_latency
         else:
