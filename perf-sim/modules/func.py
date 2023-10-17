@@ -27,7 +27,7 @@ class Func(Module):
 
         self.transfer_latency: int = (
             ceil(self.datatype_size / self.bus_width) * self.bus_latency
-        )  # Latency for readfing from outpt buffers
+        )  # Latency for reading from output buffers
         self.total_latency: float = (
             (1 / self.clk_freq)
             * (self.operation_latency + self.ibuf_write_latency + self.transfer_latency)
