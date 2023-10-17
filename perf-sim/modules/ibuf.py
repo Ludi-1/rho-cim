@@ -1,9 +1,9 @@
+from abc import abstractmethod
 from modules.module import Module
-from modules.ctrl import Control
 from math import ceil
 
 
-class CNN_Control(Control):
+class CNN_Ibuf(Module):
     def __init__(
         self,
         f,
@@ -11,15 +11,19 @@ class CNN_Control(Control):
         next_module: Module,  # Should always be a CIM module
         param_dict: dict,
     ):
-        self.image_size: int = param_dict["image_size"]  # CNN input square image size
+        super().__init__(f, name, next_module)
+
+        self.image_size: int = param_dict["image_size"]  # CNN input image size
         self.kernel_size: int = param_dict[
             "kernel_size"
         ]  # CNN kernel size applied over image
         self.stride: int = param_dict["stride"]
-        self.input_channels = param_dict["input_channels"]
-        param_dict["input_size"] = self.kernel_size ** 2 * self.input_channels
 
-        super().__init__(f, name, next_module, param_dict)
+        self.clk_freq: float = param_dict["fpga_clk_freq"]  # Clock frequency
+
+        self.total_latency = (
+            1 / self.clk_freq
+        )
 
         self.entry_count: int = 0
         self.col_count: int = 0
@@ -55,7 +59,6 @@ class CNN_Control(Control):
                     self.stride_count = 0
                     self.current_time = time + self.total_latency
                     self.start_next()
-                    self.current_time = self.next_module.current_time
 
         if self.entry_count == self.image_size ** 2 - 1:
             self.entry_count = 0
