@@ -18,11 +18,11 @@ def main():
         "adc_energy": 2 * 10 ** -12,
         "technology_node": "15 nm",
         "total_energy": 10 * 10 ** -6,
-        "total_latency": 774 * 10 ** -9,
+        "total_latency": 2 * 10 ** -9,
     }
 
     param_dict: dict = {
-        "start_times": [i / (100 * 10 ** 6) for i in range(28 ** 2)],
+        "start_times": [0 for i in range(28 ** 2)],
         "fpga_clk_freq": 100 * 10 ** 6,
         "layer_list": [
             # (Layer type, image size, kernel size, input channels, output_channels, stride)
@@ -49,6 +49,7 @@ def main():
     if not os.path.exists("./output"):
         os.mkdir("./output")
     f = open("./output/log.txt", "w")
+    print("opened")
     conf = Conf(param_dict, f)
     conf.start()
 

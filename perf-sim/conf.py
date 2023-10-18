@@ -74,9 +74,10 @@ class Conf:
 
         # Connect agent to first module of configuration
         self.agent = Agent(
-            clk_freq=param_dict["fpga_clk_freq"],
-            first_module=self.layer_list[-1],
-            start_times=param_dict["start_times"],
+            f=f,
+            name="Agent",
+            param_dict=param_dict,
+            next_module=self.layer_list[-1]
         )
 
         for layer in self.layer_list:

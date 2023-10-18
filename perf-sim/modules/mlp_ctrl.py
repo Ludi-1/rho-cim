@@ -27,9 +27,9 @@ class MLP_Control(Control):
         # print(f"{self.name}: {self.entry_count}, {self.fifo_size}")
         if self.entry_count == self.fifo_size - 1:
             self.entry_count = 0
-            self.current_time = time + self.total_latency
+            # self.current_time = time + self.total_latency
             # print(f"{self.name}: {self.entry_count}, {self.fifo_size}")
-            self.start_next()
+            super().start(time)
         else:
             # print(f"{self.name}: Entry count {self.entry_count}")
             self.current_time = time + 1 / self.clk_freq

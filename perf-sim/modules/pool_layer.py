@@ -63,8 +63,8 @@ class Pool_Layer(Module):
                 # print(f"act: {self.name} {self.entry_count}, {self.col_count}")
                 if ((self.col_count + 1) % self.stride) == 0 and ((self.row_count + 1) % self.stride) == 0:
                     self.stride_count = 0
-                    self.current_time = time + self.total_latency
-                    self.start_next()
+                    # self.current_time = time + self.total_latency
+                    super().start(time)
 
         if self.entry_count == self.image_size ** 2 - 1:
             self.entry_count = 0
