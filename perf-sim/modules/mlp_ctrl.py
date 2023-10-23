@@ -19,11 +19,6 @@ class MLP_Control(Control):
 
     def start(self, time):
         self.fd.write(f"{self.name}: Started at {time}, {self.entry_count} - {self.fifo_size}\n")
-        if time < self.current_time:  # Should always be false
-            raise Exception(
-                f"Module {self.name} started in the past: {time}, {self.current_time}"
-            )
-
         # print(f"{self.name}: {self.entry_count}, {self.fifo_size}")
         if self.entry_count == self.fifo_size - 1:
             self.entry_count = 0

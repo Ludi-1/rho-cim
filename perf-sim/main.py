@@ -18,7 +18,7 @@ def main():
         "adc_energy": 2 * 10 ** -12,
         "technology_node": "15 nm",
         "total_energy": 10 * 10 ** -6,
-        "total_latency": 2 * 10 ** -9,
+        "total_latency": 774 * 10 ** -9,
     }
 
     param_dict: dict = {
