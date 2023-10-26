@@ -27,7 +27,7 @@ class Func(Module):
 
         self.transfer_latency: int = (
             ceil(self.datatype_size / self.bus_width) * self.bus_latency
-        )  # Latency for readfing from output buffers
+        )  # Latency for reading from output buffers
         self.obuf_reads: int =  ceil(ceil(self.input_size / self.crossbar_rows) / self.func_ports) # Num of reads from obuf
 
         self.total_latency: float = (

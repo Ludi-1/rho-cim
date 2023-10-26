@@ -7,6 +7,8 @@ import os
 
 def main():
 
+    num_inferences: int = 1
+
     cim_param_dict: dict = {
         "num_of_adc": 32,
         "adc_resolution": 8,
@@ -22,7 +24,7 @@ def main():
     }
 
     param_dict: dict = {
-        "start_times": [0 for i in range(28 ** 2)],
+        "start_times": [0 for i in range(28 ** 2 * num_inferences)],
         "fpga_clk_freq": 100 * 10 ** 6,
         "layer_list": [
             # (Layer type, image size, kernel size, input channels, output_channels, stride)
@@ -35,13 +37,13 @@ def main():
             ("fc", 70, 10, 1),
         ],
         "datatype_size": [8, 1, 1, 1, 8],
-        "bus_width": 8,
-        "bus_latency": 1,
+        "bus_width": [8, 1, 1, 1, 8],
+        "bus_latency": 0,
         "crossbar_size": 256,
-        "ibuf_ports": 2,
+        "ibuf_ports": 1,
         "ibuf_read_latency": 1,
-        "func_ports": 1,
-        "operation_latency": 1,
+        "func_ports": 2**32, # Number of input operands for functional unit
+        "operation_latency": 0,
         "ibuf_write_latency": 0,
         "fpga_power": 0.114,
         "cim_param_dict": cim_param_dict,
@@ -49,7 +51,6 @@ def main():
     if not os.path.exists("./output"):
         os.mkdir("./output")
     f = open("./output/log.txt", "w")
-    print("opened")
     conf = Conf(param_dict, f)
     conf.start()
 
