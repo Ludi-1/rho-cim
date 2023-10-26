@@ -16,7 +16,13 @@ class Conf:
         next_layer = None
         n = len(param_dict["layer_list"]) - 1
         for (layer, datatype_size, bus_width) in reversed(
-            list(zip(param_dict["layer_list"], param_dict["datatype_size"], param_dict["bus_width"]))
+            list(
+                zip(
+                    param_dict["layer_list"],
+                    param_dict["datatype_size"],
+                    param_dict["bus_width"],
+                )
+            )
         ):
             match layer[0]:
                 case "conv":
@@ -77,10 +83,7 @@ class Conf:
 
         # Connect agent to first module of configuration
         self.agent = Agent(
-            f=f,
-            name="Agent",
-            param_dict=param_dict,
-            next_module=self.layer_list[-1]
+            f=f, name="Agent", param_dict=param_dict, next_module=self.layer_list[-1]
         )
 
     def start(self):
