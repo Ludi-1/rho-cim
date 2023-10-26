@@ -1,4 +1,4 @@
-num_inferences: int = 10**3
+num_inferences: int = 1
 
 
 cim_param_dict: dict = {
@@ -11,7 +11,7 @@ cim_param_dict: dict = {
     "HRS": 10**6,
     "adc_energy": 2 * 10**-12,
     "technology_node": "15 nm",
-    "total_energy": 10 * 10**-6,
+    "total_energy": 14 * 10**-9,
     "total_latency": 774 * 10**-9,
 }
 
@@ -54,6 +54,29 @@ param_dict_cnn_2: dict = {
         ("fc", 11**2, 1210, 10),  # 11**2 * 121 = 121
         ("fc", 1210, 1210, 1),
         ("fc", 1210, 10, 1),
+    ],
+    "datatype_size": [8, 1, 1, 1, 8],
+    "bus_width": [8, 1, 1, 1, 8],
+    "bus_latency": 0,
+    "crossbar_size": 256,
+    "ibuf_ports": 1,
+    "ibuf_read_latency": 1,
+    "func_ports": 2**32,  # Number of input operands for functional unit
+    "operation_latency": 0,
+    "ibuf_write_latency": 0,
+    "fpga_power": 0.114,
+    "cim_param_dict": cim_param_dict,
+}
+
+param_dict_mlp_s: dict = {
+    "start_times": [0 for i in range(28**2 * num_inferences)],
+    "fpga_clk_freq": 100 * 10**6,
+    "layer_list": [
+        # (Layer type, input size, output_size, input channels)
+        ("fc", 784, 784, 1),
+        ("fc", 784, 500, 1),
+        ("fc", 500, 250, 1),
+        ("fc", 250, 10, 1),
     ],
     "datatype_size": [8, 1, 1, 1, 8],
     "bus_width": [8, 1, 1, 1, 8],
