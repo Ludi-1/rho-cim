@@ -32,5 +32,5 @@ class MLP_Control(Control):
             self.current_time = time + 1 / self.clk_freq
         # print(self.entry_count)
 
-    def __del__(self):
-        print(f"{self.name}: {self.resets}")
+    # def __del__(self):
+    #     print(f"{self.name}: {self.resets}")

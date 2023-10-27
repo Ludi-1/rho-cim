@@ -91,4 +91,50 @@ param_dict_mlp_s: dict = {
     "cim_param_dict": cim_param_dict,
 }
 
-param_dict = param_dict_cnn_2
+param_dict_mlp_m: dict = {
+    "start_times": [0 for i in range(28**2 * num_inferences)],
+    "fpga_clk_freq": 100 * 10**6,
+    "layer_list": [
+        # (Layer type, input size, output_size, input channels)
+        ("fc", 784, 784, 1),
+        ("fc", 784, 1000, 1),
+        ("fc", 1000, 250, 1),
+        ("fc", 250, 10, 1),
+    ],
+    "datatype_size": [8, 1, 1, 1, 8],
+    "bus_width": [8, 1, 1, 1, 8],
+    "bus_latency": 0,
+    "crossbar_size": 256,
+    "ibuf_ports": 1,
+    "ibuf_read_latency": 1,
+    "func_ports": 2**32,  # Number of input operands for functional unit
+    "operation_latency": 0,
+    "ibuf_write_latency": 0,
+    "fpga_power": 0.114,
+    "cim_param_dict": cim_param_dict,
+}
+
+param_dict_mlp_l: dict = {
+    "start_times": [0 for i in range(28**2 * num_inferences)],
+    "fpga_clk_freq": 100 * 10**6,
+    "layer_list": [
+        # (Layer type, input size, output_size, input channels)
+        ("fc", 784, 784, 1),
+        ("fc", 784, 1500, 1),
+        ("fc", 1000, 500, 1),
+        ("fc", 500, 10, 1),
+    ],
+    "datatype_size": [8, 1, 1, 1, 8],
+    "bus_width": [8, 1, 1, 1, 8],
+    "bus_latency": 0,
+    "crossbar_size": 256,
+    "ibuf_ports": 1,
+    "ibuf_read_latency": 1,
+    "func_ports": 2**32,  # Number of input operands for functional unit
+    "operation_latency": 0,
+    "ibuf_write_latency": 0,
+    "fpga_power": 0.114,
+    "cim_param_dict": cim_param_dict,
+}
+
+param_dict = param_dict_mlp_s
