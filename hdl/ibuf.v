@@ -4,24 +4,35 @@ module ibuf #(
 ) (
     input clk,
     input i_write_enable,
-    input [datatype_size] i_data,
-    output [datatype_size] o_data [fifo_length]
+    input [datatype_size-1:0] i_data,
+    output reg [datatype_size-1:0] o_data [fifo_length-1:0]
 );
 
-integer fifo_idx;
-reg [fifo_length] fifo_data;
+reg [datatype_size-1:0] fifo_data [fifo_length-1:0];
 
 always @(posedge clk) begin
     if (i_write_enable) begin
         fifo_data[0] <= i_data;
-        for (fifo_idx = 0; fifo < fifo_length; fifo_idx++) begin
-            fifo_data[i + 1] <= fifo_data[i]; 
+        for (int fifo_idx = 0; fifo_idx < fifo_length - 1; fifo_idx++) begin
+            fifo_data[fifo_idx + 1] <= fifo_data[fifo_idx]; 
         end
     end
 end
 
-for (fifo_idx = 0; fifo < fifo_length; fifo_idx++) begin
-    o_data[i] <= fifo_data[i]; 
+always @(*) begin
+    for (int fifo_idx = 0; fifo_idx < fifo_length; fifo_idx++) begin
+        o_data[fifo_idx] <= fifo_data[fifo_idx]; 
+    end
 end
+
+`ifdef COCOTB_SIM
+initial begin
+    $dumpfile ("output/ibuf.fst");
+    for(int fifo_idx = 0; fifo_idx < fifo_length; fifo_idx ++) begin
+        $dumpvars (0, o_data[fifo_idx]);
+    end
+  #1;
+end
+`endif
 
 endmodule
