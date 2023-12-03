@@ -137,4 +137,4 @@ param_dict_mlp_l: dict = {
     "cim_param_dict": cim_param_dict,
 }
 
-param_dict = param_dict_mlp_s
+param_dict = param_dict_cnn_1
