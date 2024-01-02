@@ -8,3 +8,6 @@ wave
 .venv
 output
 output/log.txt
+*/output
+iverilog_dump.v
+*.fst
