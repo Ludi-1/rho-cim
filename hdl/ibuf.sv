@@ -21,18 +21,18 @@ end
 
 always @(*) begin
     for (int fifo_idx = 0; fifo_idx < fifo_length; fifo_idx++) begin
-        o_data[fifo_idx] <= fifo_data[fifo_idx]; 
+        o_data[fifo_idx] = fifo_data[fifo_idx]; 
     end
 end
 
-`ifdef COCOTB_SIM
-initial begin
-    $dumpfile ("output/ibuf.fst");
-    for(int fifo_idx = 0; fifo_idx < fifo_length; fifo_idx ++) begin
-        $dumpvars (0, o_data[fifo_idx]);
-    end
-  #1;
-end
-`endif
+// `ifdef COCOTB_SIM
+// initial begin
+//     $dumpfile ("output/ibuf.fst");
+//     for(int fifo_idx = 0; fifo_idx < fifo_length; fifo_idx ++) begin
+//         $dumpvars (0, o_data[fifo_idx]);
+//     end
+//   #1;
+// end
+// `endif
 
 endmodule
