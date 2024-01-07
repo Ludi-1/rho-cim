@@ -2,7 +2,7 @@ typedef enum {
   S0, // Reset
   S1, // Idle
   S2, // Busy
-  S3, // Start next
+  S3 // Start next
 } state;
 
 module ctrl #(
@@ -16,16 +16,20 @@ module ctrl #(
     input rst,
     input i_start,
     input i_cim_busy,
-    output o_cim_we,
+    output reg o_cim_we,
     input i_func_busy,
     output reg o_busy,
     input [datatype_size-1:0] i_data [input_size-1:0],
+    output reg [$clog2(xbar_size):0] o_cim_addr,
     output reg [datatype_size-1:0] o_data [v_cim_tiles-1:0]
 );
 
 localparam count_limit = v_cim_tiles > 1 ? xbar_size : input_size;
-integer cim_addr, next_cim_addr, input_count, next_input_count;
+reg [$clog2(xbar_size):0] cim_addr, next_cim_addr;
+integer input_count, next_input_count;
 state ctrl_state, next_ctrl_state;
+
+assign o_cim_addr = cim_addr;
 
 genvar i;
 generate
@@ -49,12 +53,11 @@ end
 always_comb begin
     case (ctrl_state)
         S0: begin // Reset state
-            o_cim_we = 1;
             next_input_count = 0;
             next_cim_addr = 0;
             if (i_start & !rst) begin // Start signal comes in
                 o_busy = 1;
-                if (i_busy) begin // If next module busy
+                if (i_cim_busy) begin // If next module busy
                     next_ctrl_state = S1; // Idle until not busy
                 end else begin // If next module not busy
                     next_ctrl_state = S2; // Start transfer
@@ -94,7 +97,7 @@ always_comb begin
                 o_cim_we = 1;
                 next_ctrl_state = S2;
                 next_input_count = input_count + 1;
-                if (cim_addr == xbar_size) begin
+                if (cim_addr >= xbar_size - 1) begin
                     next_cim_addr = 0;
                 end else begin
                     next_cim_addr = cim_addr + 1;
