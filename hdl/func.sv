@@ -5,11 +5,13 @@ typedef enum {
   S3 // Start next
 } state;
 
-module ctrl #(
+module func #(
     parameter datatype_size = 8,
     parameter input_size = 201,
     parameter xbar_size = 256,
-    parameter v_cim_tiles = (input_size + xbar_size - 1) / xbar_size // ceiled division
+    parameter h_cim_tiles = (output_size + xbar_size - 1) / xbar_size, // ceiled division
+    parameter output_datatype_size,
+    parameter output_size = 512
 ) (
     input clk,
     input rst,
@@ -20,12 +22,12 @@ module ctrl #(
     output reg o_busy,
     input [datatype_size-1:0] i_data [input_size-1:0],
     output reg [$clog2(xbar_size)-1:0] o_cim_addr,
-    output reg [datatype_size-1:0] o_data [v_cim_tiles-1:0]
+    output reg [output_datatype_size-1:0] o_data [v_cim_tiles-1:0]
 );
 
-localparam count_limit = v_cim_tiles > 1 ? xbar_size : input_size;
-int unsigned cim_addr, next_cim_addr;
-int unsigned input_count, next_input_count;
+localparam count_limit = h_cim_tiles > 1 ? xbar_size : input_size;
+integer unsigned cim_addr, next_cim_addr;
+integer unsigned input_count, next_input_count;
 state ctrl_state, next_ctrl_state;
 
 assign o_cim_addr = cim_addr[$clog2(xbar_size)-1:0];
@@ -117,15 +119,5 @@ always_comb begin
         default: next_ctrl_state = S0;
     endcase
 end
-
-// `ifdef COCOTB_SIM
-// initial begin
-//     $dumpfile ("output/ibuf.fst");
-//     for(int fifo_idx = 0; fifo_idx < fifo_length; fifo_idx ++) begin
-//         $dumpvars (0, o_data[fifo_idx]);
-//     end
-//   #1;
-// end
-// `endif
 
 endmodule

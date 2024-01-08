@@ -137,4 +137,25 @@ param_dict_mlp_l: dict = {
     "cim_param_dict": cim_param_dict,
 }
 
+# param_dict_resnet50: dict = {
+#     "start_times": [0 for i in range(28**2 * num_inferences)],
+#     "fpga_clk_freq": 100 * 10**6,
+#     "layer_list": [
+#         # (Layer type, image size, kernel size, input channels, output_channels, stride)
+#         ("conv", 28, 7, 1, 10, 1),
+#         ("fc", 500, 10, 1),
+#     ],
+#     "datatype_size": [8, 1, 1, 1, 8],
+#     "bus_width": [8, 1, 1, 1, 8],
+#     "bus_latency": 0,
+#     "crossbar_size": 256,
+#     "ibuf_ports": 1,
+#     "ibuf_read_latency": 1,
+#     "func_ports": 2**32,  # Number of input operands for functional unit
+#     "operation_latency": 0,
+#     "ibuf_write_latency": 0,
+#     "fpga_power": 0.114,
+#     "cim_param_dict": cim_param_dict,
+# }
+
 param_dict = param_dict_cnn_1
