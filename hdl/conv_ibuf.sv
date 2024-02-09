@@ -1,13 +1,16 @@
-module ibuf #(
+module conv_ibuf #(
     parameter datatype_size = 8,
-    parameter fifo_length = 720
+    parameter fifo_length = 720,
+    parameter img_width = 28,
+    parameter kernel_dim = 3
 ) (
     input clk,
     input i_write_enable,
     input [datatype_size-1:0] i_data,
-    output reg [datatype_size-1:0] o_data [fifo_length-1:0]
+    output reg [datatype_size-1:0] o_data [kernel_dim**2-1:0]
 );
 
+localparam fifo_length = img_width * (kernel_dim - 1) + kernel_dim;
 reg [datatype_size-1:0] fifo_data [fifo_length-1:0];
 
 always @(posedge clk) begin
