@@ -9,6 +9,7 @@ EXTRA_ARGS += --trace-fst --trace-structs
 EXTRA_ARGS += --trace --trace-structs
 
 TOPLEVEL ?= ibuf
+$(shell rm -rf sim_build)
 
 ifeq ($(TOPLEVEL),ibuf)
     VERILOG_SOURCES = $(shell pwd)/hdl/ibuf.sv
@@ -18,6 +19,9 @@ ifeq ($(TOPLEVEL),ibuf)
 else ifeq ($(TOPLEVEL),ctrl)
     VERILOG_SOURCES = $(shell pwd)/hdl/ctrl.sv
     MODULE = tb.test_ctrl
+else ifeq ($(TOPLEVEL),func)
+    VERILOG_SOURCES = $(shell pwd)/hdl/func.sv
+    MODULE = tb.test_func
 else
     $(error Given TOPLEVEL '$(TOPLEVEL)' not supported)
 endif

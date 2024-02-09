@@ -1,6 +1,6 @@
 module ibuf #(
     parameter datatype_size = 8,
-    parameter fifo_length = 5
+    parameter fifo_length = 720
 ) (
     input clk,
     input i_write_enable,
