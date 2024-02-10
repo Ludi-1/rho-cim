@@ -22,8 +22,10 @@ always @(posedge clk) begin
 end
 
 always @(*) begin
-    for (int fifo_idx = 0; fifo_idx < fifo_length; fifo_idx++) begin
-        o_data[fifo_idx] = fifo_data[fifo_idx]; 
+    for (int i = 0; i < kernel_dim; i++) begin
+        for (int j = 0; j < kernel_dim; j++) begin
+            o_data[i + j*kernel_dim] = fifo_data[i*img_width + j];
+        end
     end
 end
 

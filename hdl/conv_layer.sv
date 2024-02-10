@@ -41,9 +41,9 @@ generate
       .kernel_dim(kernel_dim)
     ) ibuf (
       .clk(clk),
-      .we(i_ibuf_we[i]),
-      .d_in(i_ibuf_wr_data[i]), // From prev layer func to ibuf
-      .d_out(ibuf_rd_data[i]) // From ibuf to ctrl of this layer
+      .i_write_enable(i_ibuf_we[i]),
+      .i_data(i_ibuf_wr_data[i]), // From prev layer func to ibuf
+      .o_data(ibuf_rd_data[i]) // From ibuf to ctrl of this layer
     );
     for (j = 0; j < kernel_dim**2; j++) begin
       assign ctrl_rd_data[i * kernel_dim**2 + j] = ibuf_rd_data[i][j];
@@ -54,7 +54,8 @@ endgenerate
 // Instantiate ctrl module
 conv_ctrl #(
     .datatype_size(datatype_size),
-    .input_size(input_size),
+    .input_channels(input_channels),
+    .kernel_dim(kernel_dim),
     .xbar_size(xbar_size)
 ) ctrl (
     .clk(clk),
@@ -69,7 +70,7 @@ conv_ctrl #(
     .o_data(o_cim_data)
 );
 
-conv_func #(
+fc_func #(
     .input_size(input_size),
     .output_size(output_size),
     .xbar_size(xbar_size),
