@@ -19,12 +19,12 @@ module conv_ctrl #(
     output reg o_cim_we,
     input i_func_busy,
     output reg o_busy,
-    input [datatype_size-1:0] i_data [input_channels-1:0][kernel_dim**2-1:0],
+    input [datatype_size-1:0] i_data [input_channels*(kernel_dim**2)-1:0],
     output reg [$clog2(xbar_size)-1:0] o_cim_addr,
     output reg [datatype_size-1:0] o_data [v_cim_tiles-1:0]
 );
 
-localparam input_size = 
+localparam input_size = input_channels*(kernel_dim**2);
 localparam count_limit = v_cim_tiles > 1 ? xbar_size : input_size;
 int unsigned cim_addr, next_cim_addr;
 int unsigned input_count, next_input_count;

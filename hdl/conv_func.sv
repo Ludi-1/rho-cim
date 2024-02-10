@@ -5,7 +5,7 @@ typedef enum {
   S3 // Start next
 } state;
 
-module func #(
+module conv_func #(
     parameter input_size = 201,
     parameter output_size = 512,
     parameter xbar_size = 256,

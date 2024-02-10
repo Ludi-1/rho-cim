@@ -6,7 +6,7 @@ module conv_layer #(
     parameter xbar_size = 256,
     parameter datatype_size = 8,
     parameter output_datatype_size = 8,
-    parameter input_size = input_channels * kernel_dim**2; // Total CIM rows
+    parameter input_size = input_channels * kernel_dim**2, // Total CIM rows
     parameter v_cim_tiles = (input_size + xbar_size - 1) / xbar_size, // ceiled division
     parameter h_cim_tiles = (output_size + xbar_size - 1) / xbar_size // ceiled division
 ) (
@@ -29,10 +29,11 @@ module conv_layer #(
 );
 
 logic [datatype_size-1:0] ibuf_rd_data [input_channels-1:0][kernel_dim**2-1:0];
+logic [datatype_size-1:0] ctrl_rd_data [input_channels*kernel_dim**2-1:0];
 logic func_busy;
 
 generate
-  genvar i;
+  genvar i, j;
   for (i = 0; i < input_channels; i++) begin
     conv_ibuf #(
       .datatype_size(datatype_size),
@@ -45,6 +46,9 @@ generate
       .d_in(i_ibuf_wr_data[i]), // From prev layer func to ibuf
       .d_out(ibuf_rd_data[i]) // From ibuf to ctrl of this layer
     );
+    for (j = 0; j < kernel_dim**2; j++) begin
+      ctrl_rd_data[i * kernel_dim**2 + j] = ibuf_rd_data[i][j];
+    end
   end
 endgenerate
 
@@ -61,7 +65,7 @@ conv_ctrl #(
     .o_cim_we(o_cim_we),
     .i_func_busy(func_busy),
     .o_busy(o_busy),
-    .i_data(ibuf_rd_data),
+    .i_data(ctrl_rd_data),
     .o_cim_addr(o_cim_wr_addr),
     .o_data(o_cim_data)
 );
