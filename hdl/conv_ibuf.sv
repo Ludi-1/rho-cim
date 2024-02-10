@@ -1,6 +1,5 @@
 module conv_ibuf #(
     parameter datatype_size = 8,
-    parameter fifo_length = 720,
     parameter img_width = 28,
     parameter kernel_dim = 3
 ) (

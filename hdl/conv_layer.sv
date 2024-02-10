@@ -37,7 +37,6 @@ generate
   for (i = 0; i < input_channels; i++) begin
     conv_ibuf #(
       .datatype_size(datatype_size),
-      .fifo_length(ibuf_size),
       .img_width(img_width),
       .kernel_dim(kernel_dim)
     ) ibuf (
@@ -47,7 +46,7 @@ generate
       .d_out(ibuf_rd_data[i]) // From ibuf to ctrl of this layer
     );
     for (j = 0; j < kernel_dim**2; j++) begin
-      ctrl_rd_data[i * kernel_dim**2 + j] = ibuf_rd_data[i][j];
+      assign ctrl_rd_data[i * kernel_dim**2 + j] = ibuf_rd_data[i][j];
     end
   end
 endgenerate

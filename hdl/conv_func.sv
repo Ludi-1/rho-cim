@@ -1,9 +1,9 @@
 typedef enum {
-  S0, // Reset
-  S1, // Idle
-  S2, // Busy
-  S3 // Start next
-} state;
+  s_func_reset, // Reset
+  s_func_idle, // Idle
+  s_func_busy, // Busy
+  s_func_start_next // Start next
+} t_func_state;
 
 module conv_func #(
     parameter input_size = 201,
@@ -29,7 +29,7 @@ module conv_func #(
 localparam count_limit = h_cim_tiles > 1 ? xbar_size : input_size;
 integer unsigned cim_addr, next_cim_addr;
 integer unsigned input_count, next_input_count;
-state func_state, func_ctrl_state;
+t_func_state func_state, func_ctrl_state;
 
 assign o_cim_addr = cim_addr[$clog2(xbar_size)-1:0];
 
@@ -42,7 +42,7 @@ endgenerate
 
 always_ff @(posedge clk) begin
     if (rst) begin
-        ctrl_state <= S0;
+        ctrl_state <= s_func_reset;
         input_count <= 0;
         cim_addr <= 0;
     end else begin
@@ -54,50 +54,50 @@ end
 
 always_comb begin
     case (ctrl_state)
-        S0: begin // Reset state
+        s_func_reset: begin // Reset state
             next_input_count = 0;
             next_cim_addr = 0;
             if (i_start & !rst) begin // Start signal comes in
                 o_busy = 1;
                 if (i_cim_busy) begin // If next module busy
-                    next_ctrl_state = S1; // Idle until not busy
+                    next_ctrl_state = s_func_idle; // Idle until not busy
                 end else begin // If next module not busy
-                    next_ctrl_state = S2; // Start transfer
+                    next_ctrl_state = s_func_busy; // Start transfer
                 end
             end else begin // Stay in reset state
                 o_cim_we = 0;
                 o_busy = 0;
-                next_ctrl_state = S0;
+                next_ctrl_state = s_func_reset;
             end
         end
-        S1: begin // Idle state
+        s_func_idle: begin // Idle state
             o_busy = 1;
             next_input_count = 0;
             next_cim_addr = 0;
             if (!i_cim_busy) begin
                 o_cim_we = 1;
-                next_ctrl_state = S2;
+                next_ctrl_state = s_func_busy;
             end else begin
                 o_cim_we = 0;
-                next_ctrl_state = S1;
+                next_ctrl_state = s_func_idle;
             end
         end
-        S2: begin // Busy state
+        s_func_busy: begin // Busy state
             o_busy = 1;
             if (input_count >= count_limit - 1) begin
                 o_cim_we = 0;
                 if (!i_func_busy) begin // If functional unit of next layer not busy
-                    next_ctrl_state = S3; // Start
+                    next_ctrl_state = s_func_start_next; // Start
                     next_input_count = 0;
                     next_cim_addr = 0;
                 end else begin
-                    next_ctrl_state = S2;
+                    next_ctrl_state = s_func_busy;
                     next_input_count = input_count;
                     next_cim_addr = cim_addr;
                 end
             end else begin
                 o_cim_we = 1;
-                next_ctrl_state = S2;
+                next_ctrl_state = s_func_busy;
                 next_input_count = input_count + 1;
                 if (cim_addr >= xbar_size - 1) begin
                     next_cim_addr = 0;
@@ -106,18 +106,18 @@ always_comb begin
                 end
             end
         end
-        S3: begin
+        s_func_start_next: begin
             o_busy = 0;
             o_cim_we = 0;
             next_cim_addr = 0;
             next_input_count = 0;
             if (i_cim_busy) begin
-                next_ctrl_state = S0;
+                next_ctrl_state = s_func_reset;
             end else begin
-                next_ctrl_state = S3;
+                next_ctrl_state = s_func_start_next;
             end
         end
-        default: next_ctrl_state = S0;
+        default: next_ctrl_state = s_func_reset;
     endcase
 end
 
