@@ -121,6 +121,7 @@ param_dict_mlp_l: dict = {
         # (Layer type, input size, output_size, input channels)
         ("fc", 784, 784, 1),
         ("fc", 784, 1500, 1),
+        ("fc", 1500, 1000, 1),
         ("fc", 1000, 500, 1),
         ("fc", 500, 10, 1),
     ],

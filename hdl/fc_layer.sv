@@ -1,6 +1,6 @@
 module fc_layer #(
-    parameter input_size = 201,
-    parameter output_size = 512,
+    parameter input_size = 1500,
+    parameter output_size = 1000,
     parameter xbar_size = 256,
     parameter datatype_size = 8,
     parameter output_datatype_size = 8,

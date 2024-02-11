@@ -1,8 +1,8 @@
 module conv_layer #(
     parameter input_channels = 5, // Number of input channels
     parameter img_width = 28, // Input image width
-    parameter kernel_dim = 3, // kernel dim N, where kernel size is NxN
-    parameter output_size = 10, // Number of output channels
+    parameter kernel_dim = 5, // kernel dim N, where kernel size is NxN
+    parameter output_size = 5, // Number of output channels
     parameter xbar_size = 256,
     parameter datatype_size = 8,
     parameter output_datatype_size = 8,

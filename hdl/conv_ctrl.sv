@@ -56,7 +56,8 @@ always_comb begin
         s_conv_ctrl_reset: begin // Reset state
             next_input_count = 0;
             next_cim_addr = 0;
-            if (i_start & !rst) begin // Start signal comes in
+            o_cim_we = 0;
+            if (i_start) begin // Start signal comes in
                 o_busy = 1;
                 if (i_cim_busy) begin // If next module busy
                     next_ctrl_state = s_conv_ctrl_idle; // Idle until not busy
@@ -64,7 +65,6 @@ always_comb begin
                     next_ctrl_state = s_conv_ctrl_busy; // Start transfer
                 end
             end else begin // Stay in reset state
-                o_cim_we = 0;
                 o_busy = 0;
                 next_ctrl_state = s_conv_ctrl_reset;
             end

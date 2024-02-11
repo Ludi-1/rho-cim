@@ -16,8 +16,8 @@ ifeq ($(TOPLEVEL),ibuf)
     MODULE = tb.test_ibuf
     # SIM_ARGS += -gdatatype_size=8
     # SIM_ARGS += -gfifo_length=5
-else ifeq ($(TOPLEVEL),ctrl)
-    VERILOG_SOURCES = $(shell pwd)/hdl/ctrl.sv
+else ifeq ($(TOPLEVEL),fc_ctrl)
+    VERILOG_SOURCES = $(shell pwd)/hdl/fc_ctrl.sv
     MODULE = tb.test_ctrl
 else ifeq ($(TOPLEVEL),func)
     VERILOG_SOURCES = $(shell pwd)/hdl/func.sv
