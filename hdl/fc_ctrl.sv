@@ -24,7 +24,6 @@ module fc_ctrl #(
     output reg [datatype_size-1:0] o_data [v_cim_tiles-1:0]
 );
 
-localparam count_limit = input_size;
 int unsigned cim_addr, next_cim_addr;
 int unsigned input_count, next_input_count;
 state ctrl_state, next_ctrl_state;
@@ -41,13 +40,13 @@ endgenerate
 
 always_ff @(posedge clk) begin
     if (rst) begin
-        ctrl_state <= S0;
-        input_count <= 0;
-        cim_addr <= 0;
+        ctrl_state = S0;
+        input_count = 0;
+        cim_addr = 0;
     end else begin
-        ctrl_state <= next_ctrl_state;
-        input_count <= next_input_count;
-        cim_addr <= next_cim_addr;
+        ctrl_state = next_ctrl_state;
+        input_count = next_input_count;
+        cim_addr = next_cim_addr;
     end
 end
 
@@ -83,7 +82,7 @@ always_comb begin
         end
         S2: begin // Busy state
             o_busy = 1;
-            if (input_count >= count_limit - 1) begin
+            if (input_count >= input_size - 1) begin
                 o_cim_we = 0;
                 if (!i_func_busy) begin
                     next_ctrl_state = S3; // Start
