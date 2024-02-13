@@ -19,8 +19,8 @@ ifeq ($(TOPLEVEL),ibuf)
 else ifeq ($(TOPLEVEL),fc_ctrl)
     VERILOG_SOURCES = $(shell pwd)/hdl/fc_ctrl.sv
     MODULE = tb.test_ctrl
-else ifeq ($(TOPLEVEL),func)
-    VERILOG_SOURCES = $(shell pwd)/hdl/func.sv
+else ifeq ($(TOPLEVEL),fc_func)
+    VERILOG_SOURCES = $(shell pwd)/hdl/fc_func.sv
     MODULE = tb.test_func
 else
     $(error Given TOPLEVEL '$(TOPLEVEL)' not supported)

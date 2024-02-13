@@ -10,11 +10,11 @@ async def func_test(dut):
     dut.rst.value = 1
     dut.i_start.value = 0
     dut.i_cim_busy.value = 0
-    dut.i_func_busy.value = 0
-    n = 0
-    for input_idx in range(len(dut.i_data.value)):
-        dut.i_data[input_idx].value = n % 256
-        n += 1
+    dut.i_next_busy.value = 0
+    # print(dut.__dict__)
+    # for h_idx in range(dut.h_cim_tiles.value):
+    #     for v_idx in range(dut.v_cim_tiles.value):
+    #         dut.i_data[v_idx][h_idx].value = (h_idx + v_idx) % 256
     await RisingEdge(dut.clk)
     dut.rst.value = 0
     dut.i_start.value = 1

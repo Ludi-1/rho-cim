@@ -8,10 +8,10 @@ typedef enum {
 } t_func_state;
 
 module fc_func #(
-    parameter input_size = 201,
+    parameter input_size = 257,
     parameter output_size = 512,
     parameter xbar_size = 256,
-    parameter h_cim_tiles = (output_size + xbar_size - 1) / xbar_size, // ceiled division
+    parameter h_cim_tiles = (output_size*datatype_size + xbar_size - 1) / xbar_size, // ceiled division
     parameter v_cim_tiles = (input_size + xbar_size - 1) / xbar_size, // ceiled division
     parameter datatype_size = 8,
     parameter output_datatype_size = 8
@@ -22,9 +22,9 @@ module fc_func #(
     input i_cim_busy,
     input i_next_busy,
     output reg o_busy,
-    input [datatype_size-1:0] i_data [v_cim_tiles-1:0][h_cim_tiles-1:0],
+    input [datatype_size-1:0] i_data [v_cim_tiles-1:0][h_cim_tiles-1:0], // Data from CIM obuf to FPGA
     output reg [$clog2(xbar_size)-1:0] o_cim_addr,
-    output reg [output_datatype_size-1:0] o_data
+    output reg [output_datatype_size-1:0] o_data // Data from FPGA ctrl to CIM RD buffer
 );
 
 localparam count_limit = output_size;

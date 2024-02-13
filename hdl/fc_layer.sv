@@ -1,11 +1,11 @@
 module fc_layer #(
-    parameter input_size = 1500,
-    parameter output_size = 1000,
-    parameter xbar_size = 256,
+    parameter input_size = 500,
+    parameter output_size = 10,
+    parameter xbar_size = 512,
     parameter datatype_size = 8,
     parameter output_datatype_size = 8,
     parameter v_cim_tiles = (input_size + xbar_size - 1) / xbar_size, // ceiled division
-    parameter h_cim_tiles = (output_size + xbar_size - 1) / xbar_size // ceiled division
+    parameter h_cim_tiles = (output_size*datatype_size + xbar_size - 1) / xbar_size // ceiled division
 ) (
     input clk,
     input rst,

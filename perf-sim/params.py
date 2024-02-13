@@ -119,11 +119,11 @@ param_dict_mlp_l: dict = {
     "fpga_clk_freq": 100 * 10**6,
     "layer_list": [
         # (Layer type, input size, output_size, input channels)
-        ("fc", 784, 784, 1),
-        ("fc", 784, 1500, 1),
-        ("fc", 1500, 1000, 1),
-        ("fc", 1000, 500, 1),
-        ("fc", 500, 10, 1),
+        ("fc", 784, 784, 1), # FC(784)
+        ("fc", 784, 1500, 1), # FC(1500)
+        ("fc", 1500, 1000, 1), # FC(1000)
+        ("fc", 1000, 500, 1), # FC(500)
+        ("fc", 500, 10, 1), # FC(10)
     ],
     "datatype_size": [8, 1, 1, 1, 8],
     "bus_width": [8, 1, 1, 1, 8],
