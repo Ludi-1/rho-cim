@@ -5,10 +5,7 @@ module pool_layer #(
     parameter output_size = input_channels, // Number of output channels
     parameter xbar_size = 256,
     parameter datatype_size = 8,
-    parameter output_datatype_size = 8,
-    parameter input_size = input_channels * kernel_dim**2, // Total CIM rows
-    parameter v_cim_tiles = (input_size + xbar_size - 1) / xbar_size, // ceiled division
-    parameter h_cim_tiles = (output_size + xbar_size - 1) / xbar_size // ceiled division
+    parameter output_datatype_size = 8
 ) (
     input clk,
     input rst,
