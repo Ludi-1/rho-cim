@@ -4,11 +4,11 @@ module conv_layer #(
     parameter kernel_dim = 5, // kernel dim N, where kernel size is NxN
     parameter output_size = 5, // Number of output channels
     parameter xbar_size = 256,
-    parameter datatype_size = 8,
-    parameter output_datatype_size = 8,
+    parameter datatype_size = 4,
+    parameter output_datatype_size = 4,
     parameter input_size = input_channels * kernel_dim**2, // Total CIM rows
     parameter v_cim_tiles = (input_size + xbar_size - 1) / xbar_size, // ceiled division
-    parameter h_cim_tiles = (output_size + xbar_size - 1) / xbar_size // ceiled division
+    parameter h_cim_tiles = (output_size*datatype_size + xbar_size - 1) / xbar_size // ceiled division
 ) (
     input clk,
     input rst,
@@ -25,7 +25,7 @@ module conv_layer #(
     input i_next_busy,
     input [datatype_size-1:0] i_data [v_cim_tiles-1:0][h_cim_tiles-1:0], // CIM Output buffer data
     output reg [$clog2(xbar_size)-1:0] o_cim_rd_addr,
-    output reg [output_datatype_size-1:0] o_func_data
+    output reg [output_datatype_size-1:0] o_func_data // Only one port because func reads one unit at a time
 );
 
 logic [datatype_size-1:0] ibuf_rd_data [input_channels-1:0][kernel_dim**2-1:0];
@@ -70,7 +70,7 @@ conv_ctrl #(
     .o_data(o_cim_data)
 );
 
-fc_func #(
+conv_func #(
     .input_size(input_size),
     .output_size(output_size),
     .xbar_size(xbar_size),

@@ -11,10 +11,10 @@ module fc_func #(
     parameter input_size = 257,
     parameter output_size = 512,
     parameter xbar_size = 256,
-    parameter h_cim_tiles = (output_size*datatype_size + xbar_size - 1) / xbar_size, // ceiled division
-    parameter v_cim_tiles = (input_size + xbar_size - 1) / xbar_size, // ceiled division
     parameter datatype_size = 8,
-    parameter output_datatype_size = 8
+    parameter output_datatype_size = 8,
+    parameter h_cim_tiles = (output_size*datatype_size + xbar_size - 1) / xbar_size, // ceiled division
+    parameter v_cim_tiles = (input_size + xbar_size - 1) / xbar_size // ceiled division
 ) (
     input clk,
     input rst,
