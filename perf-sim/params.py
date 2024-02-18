@@ -1,7 +1,6 @@
 num_inferences: int = 1
 
-
-cim_param_dict: dict = {
+cim_param_dict_d2: dict = {
     "num_of_adc": 32,
     "adc_resolution": 8,
     "max_datatype_size": 8,
@@ -11,9 +10,39 @@ cim_param_dict: dict = {
     "HRS": 10**6,
     "adc_energy": 2 * 10**-12,
     "technology_node": "15 nm",
-    "total_energy": 14 * 10**-9,
-    "total_latency": 774 * 10**-9,
+    "total_energy": 3.3 * 10**-9,
+    "total_latency": 296 * 10**-9,
 }
+
+cim_param_dict_d4: dict = {
+    "num_of_adc": 32,
+    "adc_resolution": 8,
+    "max_datatype_size": 8,
+    "xbar_latency": 100 * 10**-9,
+    "adc_latency": 1 * 10**-9,
+    "LRS": 5000,
+    "HRS": 10**6,
+    "adc_energy": 2 * 10**-12,
+    "technology_node": "15 nm",
+    "total_energy": 8.4 * 10**-9,
+    "total_latency": 333 * 10**-9,
+}
+
+cim_param_dict_d8: dict = {
+    "num_of_adc": 32,
+    "adc_resolution": 8,
+    "max_datatype_size": 8,
+    "xbar_latency": 100 * 10**-9,
+    "adc_latency": 1 * 10**-9,
+    "LRS": 5000,
+    "HRS": 10**6,
+    "adc_energy": 2 * 10**-12,
+    "technology_node": "15 nm",
+    "total_energy": 14.8 * 10**-9,
+    "total_latency": 455 * 10**-9,
+}
+
+cim_param_dict: dict = cim_param_dict_d8
 
 param_dict_cnn_1: dict = {
     "start_times": [0 for i in range(28 ** 2 * num_inferences)],
@@ -159,4 +188,9 @@ param_dict_mlp_l: dict = {
 #     "cim_param_dict": cim_param_dict,
 # }
 
-param_dict = param_dict_cnn_1
+param_dict = param_dict_mlp_l
+param_dict["datatype_size"] = [8]*5
+param_dict["bus_width"] = [8]*5
+param_dict["cim_param_dict"] = cim_param_dict_d8
+param_dict["crossbar_size"] = 256
+param_dict["fpga_power"] = 0.024

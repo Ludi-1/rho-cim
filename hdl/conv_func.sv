@@ -21,13 +21,14 @@ module conv_func #(
     output reg o_cim_we,
     input i_next_busy,
     output reg o_busy,
-    input [datatype_size-1:0] i_data [h_cim_tiles-1:0][v_cim_tiles-1:0],
+    input [datatype_size-1:0] i_data [v_cim_tiles-1:0][h_cim_tiles-1:0],
     output reg [$clog2(xbar_size)-1:0] o_cim_addr,
     output reg [output_datatype_size-1:0] o_data
 );
 
 localparam count_limit = output_size;
 integer unsigned cim_addr, next_cim_addr;
+integer unsigned h_tile_count, next_h_tile_count;
 integer unsigned input_count, next_input_count;
 t_conv_func_state func_state, next_func_state;
 
@@ -36,17 +37,19 @@ assign o_cim_addr = cim_addr[$clog2(xbar_size)-1:0];
 always_comb begin
     o_data = 0;
     for (int i = 0; i < v_cim_tiles; i++) begin
-        o_data[output_size] += i_data[i][input_count];
+        o_data[output_size] += i_data[i][h_tile_count];
     end
 end
 
 always_ff @(posedge clk) begin
     if (rst) begin
         func_state <= s_conv_func_reset;
+        h_tile_count <= 0;
         input_count <= 0;
         cim_addr <= 0;
     end else begin
         func_state <= next_func_state;
+        h_tile_count <= next_h_tile_count;
         input_count <= next_input_count;
         cim_addr <= next_cim_addr;
     end
@@ -57,6 +60,7 @@ always_comb begin
         s_conv_func_reset: begin // Reset state
             next_input_count = 0;
             next_cim_addr = 0;
+            next_h_tile_count = 0;
             if (i_start & !rst) begin // Start signal comes in
                 o_busy = 1;
                 if (i_cim_busy) begin // If next module busy
@@ -74,6 +78,7 @@ always_comb begin
             o_busy = 1;
             next_input_count = 0;
             next_cim_addr = 0;
+            next_h_tile_count = 0;
             if (!i_cim_busy) begin
                 o_cim_we = 1;
                 next_func_state = s_conv_func_busy;
@@ -90,10 +95,12 @@ always_comb begin
                     next_func_state = s_conv_func_start_next; // Start
                     next_input_count = 0;
                     next_cim_addr = 0;
+                    next_h_tile_count = 0;
                 end else begin
                     next_func_state = s_conv_func_busy;
                     next_input_count = input_count;
                     next_cim_addr = cim_addr;
+                    next_h_tile_count = h_tile_count;
                 end
             end else begin
                 o_cim_we = 1;
@@ -101,6 +108,7 @@ always_comb begin
                 next_input_count = input_count + 1;
                 if (cim_addr >= xbar_size - 1) begin
                     next_cim_addr = 0;
+                    next_h_tile_count = h_tile_count + 1;
                 end else begin
                     next_cim_addr = cim_addr + 1;
                 end
@@ -111,6 +119,7 @@ always_comb begin
             o_cim_we = 0;
             next_cim_addr = 0;
             next_input_count = 0;
+            next_h_tile_count = 0;
             if (i_cim_busy) begin
                 next_func_state = s_conv_func_reset;
             end else begin
