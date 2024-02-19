@@ -92,7 +92,7 @@ param_dict_cnn_1: dict = {
         # (Layer type, image size, kernel size, input channels, output_channels, stride)
         ("conv", 28, 5, 1, 5, 1),
         # image size = (prev_image_size - kernel_size + 2*padding) / stride + 1
-        ("pool", 24, 2, 5, 5, 2),
+        ("pool", 24, 2, 5, 5, 1),
         # (Layer type, input neurons, output neurons, input channels)
         ("fc", 12**2, 720, 5), # 12**2 * 5 = 720
         ("fc", 720, 70, 1),
@@ -229,11 +229,11 @@ param_dict_mlp_l: dict = {
 #     "cim_param_dict": cim_param_dict,
 # }
 
-param_dict = param_dict_mlp_l
+param_dict = param_dict_cnn_1
 
 technology = "reram"
-datatype_size = 8
-param_dict["crossbar_size"] = 256
+datatype_size = 8 # 1,2,4,8
+param_dict["crossbar_size"] = 256 # 128,256,512
 sparsity = 50
 param_dict["fpga_power"] = 0.024
 
