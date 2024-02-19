@@ -1,5 +1,46 @@
 num_inferences: int = 1
 
+cim_param = {
+    "reram": {
+        "energy": {
+            25: {1: 3.4+0.8, 2: 7.2+0.8, 4: 13.4+0.8, 8: 27+0.8},
+            50: {1: 1.7+0.8, 2: 3.5+0.8, 4: 7.6+0.8, 8: 14+0.8},
+            75: {1: 0.8+0.8, 2: 1.7+0.8, 4: 3.3+0.8, 8: 6.8+0.8}},
+        "latency": {
+            25: {1: 281, 2: 296, 4: 332, 8: 454},
+            50: {1: 282, 2: 296, 4: 333, 8: 455},
+            75: {1: 283, 2: 296, 4: 334, 8: 456}}},
+    "pcm": {
+        "energy": {
+            25: {1: 1.2+0.8, 2: 2.5+0.8, 4: 4.9+0.8, 8: 10.2+0.8},
+            50: {1: 0.8+0.8, 2: 1.7+0.8, 4: 3.4+0.8, 8: 6.7+0.8},
+            75: {1: 0.6+0.8, 2: 1.1+0.8, 4: 2.3+0.8, 8: 4.8+0.8}},
+        "latency": {
+            25: {1: 281, 2: 296, 4: 332, 8: 454},
+            50: {1: 282, 2: 296, 4: 333, 8: 455},
+            75: {1: 283, 2: 296, 4: 334, 8: 456}}}
+}
+
+reram_energy = {
+    25: {1: 3.4+0.8, 2: 7.2+0.8, 4: 13.4+0.8, 8: 27+0.8},
+    50: {1: 1.7+0.8, 2: 3.5+0.8, 4: 7.6+0.8, 8: 14+0.8},
+    75: {1: 0.8+0.8, 2: 1.7+0.8, 4: 3.3+0.8, 8: 6.8+0.8}}
+
+reram_latency = {
+    25: {1: 281, 2: 296, 4: 332, 8: 454},
+    50: {1: 282, 2: 296, 4: 333, 8: 455},
+    75: {1: 283, 2: 296, 4: 334, 8: 456}}
+
+pcm_energy = {
+    25: {1: 1.2+0.8, 2: 2.5+0.8, 4: 4.9+0.8, 8: 10.2+0.8},
+    50: {1: 0.8+0.8, 2: 1.7+0.8, 4: 3.4+0.8, 8: 6.7+0.8},
+    75: {1: 0.6+0.8, 2: 1.1+0.8, 4: 2.3+0.8, 8: 4.8+0.8}}
+
+pcm_latency = {
+    25: {1: 281, 2: 296, 4: 332, 8: 454},
+    50: {1: 282, 2: 296, 4: 333, 8: 455},
+    75: {1: 283, 2: 296, 4: 334, 8: 456}}
+
 cim_param_dict_d2: dict = {
     "num_of_adc": 32,
     "adc_resolution": 8,
@@ -189,8 +230,15 @@ param_dict_mlp_l: dict = {
 # }
 
 param_dict = param_dict_mlp_l
-param_dict["datatype_size"] = [8]*5
-param_dict["bus_width"] = [8]*5
-param_dict["cim_param_dict"] = cim_param_dict_d8
+
+technology = "reram"
+datatype_size = 8
 param_dict["crossbar_size"] = 256
+sparsity = 50
 param_dict["fpga_power"] = 0.024
+
+param_dict["datatype_size"] = [datatype_size]*5
+param_dict["bus_width"] = [datatype_size]*5
+param_dict["cim_param_dict"] = {
+    "total_energy": cim_param[technology]["energy"][sparsity][datatype_size],
+    "total_latency": cim_param[technology]["latency"][sparsity][datatype_size]}
