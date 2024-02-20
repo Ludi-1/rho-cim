@@ -11,7 +11,7 @@ from math import ceil
 
 
 class CNN_Layer(Module):
-    def __init__(self, f, name: str, next_module: Module, param_dict: dict):
+    def __init__(self, f, name: str, next_module: Module, param_dict: dict, f_r):
         super().__init__(f, name, next_module)
 
         param_dict["cim_param_dict"]["v_tiles"] = ceil(
@@ -30,6 +30,7 @@ class CNN_Layer(Module):
             name=f"({self.name}, func)",
             next_module=self.next_module,
             param_dict=param_dict,
+            f_r = f_r,
         )
     
         self.cim = CIM(
@@ -37,6 +38,7 @@ class CNN_Layer(Module):
             name=f"({self.name}, cim)",
             next_module=self.func,
             param_dict=param_dict["cim_param_dict"],
+            f_r = f_r,
         )
 
         self.ctrl = CNN_Control(

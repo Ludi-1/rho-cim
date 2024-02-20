@@ -8,8 +8,8 @@ from modules.module import Module
 
 
 class CIM(Module):
-    def __init__(self, f, name: str, next_module: Module, param_dict: dict):
-        super().__init__(f, name, next_module)
+    def __init__(self, f, name: str, next_module: Module, param_dict: dict, f_r):
+        super().__init__(f, name, next_module, f_r)
         self.total_latency = param_dict[
             "total_latency"
         ]  # CIM Tile delay should be filled in manually
@@ -23,9 +23,11 @@ class CIM(Module):
         super().start(time)
 
     def __del__(self):
-        print(
-            f"{self.name}, Num of activations: {self.start_count}, #tiles: {self.num_tiles}"
-        )
-        print(
-            f"{self.name}, total energy consumption: {self.total_energy*self.start_count*self.num_tiles}J"
-        )
+        energy = self.total_energy*self.start_count*self.num_tiles
+        self.fr.write(f"{self.name}, #N Tiles: {self.num_tiles}, Energy: {energy}J\n")
+        # print(
+        #     f"{self.name}, Num of activations: {self.start_count}, #tiles: {self.num_tiles}"
+        # )
+        # print(
+        #     f"{self.name}, total energy consumption: {self.total_energy*self.start_count*self.num_tiles}J"
+        # )

@@ -7,8 +7,12 @@ from abc import ABC, abstractmethod
 
 
 class Module(ABC):
-    def __init__(self, f, name: str, next_module=None):
+    def __init__(self, f, name: str, next_module=None, f_r=None):
         """Add all user configurable parameters"""
+        if f_r is not None:
+            self.fr = f_r
+        else:
+            self.fr = None
         self.fd = f
         self.current_time = 0
         self.next_module: Module = next_module

@@ -41,7 +41,7 @@ class Pool_Layer(Module):
 
     def start(self, time):
         # print(f"{self.name}: Started at {time}")
-        self.fd.write(f"({self.name}): Started at {time}\n")
+        self.fd.write(f"({self.name}): Started at {time}: {self.entry_count} | {self.col_count}, {self.row_count}\n")
         if time < self.current_time:
             raise Exception(
                 f"Module {self.name} at time {self.current_time} started in the past: {time}"
@@ -61,7 +61,7 @@ class Pool_Layer(Module):
                     # print(f"init skip: {self.name} {self.entry_count}, {self.col_count}")
                     self.skip = True
                 # print(f"act: {self.name} {self.entry_count}, {self.col_count}")
-                if (self.col_count % self.stride) == 0 and (self.row_count % self.stride) == 0:
+                if ((self.col_count + 1) % self.stride) == 0 and ((self.row_count + 1) % self.stride) == 0:
                     # self.current_time = time + self.total_latency
                     super().start(time)
 

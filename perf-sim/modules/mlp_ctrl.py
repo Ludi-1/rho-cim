@@ -18,7 +18,7 @@ class MLP_Control(Control):
         self.fifo_size: int = param_dict["input_neurons"]
         self.resets = 0
     def start(self, time):
-        self.fd.write(f"{self.name}: Started at {time}, {self.entry_count} - {self.fifo_size}\n")
+        self.fd.write(f"{self.name}: Started at {time}, {self.entry_count} | {self.fifo_size}\n")
         self.entry_count += 1
         # print(f"{self.name}: {self.entry_count}, {self.fifo_size}")
         if self.entry_count == self.fifo_size:

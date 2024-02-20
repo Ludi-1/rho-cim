@@ -41,33 +41,49 @@ pcm_latency = {
     50: {1: 282, 2: 296, 4: 333, 8: 455},
     75: {1: 283, 2: 296, 4: 334, 8: 456}}
 
-fpga_param = {
-    "cnn-1": {
-        2: {256: 0.036},
-        4: {256: 0.065},
-        8: {128: 0.119, 256: 0.117, 512: 0.116},
-    },
-    "cnn-2": {
-        2: {256: 0.036},
-        4: {256: 0.065},
-        8: {128: 0.119, 256: 0.117, 512: 0.116},      
-    },
-    "mlp-l": {
-        2: {256: 0.036},
-        4: {256: 0.065},
-        8: {128: 0.119, 256: 0.117, 512: 0.116},
-    },
-    "mlp-m": {
-        2: {256: 0.036},
-        4: {256: 0.065},
-        8: {128: 0.119, 256: 0.117, 512: 0.116},
-    },
-    "mlp-s": {
-        2: {256: 0.036},
-        4: {256: 0.065},
-        8: {128: 0.119, 256: 0.117, 512: 0.116},
-    },
+cim_param_dict_d2: dict = {
+    "num_of_adc": 32,
+    "adc_resolution": 8,
+    "max_datatype_size": 8,
+    "xbar_latency": 100 * 10**-9,
+    "adc_latency": 1 * 10**-9,
+    "LRS": 5000,
+    "HRS": 10**6,
+    "adc_energy": 2 * 10**-12,
+    "technology_node": "15 nm",
+    "total_energy": 3.3 * 10**-9,
+    "total_latency": 296 * 10**-9,
 }
+
+cim_param_dict_d4: dict = {
+    "num_of_adc": 32,
+    "adc_resolution": 8,
+    "max_datatype_size": 8,
+    "xbar_latency": 100 * 10**-9,
+    "adc_latency": 1 * 10**-9,
+    "LRS": 5000,
+    "HRS": 10**6,
+    "adc_energy": 2 * 10**-12,
+    "technology_node": "15 nm",
+    "total_energy": 8.4 * 10**-9,
+    "total_latency": 333 * 10**-9,
+}
+
+cim_param_dict_d8: dict = {
+    "num_of_adc": 32,
+    "adc_resolution": 8,
+    "max_datatype_size": 8,
+    "xbar_latency": 100 * 10**-9,
+    "adc_latency": 1 * 10**-9,
+    "LRS": 5000,
+    "HRS": 10**6,
+    "adc_energy": 2 * 10**-12,
+    "technology_node": "15 nm",
+    "total_energy": 14.8 * 10**-9,
+    "total_latency": 455 * 10**-9,
+}
+
+cim_param_dict: dict = cim_param_dict_d8
 
 param_dict_cnn_1: dict = {
     "start_times": [0 for i in range(28 ** 2 * num_inferences)],
@@ -91,6 +107,8 @@ param_dict_cnn_1: dict = {
     "func_ports": 2**32, # Number of input operands for functional unit
     "operation_latency": 0,
     "ibuf_write_latency": 0,
+    "fpga_power": 0.114,
+    "cim_param_dict": cim_param_dict,
 }
 
 param_dict_cnn_2: dict = {
@@ -116,6 +134,8 @@ param_dict_cnn_2: dict = {
     "func_ports": 2**32,  # Number of input operands for functional unit
     "operation_latency": 0,
     "ibuf_write_latency": 0,
+    "fpga_power": 0.114,
+    "cim_param_dict": cim_param_dict,
 }
 
 param_dict_mlp_s: dict = {
@@ -137,6 +157,8 @@ param_dict_mlp_s: dict = {
     "func_ports": 2**32,  # Number of input operands for functional unit
     "operation_latency": 0,
     "ibuf_write_latency": 0,
+    "fpga_power": 0.114,
+    "cim_param_dict": cim_param_dict,
 }
 
 param_dict_mlp_m: dict = {
@@ -158,6 +180,8 @@ param_dict_mlp_m: dict = {
     "func_ports": 2**32,  # Number of input operands for functional unit
     "operation_latency": 0,
     "ibuf_write_latency": 0,
+    "fpga_power": 0.114,
+    "cim_param_dict": cim_param_dict,
 }
 
 param_dict_mlp_l: dict = {
@@ -180,9 +204,45 @@ param_dict_mlp_l: dict = {
     "func_ports": 2**32,  # Number of input operands for functional unit
     "operation_latency": 0,
     "ibuf_write_latency": 0,
+    "fpga_power": 0.114,
+    "cim_param_dict": cim_param_dict,
 }
 
+# param_dict_resnet50: dict = {
+#     "start_times": [0 for i in range(28**2 * num_inferences)],
+#     "fpga_clk_freq": 100 * 10**6,
+#     "layer_list": [
+#         # (Layer type, image size, kernel size, input channels, output_channels, stride)
+#         ("conv", 28, 7, 1, 10, 1),
+#         ("fc", 500, 10, 1),
+#     ],
+#     "datatype_size": [8, 1, 1, 1, 8],
+#     "bus_width": [8, 1, 1, 1, 8],
+#     "bus_latency": 0,
+#     "crossbar_size": 256,
+#     "ibuf_ports": 1,
+#     "ibuf_read_latency": 1,
+#     "func_ports": 2**32,  # Number of input operands for functional unit
+#     "operation_latency": 0,
+#     "ibuf_write_latency": 0,
+#     "fpga_power": 0.114,
+#     "cim_param_dict": cim_param_dict,
+# }
+
 datatype_size_list = [2, 4, 8]
-crossbar_size_list = [128, 256, 512]
-sparsity_list = [25, 50, 75]
+crossbar_size_list = [2, 4, 8]
 param_dicts = [("cnn-1", param_dict_cnn_1), ("cnn-2", param_dict_cnn_2), ("mlp-s", param_dict_mlp_s), ("mlp-m", param_dict_mlp_m), ("mlp-l", param_dict_mlp_l)]
+
+param_dict = param_dict_cnn_1
+
+technology = "reram"
+datatype_size = 8 # 1,2,4,8
+param_dict["crossbar_size"] = 256 # 128,256,512
+sparsity = 50
+param_dict["fpga_power"] = 0.024
+
+param_dict["datatype_size"] = [datatype_size]*5
+param_dict["bus_width"] = [datatype_size]*5
+param_dict["cim_param_dict"] = {
+    "total_energy": cim_param[technology]["energy"][sparsity][datatype_size] * 10**(-9),
+    "total_latency": cim_param[technology]["latency"][sparsity][datatype_size] * 10**(-9)}
