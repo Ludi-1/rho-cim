@@ -211,17 +211,17 @@ param_dict_alexnet: dict = {
     "start_times": [0 for i in range(227**2 * num_inferences)],
     "fpga_clk_freq": 100 * 10**6,
     "layer_list": [
-        # (Layer type, image size, kernel size, input channels, output_channels, stride)
+        # (Layer type, image size, kernel size, input channels, output_channels, stride, padding)
         ("conv", 227, 11, 3, 96, 4, 0), # L0
         # image size = (prev_image_size - kernel_size + 2*padding) / stride + 1
-        # (Layer type, image size, kernel size, input channels, output_channels, stride)
-        ("pool", 55, 3, 96, 96, 2, 0), # L1
+        # (Layer type, image size, kernel size, input channels, output_channels, stride, padding)
+        ("pool", 55, 3, 96, 96, 2), # L1
         ("conv", 27, 5, 96, 256, 1, 0), # L2
-        ("pool", 23, 3, 256, 256, 2, 0), # L3
+        ("pool", 23, 3, 256, 256, 2), # L3
         ("conv", 11, 3, 256, 384, 1, 0), # L4
         ("conv", 9, 3, 384, 384, 1, 0), # L5
         ("conv", 7, 3, 384, 256, 1, 0), # L6
-        ("pool", 5, 3, 256, 256, 2, 0), # L7
+        ("pool", 5, 3, 256, 256, 2), # L7
         # (Layer type, input neurons, output neurons, input channels)
         ("fc", 2**2, 4096, 256),  # (7-3)/2+1 = 3
         ("fc", 4096, 4096, 1),

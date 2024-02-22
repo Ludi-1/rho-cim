@@ -39,12 +39,12 @@ class CNN_Control(Control):
             )
 
         # print(f"{self.name} {self.entry_count}, {self.col_count}")
-        if self.entry_count < self.fifo_size - 1:
+        if self.entry_count < self.fifo_size - 1 and self.padding == 0:
             # print(f"init: {self.name} {self.entry_count}, {self.col_count}")
             self.current_time = time + 1 / self.clk_freq
             pass
         else:  # FIFO is full
-            if self.skip:
+            if self.skip and self.padding == 0:
                 if self.col_count == self.kernel_size - 2:
                     self.skip = False
                 # print(f"skip: {self.name} {self.entry_count}, {self.col_count}")
@@ -53,7 +53,7 @@ class CNN_Control(Control):
                 if self.col_count == self.image_size - 1:
                     self.skip = True
                 # print(f"act: {self.name} {self.entry_count}, {self.col_count}")
-                if ((self.col_count - self.kernel_size + self.padding + 1) % self.stride) == 0 and ((self.row_count - self.kernel_size + 1) % self.stride) == 0:
+                if ((self.col_count - self.kernel_size + 1) % self.stride) == 0 and ((self.row_count - self.kernel_size + 1) % self.stride) == 0 and self.padding == 0:
                     self.stride_count = 0
                     # self.current_time = time + self.total_latency
                     # self.fd.write(f"{self.name}, Time before start: {self.current_time}\n")
