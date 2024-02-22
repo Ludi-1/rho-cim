@@ -61,8 +61,9 @@ class Pool_Layer(Module):
                     # print(f"init skip: {self.name} {self.entry_count}, {self.col_count}")
                     self.skip = True
                 # print(f"act: {self.name} {self.entry_count}, {self.col_count}")
-                if ((self.col_count + 1) % self.stride) == 0 and ((self.row_count + 1) % self.stride) == 0:
+                if ((self.col_count - self.kernel_size + 1) % self.stride) == 0 and ((self.row_count - self.kernel_size + 1) % self.stride) == 0:
                     # self.current_time = time + self.total_latency
+                    self.fd.write(f"({self.name}): Write\n")
                     super().start(time)
 
         if self.entry_count == self.image_size ** 2 - 1:

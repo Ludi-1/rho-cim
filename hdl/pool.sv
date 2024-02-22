@@ -1,9 +1,8 @@
 module pool_layer #(
-    parameter input_channels = 10, // Number of input channels
-    parameter img_width = 22, // Input image width
+    parameter input_channels = 16, // Number of input channels
+    parameter img_width = 8, // Input image width
     parameter kernel_dim = 2, // kernel dim N, where kernel size is NxN
     parameter output_size = input_channels, // Number of output channels
-    parameter xbar_size = 256,
     parameter datatype_size = 2,
     parameter output_datatype_size = 2
 ) (

@@ -1,11 +1,11 @@
 module conv_layer #(
     parameter input_channels = 6, // Number of input channels
-    parameter img_width = 28, // Input image width
+    parameter img_width = 12, // Input image width
     parameter kernel_dim = 5, // kernel dim N, where kernel size is NxN
-    parameter output_size = 6, // Number of output channels
-    parameter xbar_size = 128,
-    parameter datatype_size = 8,
-    parameter output_datatype_size = 8,
+    parameter output_size = 16, // Number of output channels
+    parameter xbar_size = 256,
+    parameter datatype_size = 2,
+    parameter output_datatype_size = 2,
     parameter input_size = input_channels * kernel_dim**2, // Total CIM rows
     parameter v_cim_tiles = (input_size + xbar_size - 1) / xbar_size, // ceiled division
     parameter h_cim_tiles = (output_size*datatype_size + xbar_size - 1) / xbar_size // ceiled division

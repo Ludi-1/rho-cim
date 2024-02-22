@@ -67,6 +67,16 @@ fpga_param = {
         4: {256: 0.065},
         8: {128: 0.119, 256: 0.117, 512: 0.116},
     },
+    "lenet5": {
+        2: {256: 0.036},
+        4: {256: 0.065},
+        8: {128: 0.119, 256: 0.117, 512: 0.116},
+    },
+    "alexnet": {
+        2: {256: 0.036},
+        4: {256: 0.065},
+        8: {128: 0.119, 256: 0.117, 512: 0.116},
+    },
 }
 
 param_dict_cnn_1: dict = {
@@ -74,16 +84,14 @@ param_dict_cnn_1: dict = {
     "fpga_clk_freq": 100 * 10 ** 6,
     "layer_list": [
         # (Layer type, image size, kernel size, input channels, output_channels, stride)
-        ("conv", 28, 5, 1, 5, 1),
+        ("conv", 28, 5, 1, 5, 1, 0),
         # image size = (prev_image_size - kernel_size + 2*padding) / stride + 1
-        ("pool", 24, 2, 5, 5, 2),
+        ("pool", 24, 2, 5, 5, 2, 0),
         # (Layer type, input neurons, output neurons, input channels)
         ("fc", 12**2, 720, 5), # 12**2 * 5 = 720
         ("fc", 720, 70, 1),
         ("fc", 70, 10, 1),
     ],
-    "datatype_size": [8, 1, 1, 1, 8],
-    "bus_width": [8, 1, 1, 1, 8],
     "bus_latency": 0,
     "crossbar_size": 256,
     "ibuf_ports": 1,
@@ -98,17 +106,15 @@ param_dict_cnn_2: dict = {
     "fpga_clk_freq": 100 * 10**6,
     "layer_list": [
         # (Layer type, image size, kernel size, input channels, output_channels, stride)
-        ("conv", 28, 7, 1, 10, 1),
+        ("conv", 28, 7, 1, 10, 1, 0),
         # image size = (prev_image_size - kernel_size + 2*padding) / stride + 1
         # (Layer type, image size, kernel size, input channels, output_channels, stride)
-        ("pool", 22, 2, 10, 10, 2), # padding = 0
+        ("pool", 22, 2, 10, 10, 2, 0), # padding = 0
         # (Layer type, input neurons, output neurons, input channels)
         ("fc", 11**2, 1210, 10),  # 11**2 * 121 = 121
         ("fc", 1210, 1210, 1),
         ("fc", 1210, 10, 1),
     ],
-    "datatype_size": [8, 1, 1, 1, 8],
-    "bus_width": [8, 1, 1, 1, 8],
     "bus_latency": 0,
     "crossbar_size": 256,
     "ibuf_ports": 1,
@@ -128,8 +134,6 @@ param_dict_mlp_s: dict = {
         ("fc", 500, 250, 1),
         ("fc", 250, 10, 1),
     ],
-    "datatype_size": [8, 1, 1, 1, 8],
-    "bus_width": [8, 1, 1, 1, 8],
     "bus_latency": 0,
     "crossbar_size": 256,
     "ibuf_ports": 1,
@@ -149,8 +153,6 @@ param_dict_mlp_m: dict = {
         ("fc", 1000, 250, 1),
         ("fc", 250, 10, 1),
     ],
-    "datatype_size": [8, 1, 1, 1, 8],
-    "bus_width": [8, 1, 1, 1, 8],
     "bus_latency": 0,
     "crossbar_size": 256,
     "ibuf_ports": 1,
@@ -171,8 +173,60 @@ param_dict_mlp_l: dict = {
         ("fc", 1000, 500, 1), # FC(500)
         ("fc", 500, 10, 1), # FC(10)
     ],
-    "datatype_size": [8, 1, 1, 1, 8],
-    "bus_width": [8, 1, 1, 1, 8],
+    "bus_latency": 0,
+    "crossbar_size": 256,
+    "ibuf_ports": 1,
+    "ibuf_read_latency": 1,
+    "func_ports": 2**32,  # Number of input operands for functional unit
+    "operation_latency": 0,
+    "ibuf_write_latency": 0,
+}
+
+param_dict_lenet5: dict = {
+    "start_times": [0 for i in range(28**2 * num_inferences)],
+    "fpga_clk_freq": 100 * 10**6,
+    "layer_list": [
+        # (Layer type, image size, kernel size, input channels, output_channels, stride)
+        ("conv", 28, 5, 1, 6, 1, 0),
+        # image size = (prev_image_size - kernel_size + 2*padding) / stride + 1
+        # (Layer type, image size, kernel size, input channels, output_channels, stride)
+        ("pool", 24, 2, 6, 6, 2, 0), # padding = 0
+        ("conv", 12, 5, 6, 16, 1, 0),
+        ("pool", 8, 2, 16, 16, 2, 0), # padding = 0
+        # (Layer type, input neurons, output neurons, input channels)
+        ("fc", 4**2, 120, 16),  # (8-2)/2 = 4
+        ("fc", 120, 84, 1),
+        ("fc", 84, 10, 1),
+    ],
+    "bus_latency": 0,
+    "crossbar_size": 256,
+    "ibuf_ports": 1,
+    "ibuf_read_latency": 1,
+    "func_ports": 2**32,  # Number of input operands for functional unit
+    "operation_latency": 0,
+    "ibuf_write_latency": 0,
+}
+
+param_dict_alexnet: dict = {
+    "start_times": [0 for i in range(227**2 * num_inferences)],
+    "fpga_clk_freq": 100 * 10**6,
+    "layer_list": [
+        # (Layer type, image size, kernel size, input channels, output_channels, stride)
+        ("conv", 227, 11, 3, 96, 4, 0), # L0
+        # image size = (prev_image_size - kernel_size + 2*padding) / stride + 1
+        # (Layer type, image size, kernel size, input channels, output_channels, stride)
+        ("pool", 55, 3, 96, 96, 2, 0), # L1
+        ("conv", 27, 5, 96, 256, 1, 0), # L2
+        ("pool", 23, 3, 256, 256, 2, 0), # L3
+        ("conv", 11, 3, 256, 384, 1, 0), # L4
+        ("conv", 9, 3, 384, 384, 1, 0), # L5
+        ("conv", 7, 3, 384, 256, 1, 0), # L6
+        ("pool", 5, 3, 256, 256, 2, 0), # L7
+        # (Layer type, input neurons, output neurons, input channels)
+        ("fc", 2**2, 4096, 256),  # (7-3)/2+1 = 3
+        ("fc", 4096, 4096, 1),
+        ("fc", 4096, 1000, 1),
+    ],
     "bus_latency": 0,
     "crossbar_size": 256,
     "ibuf_ports": 1,
@@ -185,4 +239,4 @@ param_dict_mlp_l: dict = {
 datatype_size_list = [2, 4, 8]
 crossbar_size_list = [128, 256, 512]
 sparsity_list = [25, 50, 75]
-param_dicts = [("cnn-1", param_dict_cnn_1), ("cnn-2", param_dict_cnn_2), ("mlp-s", param_dict_mlp_s), ("mlp-m", param_dict_mlp_m), ("mlp-l", param_dict_mlp_l)]
+param_dicts = [("cnn-1", param_dict_cnn_1), ("cnn-2", param_dict_cnn_2), ("mlp-s", param_dict_mlp_s), ("mlp-m", param_dict_mlp_m), ("mlp-l", param_dict_mlp_l), ("lenet5", param_dict_lenet5), ("alexnet", param_dict_alexnet)]

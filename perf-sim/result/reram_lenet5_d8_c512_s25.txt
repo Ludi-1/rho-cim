@@ -1,0 +1,6 @@
+(Layer 0: Conv, cim), #N Tiles: 1, Energy: 1.6012800000000004e-05J
+(Layer 2: Conv, cim), #N Tiles: 1, Energy: 1.7792000000000003e-06J
+(Layer 4: FC, cim), #N Tiles: 2, Energy: 5.560000000000001e-08J
+(Layer 5: FC, cim), #N Tiles: 2, Energy: 5.560000000000001e-08J
+(Layer 6: FC, cim), #N Tiles: 1, Energy: 2.7800000000000004e-08J
+Total latency = 0.000654270000000004s, FPGA energy = 7.589532000000046e-05J

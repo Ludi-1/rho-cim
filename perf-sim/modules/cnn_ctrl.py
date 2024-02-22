@@ -17,6 +17,7 @@ class CNN_Control(Control):
         ]  # CNN kernel size applied over image
         self.stride: int = param_dict["stride"]
         self.input_channels = param_dict["input_channels"]
+        self.padding = param_dict["padding"]
         param_dict["input_size"] = self.kernel_size ** 2 * self.input_channels
 
         super().__init__(f, name, next_module, param_dict)
@@ -31,7 +32,7 @@ class CNN_Control(Control):
 
     def start(self, time):
         # print(f"{self.name}: Started at {time}")
-        self.fd.write(f"{self.name}: Started at {time}\n")
+        self.fd.write(f"{self.name}: Started at {time}: {self.entry_count} | {self.col_count}, {self.row_count}\n")
         if time < self.current_time:
             raise Exception(
                 f"Module {self.name} at time {self.current_time} started in the past: {time}"
@@ -52,7 +53,7 @@ class CNN_Control(Control):
                 if self.col_count == self.image_size - 1:
                     self.skip = True
                 # print(f"act: {self.name} {self.entry_count}, {self.col_count}")
-                if ((self.col_count + 1) % self.stride) == 0 and ((self.row_count + 1) % self.stride) == 0:
+                if ((self.col_count - self.kernel_size + self.padding + 1) % self.stride) == 0 and ((self.row_count - self.kernel_size + 1) % self.stride) == 0:
                     self.stride_count = 0
                     # self.current_time = time + self.total_latency
                     # self.fd.write(f"{self.name}, Time before start: {self.current_time}\n")

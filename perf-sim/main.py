@@ -17,7 +17,7 @@ def main():
         for datatype_size in datatype_size_list:
             for crossbar_size in crossbar_size_list:
                 if crossbar_size != 256 and datatype_size != 8:
-                    break
+                    continue
                 for sparsity in sparsity_list:
                     print(param_dict_tuple[0], datatype_size, crossbar_size, sparsity)
                     technology = "reram"

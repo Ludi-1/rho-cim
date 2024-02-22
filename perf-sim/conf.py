@@ -32,6 +32,7 @@ class Conf:
                     layer_dict["input_channels"] = layer[3]
                     layer_dict["output_channels"] = layer[4]
                     layer_dict["stride"] = layer[5]
+                    layer_dict["padding"] = layer[6]
                     layer_dict["datatype_size"] = datatype_size
                     layer_dict["bus_width"] = bus_width
                     self.layer_list.append(
@@ -51,6 +52,7 @@ class Conf:
                     layer_dict["input_channels"] = layer[3]
                     layer_dict["output_channels"] = layer[4]
                     layer_dict["stride"] = layer[5]
+                    layer_dict["padding"] = layer[6]
                     layer_dict["datatype_size"] = datatype_size
                     layer_dict["bus_width"] = bus_width
                     self.layer_list.append(
