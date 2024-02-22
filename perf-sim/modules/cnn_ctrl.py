@@ -54,11 +54,12 @@ class CNN_Control(Control):
                     self.skip = True
                 # print(f"act: {self.name} {self.entry_count}, {self.col_count}")
                 if ((self.col_count - self.kernel_size + 1) % self.stride) == 0 and ((self.row_count - self.kernel_size + 1) % self.stride) == 0 and self.padding == 0:
-                    self.stride_count = 0
                     # self.current_time = time + self.total_latency
                     # self.fd.write(f"{self.name}, Time before start: {self.current_time}\n")
                     super().start(time)
                     # self.fd.write(f"{self.name}, Time after start: {self.current_time}\n")
+                elif ((self.col_count + self.kernel_size - self.padding + 1) % self.stride) == 0 and ((self.row_count + self.kernel_size - self.padding + 1) % self.stride) == 0:
+                    super().start(time)
 
         if self.entry_count == self.image_size ** 2 - 1:
             self.entry_count = 0

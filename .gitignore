@@ -9,5 +9,6 @@ wave
 output
 output/log.txt
 */output
+*/result
 iverilog_dump.v
 *.fst
