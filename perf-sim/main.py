@@ -19,14 +19,16 @@ def main():
                 if crossbar_size != 256 and datatype_size != 8:
                     continue
                 for sparsity in sparsity_list:
-                    print(param_dict_tuple[0], datatype_size, crossbar_size, sparsity)
+                    if sparsity != 50:
+                        continue
+                    # print(param_dict_tuple[0], datatype_size, crossbar_size, sparsity)
                     technology = "reram"
                     param_dict["crossbar_size"] = crossbar_size # 128,256,512
                     param_dict["fpga_power"] = fpga_param[param_dict_tuple[0]][datatype_size][crossbar_size]
                     param_dict["datatype_size"] = [datatype_size]*len(param_dict["layer_list"])
                     param_dict["bus_width"] = [datatype_size]*len(param_dict["layer_list"])
                     param_dict["cim_param_dict"] = {
-                        "total_energy": cim_param[technology]["energy"][sparsity][datatype_size] * 10**(-9),
+                        "total_energy": cim_param[technology]["energy"][sparsity][datatype_size] * 10**(-9) * (crossbar_size**2 / 256**2),
                         "total_latency": cim_param[technology]["latency"][sparsity][datatype_size] * 10**(-9)}
 
                     conf_name = f"{technology}_{param_dict_tuple[0]}_d{datatype_size}_c{crossbar_size}_s{sparsity}"
