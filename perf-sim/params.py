@@ -1,4 +1,4 @@
-num_inferences: int = 1
+num_inferences: int = 100
 
 cim_param = {
     "reram": {
@@ -73,9 +73,9 @@ fpga_param = {
         8: {128: 0.084, 256: 0.082, 512: 0.082},
     },
     "alexnet": {
-        2: {256: 1.427},
-        4: {256: 3.312},
-        8: {128: 9.552, 256: 6.255, 512: 4.728},
+        2: {256: 1.426},
+        4: {256: 3.310},
+        8: {128: 9.537, 256: 6.251, 512: 4.727},
     },
 }
 
@@ -220,7 +220,7 @@ param_dict_alexnet: dict = {
         # (Layer type, input neurons, output neurons, input channels)
         ("fc", 6**2, 4096, 256),  # (13-3)/2+1 = 6
         ("fc", 4096, 4096, 1),
-        ("fc", 4096, 1000, 1),
+        ("fc", 4096, 10, 1),
     ],
     "bus_latency": 0,
     "ibuf_ports": 1,
