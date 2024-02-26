@@ -93,7 +93,6 @@ param_dict_cnn_1: dict = {
         ("fc", 70, 10, 1),
     ],
     "bus_latency": 0,
-    "crossbar_size": 256,
     "ibuf_ports": 1,
     "ibuf_read_latency": 1,
     "func_ports": 2**32, # Number of input operands for functional unit
@@ -116,7 +115,6 @@ param_dict_cnn_2: dict = {
         ("fc", 1210, 10, 1),
     ],
     "bus_latency": 0,
-    "crossbar_size": 256,
     "ibuf_ports": 1,
     "ibuf_read_latency": 1,
     "func_ports": 2**32,  # Number of input operands for functional unit
@@ -135,7 +133,6 @@ param_dict_mlp_s: dict = {
         ("fc", 250, 10, 1),
     ],
     "bus_latency": 0,
-    "crossbar_size": 256,
     "ibuf_ports": 1,
     "ibuf_read_latency": 1,
     "func_ports": 2**32,  # Number of input operands for functional unit
@@ -155,7 +152,6 @@ param_dict_mlp_m: dict = {
         ("fc", 250, 10, 1),
     ],
     "bus_latency": 0,
-    "crossbar_size": 256,
     "ibuf_ports": 1,
     "ibuf_read_latency": 1,
     "func_ports": 2**32,  # Number of input operands for functional unit
@@ -175,7 +171,6 @@ param_dict_mlp_l: dict = {
         ("fc", 500, 10, 1), # FC(10)
     ],
     "bus_latency": 0,
-    "crossbar_size": 256,
     "ibuf_ports": 1,
     "ibuf_read_latency": 1,
     "func_ports": 2**32,  # Number of input operands for functional unit
@@ -200,7 +195,6 @@ param_dict_lenet5: dict = {
         ("fc", 84, 10, 1),
     ],
     "bus_latency": 0,
-    "crossbar_size": 256,
     "ibuf_ports": 1,
     "ibuf_read_latency": 1,
     "func_ports": 2**32,  # Number of input operands for functional unit
@@ -229,7 +223,6 @@ param_dict_alexnet: dict = {
         ("fc", 4096, 1000, 1),
     ],
     "bus_latency": 0,
-    "crossbar_size": 256,
     "ibuf_ports": 1,
     "ibuf_read_latency": 1,
     "func_ports": 2**32,  # Number of input operands for functional unit
@@ -237,6 +230,7 @@ param_dict_alexnet: dict = {
     "ibuf_write_latency": 0,
 }
 
+technology_list = ["reram", "pcm"]
 datatype_size_list = [2, 4, 8]
 crossbar_size_list = [128, 256, 512]
 sparsity_list = [25, 50, 75]
