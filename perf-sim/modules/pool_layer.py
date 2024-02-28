@@ -8,9 +8,9 @@ from math import ceil
 
 
 class Pool_Layer(Module):
-    def __init__(self, name: str, next_module: Module, param_dict: dict, f):
+    def __init__(self, name: str, next_module: Module, param_dict: dict, f, f_r):
         super().__init__(f, name, next_module)
-
+        self.input_img_size = param_dict["image_size"]**2
         self.fpga_clk_freq: float = param_dict["fpga_clk_freq"]  # Clock frequency
         self.image_size: int = param_dict["image_size"]
         self.kernel_size: int = param_dict["kernel_size"]
@@ -38,6 +38,8 @@ class Pool_Layer(Module):
         self.fifo_size: int = (
             self.image_size * (self.kernel_size - 1) + self.kernel_size
         )
+
+        f_r.write(f"{self.name}: Latency = {self.total_latency *self.next_module.input_img_size}\n")
 
     def start(self, time):
         # print(f"{self.name}: Started at {time}")

@@ -10,6 +10,7 @@ class CNN_Func(Func):
         )
         param_dict["output_size"] = param_dict["output_channels"]
         super().__init__(f, name, next_module, param_dict, f_r=f_r)
+
     def start(self, time):
         self.fd.write(f"{self.name}: Started at {time}\n")
         super().start(time)

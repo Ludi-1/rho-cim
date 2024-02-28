@@ -1,4 +1,4 @@
-num_inferences: int = 100
+num_inferences: int = 1
 
 cim_param = {
     "reram": {

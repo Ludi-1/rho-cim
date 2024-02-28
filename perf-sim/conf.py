@@ -60,6 +60,7 @@ class Conf:
                             next_module=next_layer,
                             param_dict=layer_dict,
                             f=f,
+                            f_r = f_r,
                         )
                     )
                     next_layer = self.layer_list[-1]
