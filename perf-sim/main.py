@@ -4,6 +4,7 @@ Main script to instantiate configurations
 
 from conf import Conf
 from params import *
+from analysis import analysis
 import os
 
 
@@ -12,6 +13,8 @@ def main():
         os.mkdir("./output")
     if not os.path.exists("./result"):
         os.mkdir("./result")
+    if not os.path.exists("./analysis"):
+        os.mkdir("./analysis")
     for param_dict_tuple in param_dicts:
         param_dict = param_dict_tuple[1]
         for technology in technology_list:
@@ -20,6 +23,8 @@ def main():
                     if crossbar_size != 256 and datatype_size != 8:
                         continue
                     for sparsity in sparsity_list:
+                        conf_name = f"{technology}_{param_dict_tuple[0]}_d{datatype_size}_c{crossbar_size}_s{sparsity}"
+                        analysis(conf_name, param_dict, technology, datatype_size, crossbar_size, sparsity)
                         # if sparsity != 50:
                         #     continue
                         # print(param_dict_tuple[0], datatype_size, crossbar_size, sparsity)
@@ -31,7 +36,6 @@ def main():
                             "total_energy": cim_param[technology]["energy"][sparsity][datatype_size] * 10**(-9) * (crossbar_size**2 / 256**2),
                             "total_latency": cim_param[technology]["latency"][sparsity][datatype_size] * 10**(-9)}
 
-                        conf_name = f"{technology}_{param_dict_tuple[0]}_d{datatype_size}_c{crossbar_size}_s{sparsity}"
                         f = open(f"./output/{conf_name}.txt", "w")
                         results_file = open(f"./result/{conf_name}.txt", "w")
                         conf = Conf(param_dict, f, results_file)
