@@ -24,7 +24,6 @@ def main():
                         continue
                     for sparsity in sparsity_list:
                         conf_name = f"{technology}_{param_dict_tuple[0]}_d{datatype_size}_c{crossbar_size}_s{sparsity}"
-                        analysis(conf_name, param_dict, technology, datatype_size, crossbar_size, sparsity)
                         # if sparsity != 50:
                         #     continue
                         # print(param_dict_tuple[0], datatype_size, crossbar_size, sparsity)
@@ -41,5 +40,13 @@ def main():
                         conf = Conf(param_dict, f, results_file)
                         conf.start()
 
+    for param_dict_tuple in param_dicts:
+        param_dict = param_dict_tuple[1]
+        for technology in technology_list:
+            for datatype_size in datatype_size_list:
+                for crossbar_size in crossbar_size_list:
+                    for conv_dt in [2, 4, 8]:
+                        conf_name = f"{technology}_{param_dict_tuple[0]}_d{datatype_size}_c{crossbar_size}_a{conv_dt}"
+                        analysis(conf_name, param_dict, technology, datatype_size, crossbar_size, sparsity)
 if __name__ == "__main__":
     main()
