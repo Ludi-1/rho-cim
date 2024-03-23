@@ -1,6 +1,27 @@
 import csv
 from math import ceil, log2
 
+def write_entry(layer, i_xbar, o_xbar, i_sna, o_sna, i_func, o_func, inside_xbar, outside_xbar):
+    i_xbar = str(i_xbar).replace('.', ',')
+    o_xbar = str(o_xbar).replace('.', ',')
+    i_sna = str(i_sna).replace('.', ',')
+    o_sna = str(o_sna).replace('.', ',')
+    i_func = str(i_func).replace('.', ',')
+    o_func = str(o_func).replace('.', ',')
+    inside_xbar = str(inside_xbar).replace('.', ',')
+    outside_xbar = str(outside_xbar).replace('.', ',')
+    return {
+        'Layer': layer,
+        'i_xbar': i_xbar,
+        'o_xbar': o_xbar,
+        'i_s&a': i_sna,
+        'o_s&a': o_sna,
+        'i_func': i_func,
+        'o_func': o_func,
+        'inside_xbar': inside_xbar,
+        'outside_xbar': outside_xbar,
+    }
+
 def analysis(conf_name, param_dict, datatype_size, crossbar_size, conv_dt):
     f = open(f"./analysis/{conf_name}.csv", "w")
     fieldnames = ['Layer', 'i_xbar', 'o_xbar', "i_s&a", "o_s&a", "i_func", "o_func", "inside_xbar", "outside_xbar"]
@@ -34,17 +55,18 @@ def analysis(conf_name, param_dict, datatype_size, crossbar_size, conv_dt):
                     i_sna = output_pixels * n_v * datatype_size**2 * (conv_dt + log2(crossbar_size)) / conv_dt
                 i_func = output_pixels * (datatype_size + log2(crossbar_size)) * n_v
                 o_func = output_pixels * output_channels * datatype_size
-                writer.writerow({
-                    'Layer': f"{layer[0]} {kernel_size}x{kernel_size}",
-                    'i_xbar': i_xbar,
-                    'o_xbar': i_sna,
-                    'i_s&a': i_sna,
-                    'o_s&a': i_func,
-                    'i_func': i_func,
-                    'o_func': o_func,
-                    'inside_xbar': i_xbar/(i_xbar+i_sna+i_func)*100,
-                    'outside_xbar': (i_sna+i_func)/(i_xbar+i_sna+i_func)*100,
-                })
+                write_dict = write_entry(
+                    layer = f"{layer[0]} {kernel_size}x{kernel_size}",
+                    i_xbar = i_xbar,
+                    o_xbar = i_sna,
+                    i_sna = i_sna,
+                    o_sna = i_func,
+                    i_func = i_func,
+                    o_func = o_func,
+                    inside_xbar = i_xbar/(i_xbar+i_sna+i_func)*100,
+                    outside_xbar = (i_sna+i_func)/(i_xbar+i_sna+i_func)*100
+                )
+                writer.writerow(write_dict)
             case "pool":
                 inputs = ((layer[1] - layer[2])/layer[5] + 1)**2 * layer[2]**2 * layer[3]
                 outputs = ((layer[1] - layer[2])/layer[5] + 1)**2 * layer[4]
@@ -52,17 +74,18 @@ def analysis(conf_name, param_dict, datatype_size, crossbar_size, conv_dt):
                 i_sna = 0
                 i_func = inputs * datatype_size
                 o_func = outputs * datatype_size
-                writer.writerow({
-                    'Layer': f"{layer[0]} {layer[2]}x{layer[2]}",
-                    'i_xbar': i_xbar,
-                    'o_xbar': i_sna,
-                    'i_s&a': i_sna,
-                    'o_s&a': i_func,
-                    'i_func': i_func,
-                    'o_func': o_func,
-                    'inside_xbar': i_xbar/(i_xbar+i_sna+i_func)*100,
-                    'outside_xbar': (i_sna+i_func)/(i_xbar+i_sna+i_func)*100,
-                })
+                write_dict = write_entry(
+                    layer = f"{layer[0]} {layer[2]}x{layer[2]}",
+                    i_xbar = i_xbar,
+                    o_xbar = i_sna,
+                    i_sna = i_sna,
+                    o_sna = i_func,
+                    i_func = i_func,
+                    o_func = o_func,
+                    inside_xbar = i_xbar/(i_xbar+i_sna+i_func)*100,
+                    outside_xbar = (i_sna+i_func)/(i_xbar+i_sna+i_func)*100
+                )
+                writer.writerow(write_dict)
             case "fc":
                 inputs = layer[1] * layer[3] # input neurons * input channels
                 outputs = layer[2]
@@ -81,31 +104,33 @@ def analysis(conf_name, param_dict, datatype_size, crossbar_size, conv_dt):
                     i_sna = outputs * n_v * datatype_size**2 * (conv_dt + log2(crossbar_size)) / conv_dt
                 i_func = outputs * (datatype_size + log2(crossbar_size)) * n_v
                 o_func = outputs * datatype_size
-                writer.writerow({
-                    'Layer': f"{layer[0]} ({outputs})",
-                    'i_xbar': i_xbar,
-                    'o_xbar': i_sna,
-                    'i_s&a': i_sna,
-                    'o_s&a': i_func,
-                    'i_func': i_func,
-                    'o_func': o_func,
-                    'inside_xbar': i_xbar/(i_xbar+i_sna+i_func)*100,
-                    'outside_xbar': (i_sna+i_func)/(i_xbar+i_sna+i_func)*100,
-                })
+                write_dict = write_entry(
+                    layer = f"{layer[0]} ({outputs})",
+                    i_xbar = i_xbar,
+                    o_xbar = i_sna,
+                    i_sna = i_sna,
+                    o_sna = i_func,
+                    i_func = i_func,
+                    o_func = o_func,
+                    inside_xbar = i_xbar/(i_xbar+i_sna+i_func)*100,
+                    outside_xbar = (i_sna+i_func)/(i_xbar+i_sna+i_func)*100
+                )
+                writer.writerow(write_dict)
             case _:
                 raise ValueError(f"Bad layer type {layer[0]}")
         i_xbar_total += i_xbar
         i_sna_total += i_sna
         i_func_total += i_func
         o_func_total += o_func
-    writer.writerow({
-        'Layer': f"Total",
-        'i_xbar': i_xbar_total,
-        'o_xbar': i_sna_total,
-        'i_s&a': i_sna_total,
-        'o_s&a': i_func_total,
-        'i_func': i_func_total,
-        'o_func': o_func_total,
-        'inside_xbar': i_xbar_total/(i_xbar_total+i_sna_total+i_func_total)*100,
-        'outside_xbar': (i_sna_total+i_func_total)/(i_xbar_total+i_sna_total+i_func_total)*100,
-    })
+    write_dict = write_entry(
+        layer = "Total",
+        i_xbar = i_xbar_total,
+        o_xbar = i_sna_total,
+        i_sna = i_sna_total,
+        o_sna = i_func_total,
+        i_func = i_func_total,
+        o_func = o_func_total,
+        inside_xbar = i_xbar_total/(i_xbar_total+i_sna_total+i_func_total)*100,
+        outside_xbar = (i_sna_total+i_func_total)/(i_xbar_total+i_sna_total+i_func_total)*100
+    )
+    writer.writerow(write_dict)
