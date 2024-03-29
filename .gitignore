@@ -10,6 +10,7 @@ output
 output/log.txt
 */output
 */result
+*/output_analysis
 */analysis
 iverilog_dump.v
 *.fst

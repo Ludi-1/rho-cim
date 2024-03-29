@@ -4,13 +4,15 @@ Main script to instantiate configurations
 
 from conf import Conf
 from params import *
-from analysis import analysis
+from analysis import analysis, analysis_conf
 import os
-
+import csv
 
 def main():
     if not os.path.exists("./output"):
         os.mkdir("./output")
+    if not os.path.exists("./output_analysis"):
+        os.mkdir("./output_analysis")
     if not os.path.exists("./result"):
         os.mkdir("./result")
     if not os.path.exists("./analysis"):
@@ -39,6 +41,7 @@ def main():
                         results_file = open(f"./result/{conf_name}.txt", "w")
                         conf = Conf(param_dict, f, results_file)
                         conf.start()
+                        analysis_conf(conf, conf_name, param_dict["fpga_power"])
 
     for param_dict_tuple in param_dicts:
         param_dict = param_dict_tuple[1]

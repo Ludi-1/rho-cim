@@ -22,9 +22,12 @@ class CIM(Module):
         self.start_count += 1
         super().start(time)
 
+    def get_energy(self):
+        return self.total_energy*self.start_count*self.num_tiles
+
     def __del__(self):
         energy = self.total_energy*self.start_count*self.num_tiles
-        self.fr.write(f"{self.name}, #N Tiles: {self.num_tiles}, Energy: {energy}J\n")
+        self.fr.write(f"{self.name}, #N Tiles: {self.num_tiles}, Energy: {energy}J, Num of activations: {self.start_count}\n")
         # print(
         #     f"{self.name}, Num of activations: {self.start_count}, #tiles: {self.num_tiles}"
         # )

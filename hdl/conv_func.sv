@@ -18,7 +18,6 @@ module conv_func #(
     input rst,
     input i_start,
     input i_cim_busy,
-    output reg o_cim_we,
     input i_next_busy,
     output reg o_busy,
     input [datatype_size-1:0] i_data [v_cim_tiles-1:0][h_cim_tiles-1:0],
@@ -80,17 +79,14 @@ always_comb begin
             next_cim_addr = 0;
             next_h_tile_count = 0;
             if (!i_cim_busy) begin
-                o_cim_we = 1;
                 next_func_state = s_conv_func_busy;
             end else begin
-                o_cim_we = 0;
                 next_func_state = s_conv_func_idle;
             end
         end
         s_conv_func_busy: begin // Busy state
             o_busy = 1;
             if (input_count >= count_limit - 1) begin
-                o_cim_we = 0;
                 if (!i_next_busy) begin // If functional unit of next layer not busy
                     next_func_state = s_conv_func_start_next; // Start
                     next_input_count = 0;
@@ -103,7 +99,6 @@ always_comb begin
                     next_h_tile_count = h_tile_count;
                 end
             end else begin
-                o_cim_we = 1;
                 next_func_state = s_conv_func_busy;
                 next_input_count = input_count + 1;
                 if (cim_addr >= xbar_size - 1) begin
@@ -116,7 +111,6 @@ always_comb begin
         end
         s_conv_func_start_next: begin
             o_busy = 0;
-            o_cim_we = 0;
             next_cim_addr = 0;
             next_input_count = 0;
             next_h_tile_count = 0;

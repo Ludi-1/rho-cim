@@ -55,3 +55,6 @@ class CNN_Layer(Module):
         # print(f"{self.name}: Started at {time}")
         self.ctrl.start(time)
         self.current_time = self.ctrl.current_time
+
+    def get_latency(self):
+        return ((self.func.total_latency + self.ctrl.total_latency + self.cim.total_latency)*self.next_module.input_img_size)

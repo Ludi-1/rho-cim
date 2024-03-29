@@ -82,3 +82,6 @@ class Pool_Layer(Module):
                 self.row_count += 1
         else:
             self.col_count += 1
+
+    def get_latency(self):
+        return self.total_latency * self.next_module.input_img_size

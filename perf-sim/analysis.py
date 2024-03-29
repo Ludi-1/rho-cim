@@ -134,3 +134,72 @@ def analysis(conf_name, param_dict, datatype_size, crossbar_size, conv_dt):
         outside_xbar = (i_sna_total+i_func_total)/(i_xbar_total+i_sna_total+i_func_total)*100
     )
     writer.writerow(write_dict)
+
+def write_output_entry(layer, total_energy, fpga_energy, cim_energy, n_cim_tiles, latency):
+    total_energy = str(total_energy).replace('.', ',')
+    fpga_energy = str(fpga_energy).replace('.', ',')
+    cim_energy = str(cim_energy).replace('.', ',')
+    n_cim_tiles = str(n_cim_tiles).replace('.', ',')
+    latency = str(latency).replace('.', ',')
+    return {
+        'Layer': layer,
+        'Total energy': total_energy,
+        'FPGA energy': fpga_energy,
+        'CIM energy': cim_energy,
+        'N CIM tiles': n_cim_tiles,
+        'Latency': latency,
+    }
+
+def analysis_conf(conf, conf_name, fpga_power):
+    f_test = open(f"./output_analysis/{conf_name}.csv", "w")
+    fieldnames = ['Layer', 'Total energy', 'FPGA energy', "CIM energy", "N CIM tiles", "Latency"]
+    writer = csv.DictWriter(f_test, fieldnames=fieldnames, delimiter=';')
+    writer.writeheader()
+
+    n = 0
+    total_cim_energy = 0
+    total_tiles = 0
+    for layer in reversed(conf.layer_list):
+        n += 1
+        layer_latency = layer.get_latency()
+        cim_energy = 0
+        n_cim_tiles = 0
+        if hasattr(layer, 'cim'):
+            cim_energy = layer.cim.get_energy()
+            n_cim_tiles = layer.cim.num_tiles
+            total_cim_energy += cim_energy
+            total_tiles += n_cim_tiles
+   
+        fpga_energy = layer_latency * fpga_power
+        write_dict = write_output_entry(
+            layer = layer.name,
+            total_energy = fpga_energy + cim_energy,
+            fpga_energy = fpga_energy,
+            cim_energy = cim_energy,
+            n_cim_tiles = n_cim_tiles,
+            latency = layer_latency
+        )
+
+        fpga_energy = layer_latency * fpga_power
+        write_dict = write_output_entry(
+            layer = layer.name,
+            total_energy = fpga_energy + cim_energy,
+            fpga_energy = fpga_energy,
+            cim_energy = cim_energy,
+            n_cim_tiles = n_cim_tiles,
+            latency = layer_latency
+        )
+        writer.writerow(write_dict)
+
+        if n == len(conf.layer_list):
+            total_latency = layer.func.current_time
+            fpga_energy = total_latency * fpga_power
+            write_dict = write_output_entry(
+                layer = "Total",
+                total_energy = fpga_energy + total_cim_energy,
+                fpga_energy = fpga_energy,
+                cim_energy = total_cim_energy,
+                n_cim_tiles = total_tiles,
+                latency = total_latency
+            )
+            writer.writerow(write_dict)

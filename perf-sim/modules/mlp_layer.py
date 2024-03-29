@@ -53,3 +53,6 @@ class MLP_Layer(Module):
     def start(self, time):
         self.ctrl.start(time)
         self.current_time = self.ctrl.current_time
+
+    def get_latency(self):
+        return (self.func.total_latency + self.ctrl.total_latency + self.cim.total_latency)
