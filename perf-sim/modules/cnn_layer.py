@@ -11,7 +11,7 @@ from math import ceil
 
 
 class CNN_Layer(Module):
-    def __init__(self, f, name: str, next_module: Module, param_dict: dict, f_r):
+    def __init__(self, f, name: str, next_module: Module, param_dict: dict):
         super().__init__(f, name, next_module)
         self.input_img_size = param_dict["image_size"]**2
         param_dict["cim_param_dict"]["v_tiles"] = ceil(
@@ -30,7 +30,6 @@ class CNN_Layer(Module):
             name=f"({self.name}, func)",
             next_module=self.next_module,
             param_dict=param_dict,
-            f_r = f_r,
         )
     
         self.cim = CIM(
@@ -38,7 +37,6 @@ class CNN_Layer(Module):
             name=f"({self.name}, cim)",
             next_module=self.func,
             param_dict=param_dict["cim_param_dict"],
-            f_r = f_r,
         )
 
         self.ctrl = CNN_Control(
@@ -48,7 +46,6 @@ class CNN_Layer(Module):
             param_dict=param_dict,
         )
 
-        f_r.write(f"{self.name}: Latency = {(self.func.total_latency + self.ctrl.total_latency + param_dict['cim_param_dict']['total_latency'])*self.next_module.input_img_size}\n")
         self.current_time = 0
 
     def start(self, time):

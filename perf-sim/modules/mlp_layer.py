@@ -11,7 +11,7 @@ from math import ceil
 
 
 class MLP_Layer(Module):
-    def __init__(self, name: str, next_module: Module, param_dict: dict, f, f_r):
+    def __init__(self, name: str, next_module: Module, param_dict: dict, f):
         super().__init__(f, name, next_module)
         self.input_img_size = param_dict["input_neurons"] * param_dict["input_channels"]
         param_dict["cim_param_dict"]["v_tiles"] = ceil(
@@ -30,7 +30,6 @@ class MLP_Layer(Module):
             name=f"({self.name}, func)",
             next_module=self.next_module,
             param_dict=param_dict,
-            f_r = f_r,
         )
 
         self.cim = CIM(
@@ -38,7 +37,6 @@ class MLP_Layer(Module):
             name=f"({self.name}, cim)",
             next_module=self.func,
             param_dict=param_dict["cim_param_dict"],
-            f_r = f_r,
         )
 
         self.ctrl = MLP_Control(
@@ -47,8 +45,6 @@ class MLP_Layer(Module):
             param_dict=param_dict,
             f=f,
         )
-
-        f_r.write(f"{self.name}: Latency = {self.func.total_latency + self.ctrl.total_latency + param_dict['cim_param_dict']['total_latency']}\n")
 
     def start(self, time):
         self.ctrl.start(time)

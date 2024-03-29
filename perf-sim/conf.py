@@ -11,7 +11,7 @@ import itertools
 
 
 class Conf:
-    def __init__(self, param_dict: dict, f, f_r):
+    def __init__(self, param_dict: dict, f):
         self.layer_list = []
         next_layer = None
         n = len(param_dict["layer_list"]) - 1
@@ -40,8 +40,7 @@ class Conf:
                             name=f"Layer {n}: Conv",
                             next_module=next_layer,
                             param_dict=layer_dict,
-                            f=f,
-                            f_r = f_r,
+                            f=f
                         )
                     )
                     next_layer = self.layer_list[-1]
@@ -59,8 +58,7 @@ class Conf:
                             name=f"Layer {n}: Pool",
                             next_module=next_layer,
                             param_dict=layer_dict,
-                            f=f,
-                            f_r = f_r,
+                            f=f
                         )
                     )
                     next_layer = self.layer_list[-1]
@@ -76,8 +74,7 @@ class Conf:
                             name=f"Layer {n}: FC",
                             next_module=next_layer,
                             param_dict=layer_dict,
-                            f=f,
-                            f_r = f_r,
+                            f=f
                         ),
                     )
                     next_layer = self.layer_list[-1]
