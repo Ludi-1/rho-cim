@@ -12,5 +12,6 @@ output/log.txt
 */result
 */output_analysis
 */analysis
+*/gen_hdl
 iverilog_dump.v
 *.fst

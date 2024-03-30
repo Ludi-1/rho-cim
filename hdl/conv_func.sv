@@ -68,7 +68,6 @@ always_comb begin
                     next_func_state = s_conv_func_busy; // Start transfer
                 end
             end else begin // Stay in reset state
-                o_cim_we = 0;
                 o_busy = 0;
                 next_func_state = s_conv_func_reset;
             end
