@@ -58,6 +58,9 @@ fpga_param = {
         8: {128: 9.537, 256: 6.251, 512: 4.727},
         16: {128: 10}, # TODO
     },
+    "vgg16": {
+        16: {128: 10}, # TODO
+    }
 }
 
 param_dict_cnn_1: dict = {
@@ -211,6 +214,42 @@ param_dict_alexnet: dict = {
     "ibuf_write_latency": 0,
 }
 
+param_dict_vgg16: dict = {
+    "start_times": [0 for i in range(227**2 * num_inferences)],
+    "fpga_clk_freq": 100 * 10**6,
+    "layer_list": [
+        # conv/pool: (Layer type, image size, kernel size, input channels, output_channels, stride, padding)
+        # image size = (prev_image_size - kernel_size + 2*padding) / stride + 1
+        # FC: (Layer type, input neurons, output neurons, input channels)
+        ("conv", 224, 3, 3, 64, 1, 1), # 3x3,64 (2)
+        ("conv", 224, 3, 64, 64, 1, 1), # 3x3,64 (2)
+        ("pool", 224, 2, 64, 64, 2), # 2x2 Pool
+        ("conv", 112, 3, 64, 128, 1, 1), # 3x3,128 (2)
+        ("conv", 112, 3, 128, 128, 1, 1), # 3x3,128 (2)
+        ("pool", 112, 3, 128, 128, 2), # 2x2 Pool
+        ("conv", 56, 3, 128, 256, 1, 1), # 3x3,256 (3)
+        ("conv", 56, 3, 256, 256, 1, 1), # 3x3,256 (3)
+        ("conv", 56, 3, 256, 256, 1, 1), # 3x3,256 (3)
+        ("pool", 56, 3, 256, 256, 2), # 2x2 Pool
+        ("conv", 28, 3, 256, 512, 1, 1), # 3x3, 512 (3)
+        ("conv", 28, 3, 512, 512, 1, 1), # 3x3, 512 (3)
+        ("conv", 28, 3, 512, 512, 1, 1), # 3x3, 512 (3)
+        ("pool", 28, 3, 512, 512, 2), # 2x2 Pool
+        ("conv", 14, 3, 512, 512, 1, 1), # 3x3, 512 (3)
+        ("conv", 14, 3, 512, 512, 1, 1), # 3x3, 512 (3)
+        ("conv", 14, 3, 512, 512, 1, 1), # 3x3, 512 (3)
+        ("pool", 14, 3, 512, 512, 2), # 2x2 Pool
+        ("fc", 7**2, 4096, 512),
+        ("fc", 4096, 1000, 1),
+    ],
+    "bus_latency": 0,
+    "ibuf_ports": 1,
+    "ibuf_read_latency": 1,
+    "func_ports": 2**32,  # Number of input operands for functional unit
+    "operation_latency": 0,
+    "ibuf_write_latency": 0,
+}
+
 technology_list = ["reram", "pcm"]
 datatype_size_list = [2, 4, 8, 16]
 crossbar_size_list = [128, 256, 512]
@@ -222,5 +261,6 @@ param_dicts = [
     ("mlp-m", param_dict_mlp_m),
     ("mlp-l", param_dict_mlp_l),
     ("lenet5", param_dict_lenet5),
-    ("alexnet", param_dict_alexnet)
+    ("alexnet", param_dict_alexnet),
+    ("vgg16", param_dict_vgg16)
 ]

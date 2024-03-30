@@ -23,17 +23,19 @@ def main():
         for technology in technology_list:
             for datatype_size in datatype_size_list:
                 for crossbar_size in crossbar_size_list:
-                    if crossbar_size != 256 and datatype_size != 8 and param_dict_tuple[0] != "alexnet":
+                    if crossbar_size != 256 and datatype_size != 8 and param_dict_tuple[0] != "alexnet" and param_dict_tuple[0] != "vgg16":
                         continue
                     if param_dict_tuple[0] == "alexnet" and (datatype_size == 2 or datatype_size == 4) and crossbar_size != 256:
                         continue
                     if param_dict_tuple[0] == "alexnet" and datatype_size == 16 and crossbar_size != 128:
                         continue
+                    if param_dict_tuple[0] == "vgg16" and (datatype_size != 16 or crossbar_size != 128):
+                        continue
                     for sparsity in sparsity_list:
                         conf_name = f"{technology}_{param_dict_tuple[0]}_d{datatype_size}_c{crossbar_size}_s{sparsity}"
-                        if datatype_size == 16 and (sparsity != 50 or technology != "reram" or param_dict_tuple[0] != "alexnet"):
+                        if datatype_size == 16 and (sparsity != 50 or technology != "reram" or (param_dict_tuple[0] != "alexnet" and param_dict_tuple[0] != "vgg16")):
                             continue
-                        # print(param_dict_tuple[0], datatype_size, crossbar_size, sparsity, technology)
+                        print(param_dict_tuple[0], datatype_size, crossbar_size, sparsity, technology)
                         param_dict["crossbar_size"] = crossbar_size # 128,256,512
                         param_dict["fpga_power"] = fpga_param[param_dict_tuple[0]][datatype_size][crossbar_size]
                         param_dict["datatype_size"] = [datatype_size]*len(param_dict["layer_list"])
