@@ -46,7 +46,8 @@ class Module(ABC):
                 )  # Wait until next module is done
             else:
                 self.current_time = self.current_time + self.total_latency
-            self.fd.write(f"{self.name}: Done at {self.current_time}\n")
+            if self.fd is not None:
+                self.fd.write(f"{self.name}: Done at {self.current_time}\n")
             self.next_module.start(self.current_time)
         else:  # Next module is None, don't do anything
             pass

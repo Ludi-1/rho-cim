@@ -12,5 +12,6 @@ class CNN_Func(Func):
         super().__init__(f, name, next_module, param_dict)
 
     def start(self, time):
-        self.fd.write(f"{self.name}: Started at {time}\n")
+        if self.fd is not None:
+            self.fd.write(f"{self.name}: Started at {time}\n")
         super().start(time)

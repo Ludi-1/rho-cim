@@ -10,7 +10,8 @@ class MLP_Func(Func):
 
     def start(self, time):
         # print(f"{self.name}: Started at {time}")
-        self.fd.write(f"{self.name}: Started at {time}\n")
+        if self.fd is not None:
+            self.fd.write(f"{self.name}: Started at {time}\n")
 
         super().start(time)
         for i in range(self.output_size - 1):

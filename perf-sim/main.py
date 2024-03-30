@@ -8,8 +8,9 @@ from analysis import analysis, analysis_conf
 from gen_hdl import gen_hdl
 import os
 import csv
+import sys
 
-def main():
+def main(ENABLE_OUTPUT):
     if not os.path.exists("./output"):
         os.mkdir("./output")
     if not os.path.exists("./result"):
@@ -19,7 +20,7 @@ def main():
     if not os.path.exists("./gen_hdl"):
         os.mkdir("./gen_hdl")
     for param_dict_tuple in param_dicts:
-        param_dict = param_dict_tuple[1]
+        param_dict = param_dict_tuple[1] | fpga_module_param
         for technology in technology_list:
             for datatype_size in datatype_size_list:
                 for crossbar_size in crossbar_size_list:
@@ -44,7 +45,10 @@ def main():
                             "total_energy": cim_param[technology]["energy"][sparsity][datatype_size] * 10**(-9) * (crossbar_size**2 / 256**2),
                             "total_latency": cim_param[technology]["latency"][sparsity][datatype_size] * 10**(-9)}
 
-                        f = open(f"./output/{conf_name}.txt", "w")
+                        if ENABLE_OUTPUT:
+                            f = open(f"./output/{conf_name}.txt", "w")
+                        else:
+                            f = None
                         conf = Conf(param_dict, f)
                         conf.start()
                         analysis_conf(conf, conf_name, param_dict["fpga_power"])
@@ -60,4 +64,13 @@ def main():
             for crossbar_size in crossbar_size_list:
                 gen_hdl(param_dict_tuple, datatype_size, crossbar_size)
 if __name__ == "__main__":
-    main()
+    ENABLE_OUTPUT = False
+    for arg in sys.argv:
+        match arg:
+            case "o":
+                print("Output enabled")
+                ENABLE_OUTPUT = True
+            case _:
+                print(f"Arg {arg}")
+        
+    main(ENABLE_OUTPUT)

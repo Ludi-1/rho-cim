@@ -151,7 +151,7 @@ def write_output_entry(layer, total_energy, fpga_energy, cim_energy, n_cim_tiles
     }
 
 def analysis_conf(conf, conf_name, fpga_power):
-    f_test = open(f"./output/{conf_name}.csv", "w")
+    f_test = open(f"./result/{conf_name}.csv", "w")
     fieldnames = ['Layer', 'Total energy', 'FPGA energy', "CIM energy", "N CIM tiles", "Latency"]
     writer = csv.DictWriter(f_test, fieldnames=fieldnames, delimiter=';')
     writer.writeheader()

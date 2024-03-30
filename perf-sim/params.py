@@ -56,16 +56,15 @@ fpga_param = {
         2: {256: 1.426},
         4: {256: 3.310},
         8: {128: 9.537, 256: 6.251, 512: 4.727},
-        16: {128: 10}, # TODO
+        16: {128: 9.467}, # TODO
     },
     "vgg16": {
-        16: {128: 10}, # TODO
+        16: {128: 10}, # N/A
     }
 }
 
 param_dict_cnn_1: dict = {
     "start_times": [0 for i in range(28 ** 2 * num_inferences)],
-    "fpga_clk_freq": 100 * 10 ** 6,
     "layer_list": [
         # (Layer type, image size, kernel size, input channels, output_channels, stride)
         ("conv", 28, 5, 1, 5, 1, 0),
@@ -76,17 +75,10 @@ param_dict_cnn_1: dict = {
         ("fc", 720, 70, 1),
         ("fc", 70, 10, 1),
     ],
-    "bus_latency": 0,
-    "ibuf_ports": 1,
-    "ibuf_read_latency": 1,
-    "func_ports": 2**32, # Number of input operands for functional unit
-    "operation_latency": 0,
-    "ibuf_write_latency": 0,
 }
 
 param_dict_cnn_2: dict = {
     "start_times": [0 for i in range(28**2 * num_inferences)],
-    "fpga_clk_freq": 100 * 10**6,
     "layer_list": [
         # (Layer type, image size, kernel size, input channels, output_channels, stride)
         ("conv", 28, 7, 1, 10, 1, 0),
@@ -98,17 +90,10 @@ param_dict_cnn_2: dict = {
         ("fc", 1210, 1210, 1),
         ("fc", 1210, 10, 1),
     ],
-    "bus_latency": 0,
-    "ibuf_ports": 1,
-    "ibuf_read_latency": 1,
-    "func_ports": 2**32,  # Number of input operands for functional unit
-    "operation_latency": 0,
-    "ibuf_write_latency": 0,
 }
 
 param_dict_mlp_s: dict = {
     "start_times": [0 for i in range(28**2 * num_inferences)],
-    "fpga_clk_freq": 100 * 10**6,
     "layer_list": [
         # (Layer type, input size, output_size, input channels)
         ("fc", 784, 784, 1),
@@ -116,17 +101,10 @@ param_dict_mlp_s: dict = {
         ("fc", 500, 250, 1),
         ("fc", 250, 10, 1),
     ],
-    "bus_latency": 0,
-    "ibuf_ports": 1,
-    "ibuf_read_latency": 1,
-    "func_ports": 2**32,  # Number of input operands for functional unit
-    "operation_latency": 0,
-    "ibuf_write_latency": 0,
 }
 
 param_dict_mlp_m: dict = {
     "start_times": [0 for i in range(28**2 * num_inferences)],
-    "fpga_clk_freq": 100 * 10**6,
     "layer_list": [
         # (Layer type, input size, output_size, input channels)
         ("fc", 784, 784, 1),
@@ -135,17 +113,10 @@ param_dict_mlp_m: dict = {
         ("fc", 500, 250, 1),
         ("fc", 250, 10, 1),
     ],
-    "bus_latency": 0,
-    "ibuf_ports": 1,
-    "ibuf_read_latency": 1,
-    "func_ports": 2**32,  # Number of input operands for functional unit
-    "operation_latency": 0,
-    "ibuf_write_latency": 0,
 }
 
 param_dict_mlp_l: dict = {
     "start_times": [0 for i in range(28**2 * num_inferences)],
-    "fpga_clk_freq": 100 * 10**6,
     "layer_list": [
         # (Layer type, input size, output_size, input channels)
         ("fc", 784, 784, 1), # FC(784)
@@ -154,17 +125,10 @@ param_dict_mlp_l: dict = {
         ("fc", 1000, 500, 1), # FC(500)
         ("fc", 500, 10, 1), # FC(10)
     ],
-    "bus_latency": 0,
-    "ibuf_ports": 1,
-    "ibuf_read_latency": 1,
-    "func_ports": 2**32,  # Number of input operands for functional unit
-    "operation_latency": 0,
-    "ibuf_write_latency": 0,
 }
 
 param_dict_lenet5: dict = {
     "start_times": [0 for i in range(28**2 * num_inferences)],
-    "fpga_clk_freq": 100 * 10**6,
     "layer_list": [
         # (Layer type, image size, kernel size, input channels, output_channels, stride)
         ("conv", 28, 5, 1, 6, 1, 0),
@@ -178,17 +142,10 @@ param_dict_lenet5: dict = {
         ("fc", 120, 84, 1),
         ("fc", 84, 10, 1),
     ],
-    "bus_latency": 0,
-    "ibuf_ports": 1,
-    "ibuf_read_latency": 1,
-    "func_ports": 2**32,  # Number of input operands for functional unit
-    "operation_latency": 0,
-    "ibuf_write_latency": 0,
 }
 
 param_dict_alexnet: dict = {
     "start_times": [0 for i in range(227**2 * num_inferences)],
-    "fpga_clk_freq": 100 * 10**6,
     "layer_list": [
         # (Layer type, image size, kernel size, input channels, output_channels, stride, padding)
         ("conv", 227, 11, 3, 96, 4, 0), # L0 conv 1
@@ -206,17 +163,10 @@ param_dict_alexnet: dict = {
         ("fc", 4096, 4096, 1),
         ("fc", 4096, 10, 1),
     ],
-    "bus_latency": 0,
-    "ibuf_ports": 1,
-    "ibuf_read_latency": 1,
-    "func_ports": 2**32,  # Number of input operands for functional unit
-    "operation_latency": 0,
-    "ibuf_write_latency": 0,
 }
 
 param_dict_vgg16: dict = {
-    "start_times": [0 for i in range(227**2 * num_inferences)],
-    "fpga_clk_freq": 100 * 10**6,
+    "start_times": [0 for i in range(224**2 * num_inferences)],
     "layer_list": [
         # conv/pool: (Layer type, image size, kernel size, input channels, output_channels, stride, padding)
         # image size = (prev_image_size - kernel_size + 2*padding) / stride + 1
@@ -226,34 +176,40 @@ param_dict_vgg16: dict = {
         ("pool", 224, 2, 64, 64, 2), # 2x2 Pool
         ("conv", 112, 3, 64, 128, 1, 1), # 3x3,128 (2)
         ("conv", 112, 3, 128, 128, 1, 1), # 3x3,128 (2)
-        ("pool", 112, 3, 128, 128, 2), # 2x2 Pool
+        ("pool", 112, 2, 128, 128, 2), # 2x2 Pool
         ("conv", 56, 3, 128, 256, 1, 1), # 3x3,256 (3)
         ("conv", 56, 3, 256, 256, 1, 1), # 3x3,256 (3)
         ("conv", 56, 3, 256, 256, 1, 1), # 3x3,256 (3)
-        ("pool", 56, 3, 256, 256, 2), # 2x2 Pool
+        ("pool", 56, 2, 256, 256, 2), # 2x2 Pool
         ("conv", 28, 3, 256, 512, 1, 1), # 3x3, 512 (3)
         ("conv", 28, 3, 512, 512, 1, 1), # 3x3, 512 (3)
         ("conv", 28, 3, 512, 512, 1, 1), # 3x3, 512 (3)
-        ("pool", 28, 3, 512, 512, 2), # 2x2 Pool
+        ("pool", 28, 2, 512, 512, 2), # 2x2 Pool
         ("conv", 14, 3, 512, 512, 1, 1), # 3x3, 512 (3)
         ("conv", 14, 3, 512, 512, 1, 1), # 3x3, 512 (3)
         ("conv", 14, 3, 512, 512, 1, 1), # 3x3, 512 (3)
-        ("pool", 14, 3, 512, 512, 2), # 2x2 Pool
+        ("pool", 14, 2, 512, 512, 2), # 2x2 Pool
         ("fc", 7**2, 4096, 512),
         ("fc", 4096, 1000, 1),
     ],
-    "bus_latency": 0,
-    "ibuf_ports": 1,
-    "ibuf_read_latency": 1,
-    "func_ports": 2**32,  # Number of input operands for functional unit
-    "operation_latency": 0,
-    "ibuf_write_latency": 0,
 }
 
 technology_list = ["reram", "pcm"]
 datatype_size_list = [2, 4, 8, 16]
 crossbar_size_list = [128, 256, 512]
 sparsity_list = [25, 50, 75]
+
+fpga_module_param = {
+    "fpga_clk_freq": 100 * 10**6,
+    "bus_latency": 0,
+    "bus_width": 16,
+    "ibuf_ports": 2**10,
+    "ibuf_read_latency": 1,
+    "func_ports": 2**10,  # Number of input operands for functional unit
+    "operation_latency": 0,
+    "ibuf_write_latency": 0
+}
+
 param_dicts = [
     ("cnn-1", param_dict_cnn_1),
     ("cnn-2", param_dict_cnn_2),

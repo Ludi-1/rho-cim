@@ -18,7 +18,8 @@ class CIM(Module):
         self.num_tiles = param_dict["num_tiles"]
 
     def start(self, time):
-        self.fd.write(f"{self.name}: Started at {time}\n")
+        if self.fd is not None:
+            self.fd.write(f"{self.name}: Started at {time}\n")
         self.start_count += 1
         super().start(time)
 

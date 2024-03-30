@@ -32,7 +32,8 @@ class CNN_Control(Control):
 
     def start(self, time):
         # print(f"{self.name}: Started at {time}")
-        self.fd.write(f"{self.name}: Started at {time}: {self.entry_count} | {self.col_count}, {self.row_count}\n")
+        if self.fd is not None:
+            self.fd.write(f"{self.name}: Started at {time}: {self.entry_count} | {self.col_count}, {self.row_count}\n")
         if time < self.current_time:
             raise Exception(
                 f"Module {self.name} at time {self.current_time} started in the past: {time}"
