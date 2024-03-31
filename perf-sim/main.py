@@ -63,6 +63,7 @@ def main(ENABLE_OUTPUT):
         for datatype_size in datatype_size_list:
             for crossbar_size in crossbar_size_list:
                 gen_hdl(param_dict_tuple, datatype_size, crossbar_size)
+
 if __name__ == "__main__":
     ENABLE_OUTPUT = False
     for arg in sys.argv:
