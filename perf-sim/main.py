@@ -4,7 +4,7 @@ Main script to instantiate configurations
 
 from conf import Conf
 from params import *
-from analysis import analysis, analysis_conf
+from analysis import analysis, analysis_conf, analysis_operations
 from gen_hdl import gen_hdl
 import os
 import csv
@@ -17,6 +17,8 @@ def main(ENABLE_OUTPUT):
         os.mkdir("./result")
     if not os.path.exists("./analysis"):
         os.mkdir("./analysis")
+    if not os.path.exists("./analysis_operations"):
+        os.mkdir("./analysis_operations")
     if not os.path.exists("./gen_hdl"):
         os.mkdir("./gen_hdl")
     for param_dict_tuple in param_dicts:
@@ -53,17 +55,24 @@ def main(ENABLE_OUTPUT):
                         conf.start()
                         analysis_conf(conf, conf_name, param_dict["fpga_power"])
 
-        for datatype_size in datatype_size_list:
-            for crossbar_size in crossbar_size_list:
-                for conv_dt in [1, 2, 4, 8]:
-                    conf_name = f"{param_dict_tuple[0]}_d{datatype_size}_c{crossbar_size}_a{conv_dt}"
-                    analysis(conf_name, param_dict, datatype_size, crossbar_size, conv_dt)
+    #     for datatype_size in datatype_size_list:
+    #         for crossbar_size in crossbar_size_list:
+    #             for conv_dt in [1, 2, 4, 8]:
+    #                 conf_name = f"{param_dict_tuple[0]}_d{datatype_size}_c{crossbar_size}_a{conv_dt}"
+    #                 analysis(conf_name, param_dict, datatype_size, crossbar_size, conv_dt)
 
     for param_dict_tuple in param_dicts:
         for datatype_size in datatype_size_list:
             for crossbar_size in crossbar_size_list:
                 gen_hdl(param_dict_tuple, datatype_size, crossbar_size)
 
+    for param_dict_tuple in param_dicts:
+        for datatype_size in datatype_size_list:
+            for crossbar_size in crossbar_size_list:
+                param_dict = param_dict_tuple[1]
+                conf_name = conf_name = f"{param_dict_tuple[0]}_d{datatype_size}_c{crossbar_size}"
+                analysis_operations(param_dict, conf_name, datatype_size, crossbar_size)
+        
 if __name__ == "__main__":
     ENABLE_OUTPUT = False
     for arg in sys.argv:

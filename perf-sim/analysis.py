@@ -22,6 +22,9 @@ def write_entry(layer, i_xbar, o_xbar, i_sna, o_sna, i_func, o_func, inside_xbar
         'outside_xbar': outside_xbar,
     }
 
+'''
+    Calculate amount of data processed in each component
+'''
 def analysis(conf_name, param_dict, datatype_size, crossbar_size, conv_dt):
     f = open(f"./analysis/{conf_name}.csv", "w")
     fieldnames = ['Layer', 'i_xbar', 'o_xbar', "i_s&a", "o_s&a", "i_func", "o_func", "inside_xbar", "outside_xbar"]
@@ -150,6 +153,9 @@ def write_output_entry(layer, total_energy, fpga_energy, cim_energy, n_cim_tiles
         'Latency': latency,
     }
 
+'''
+    Process simulation results of the system
+'''
 def analysis_conf(conf, conf_name, fpga_power):
     f_test = open(f"./result/{conf_name}.csv", "w")
     fieldnames = ['Layer', 'Total energy', 'FPGA energy', "CIM energy", "N CIM tiles", "Latency"]
@@ -203,3 +209,97 @@ def analysis_conf(conf, conf_name, fpga_power):
                 latency = total_latency
             )
             writer.writerow(write_dict)
+
+def write_entry_ops(layer, operations):
+    operations = str(operations).replace('.', ',')
+    return {
+        'Layer': layer,
+        'Operations': operations,
+    }
+
+''' Analysis: GOPS/TOPS
+    Analysis for the total operations
+    This will calculate the amount of operations per inference
+'''
+def analysis_operations(param_dict, conf_name, datatype_size, crossbar_size):
+    f = open(f"./analysis_operations/{conf_name}.csv", "w")
+    fieldnames = ['Layer', 'Operations']
+    writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter=';')
+    writer.writeheader()
+
+    operations_total = 0
+    for layer in param_dict["layer_list"]:
+        match layer[0]:
+            case "conv":
+                # inputs_pixels = layer[1]**2
+                output_img_size = ((layer[1] - layer[2])/layer[5] + 2*layer[6])**2
+                input_channels = layer[3]
+                output_channels = layer[5]
+                kernel_size = layer[2]**2
+                n_v = ceil(
+                    kernel_size**2 * input_channels / crossbar_size
+                )
+                n_h = ceil(
+                    output_channels
+                    * datatype_size
+                    / crossbar_size
+                )
+                num_sna = output_img_size * output_channels * n_v * n_h * log2(crossbar_size) / datatype_size
+                num_multiplications = output_img_size * kernel_size * input_channels * output_channels
+                # Additions are with 2*datatype_size operands
+                num_additions = output_img_size * (kernel_size + input_channels) * output_channels * 2
+                '''
+                    Accumulation is with operands of datatype_size + log2(crossbar_size) bits
+                    Divide this by datatype size to get 1 + log2(crossbar_size)/datatype size
+                    Scaling factor to convert to native datatype size
+                '''
+                num_accumulations = output_img_size * n_v * output_channels * (1 + log2(crossbar_size) / datatype_size)
+                num_activation_func = output_img_size * output_channels
+                operations = num_multiplications + num_additions + num_activation_func + num_accumulations + num_sna
+                write_dict = write_entry_ops(
+                    layer = f"{layer[0]} {kernel_size}x{kernel_size}",
+                    operations = operations
+                )
+                writer.writerow(write_dict)
+            case "pool":
+                output_img_size = ((layer[1] - layer[2])/layer[5] + 1)**2
+                ops_per_window = layer[2]**2
+                channels = layer[3]
+                operations = output_img_size * ops_per_window * channels
+                write_dict = write_entry_ops(
+                    layer = f"{layer[0]} {layer[2]}x{layer[2]}",
+                    operations = operations
+                )
+                writer.writerow(write_dict)
+            case "fc":
+                input_neurons = layer[1] * layer[3]
+                input_channels = layer[3]
+                inputs = input_neurons * input_channels
+                outputs = layer[2]
+                n_v = ceil(
+                    inputs / crossbar_size
+                )
+                n_h = ceil(
+                    outputs
+                    * datatype_size
+                    / crossbar_size
+                )
+                num_sna = outputs * n_v * n_h * log2(crossbar_size) / datatype_size
+                num_accumulations = outputs * n_v * (1 + log2(crossbar_size) / datatype_size)
+                num_multiplications = inputs * outputs
+                num_additions = (inputs - 1) * outputs * 2
+                num_activation_func = outputs
+                operations = num_multiplications + num_additions + num_activation_func + num_accumulations
+                write_dict = write_entry_ops(
+                    layer = f"{layer[0]} ({outputs})",
+                    operations = operations
+                )
+                writer.writerow(write_dict)
+            case _:
+                raise ValueError(f"Bad layer type {layer[0]}")
+        operations_total += operations
+    write_dict = write_entry_ops(
+        layer = "Total",
+        operations = operations_total
+    )
+    writer.writerow(write_dict)

@@ -1,4 +1,4 @@
-num_inferences: int = 1
+num_inferences: int = 500
 
 cim_param = {
     "reram": {
@@ -59,7 +59,7 @@ fpga_param = {
         16: {128: 9.467}, # TODO
     },
     "vgg16": {
-        16: {128: 63.605},
+        16: {128: 62.810},
     }
 }
 

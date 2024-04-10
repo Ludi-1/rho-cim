@@ -33,6 +33,6 @@ class Func(Module):
         self.total_latency: float = (
             (1 / self.clk_freq)
             * (((self.operation_latency + self.transfer_latency) * self.obuf_reads) + 1) * self.output_size
-        )  # Time to produce a single element of one output channel
+        )   # Time to produce a single element of one output channel
 
         self.fpga_power = param_dict["fpga_power"]

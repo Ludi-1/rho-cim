@@ -63,7 +63,6 @@ class CNN_Control(Control):
                     super().start(time)
 
         if self.entry_count == self.image_size ** 2 - 1:
-            self.entry_count = 0
             self.skip = False
         else:
             self.entry_count += 1
