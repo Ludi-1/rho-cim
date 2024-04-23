@@ -25,14 +25,19 @@ class Func(Module):
             "ibuf_write_latency"
         ]  # Latency for writing to ibuf, incorporated in operation freq
 
-        self.transfer_latency: int = (
-            ceil(self.datatype_size / self.bus_width) * self.bus_latency
-        )  # Latency for reading from output buffers
-        self.obuf_reads: int =  ceil(ceil(self.input_size / self.crossbar_rows) / self.func_ports) # Num of reads from obuf
+        # self.transfer_latency: int = (
+        #     ceil(self.datatype_size / self.bus_width) * self.bus_latency
+        # )  # Latency for reading from output buffers
+        # self.obuf_reads: int =  ceil(ceil(self.input_size / self.crossbar_rows) / self.func_ports) # Num of reads from obuf
+
+        # self.total_latency: float = (
+        #     (1 / self.clk_freq)
+        #     * (((self.operation_latency + self.transfer_latency) * self.obuf_reads) + 1) * self.output_size
+        # )   # Time to produce a single element of one output channel
 
         self.total_latency: float = (
             (1 / self.clk_freq)
-            * (((self.operation_latency + self.transfer_latency) * self.obuf_reads) + 1) * self.output_size
+            * self.crossbar_rows / self.datatype_size
         )   # Time to produce a single element of one output channel
 
         self.fpga_power = param_dict["fpga_power"]

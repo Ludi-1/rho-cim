@@ -41,9 +41,9 @@ class Control(Module):
         )
 
         self.total_latency = (
-            self.num_writes
+            self.crossbar_rows
             * (self.transfer_latency + self.ibuf_read_latency)
-            / self.clk_freq
+            / self.clk_freq / 8
         )
         # print(
         #     f"{self.name} - Total: {self.total_latency}, #Writes: {self.num_writes}, Transfer latency: {self.transfer_latency}, Ibuf rd latency: {self.ibuf_read_latency}"

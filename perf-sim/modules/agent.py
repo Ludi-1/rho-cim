@@ -14,5 +14,5 @@ class Agent(Module):
 
     def start(self):
         for start_time in self.start_times:
-            self.current_time = start_time
+            self.current_time = start_time / self.clk_freq
             super().start(start_time)

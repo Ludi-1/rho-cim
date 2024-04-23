@@ -1,4 +1,4 @@
-num_inferences: int = 500
+num_inferences: int = 1
 
 cim_param = {
     "reram": {
@@ -200,7 +200,7 @@ crossbar_size_list = [128, 256, 512]
 sparsity_list = [25, 50, 75]
 
 fpga_module_param = {
-    "fpga_clk_freq": 100 * 10**6,
+    "fpga_clk_freq": 1000 * 10**6,
     "bus_latency": 0,
     "bus_width": 16,
     "ibuf_ports": 2**10,

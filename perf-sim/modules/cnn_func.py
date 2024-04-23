@@ -1,7 +1,8 @@
 from modules.module import Module
 from modules.func import Func
 from math import ceil
-
+from modules.mlp_ctrl import MLP_Control
+from modules.mlp_layer import MLP_Layer
 
 class CNN_Func(Func):
     def __init__(self, f, name: str, next_module: Module, param_dict: dict):
@@ -14,4 +15,6 @@ class CNN_Func(Func):
     def start(self, time):
         if self.fd is not None:
             self.fd.write(f"{self.name}: Started at {time}\n")
+
+
         super().start(time)

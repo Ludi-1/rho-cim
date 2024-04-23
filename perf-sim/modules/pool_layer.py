@@ -5,7 +5,9 @@ This layer should be connected to another layer or None if it is the last layer
 
 from modules.module import Module
 from math import ceil
-
+from modules.mlp_ctrl import MLP_Control
+from modules.mlp_layer import MLP_Layer
+from modules.cnn_layer import CNN_Layer
 
 class Pool_Layer(Module):
     def __init__(self, name: str, next_module: Module, param_dict: dict, f):
@@ -66,7 +68,12 @@ class Pool_Layer(Module):
                     # self.current_time = time + self.total_latency
                     if self.fd is not None:
                         self.fd.write(f"({self.name}): Write\n")
-                    super().start(time)
+                    if type(self.next_module) is CNN_Layer:
+                        super().start(time)
+                    elif type(self.next_module) is MLP_Layer:
+                        if self.entry_count == self.image_size ** 2 - 1:
+                            super().start(time)
+                    
 
         if self.entry_count == self.image_size ** 2 - 1:
             self.entry_count = 0

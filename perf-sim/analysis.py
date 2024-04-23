@@ -272,7 +272,7 @@ def analysis_operations(param_dict, conf_name, datatype_size, crossbar_size):
                 )
                 writer.writerow(write_dict)
             case "fc":
-                input_neurons = layer[1] * layer[3]
+                input_neurons = layer[1]
                 input_channels = layer[3]
                 inputs = input_neurons * input_channels
                 outputs = layer[2]
