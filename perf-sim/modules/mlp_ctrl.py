@@ -14,7 +14,6 @@ class MLP_Control(Control):
         param_dict["input_size"] = param_dict["input_neurons"] * param_dict["input_channels"]
         super().__init__(f, name, next_module, param_dict)
 
-
     def start(self, time):
         #self.entry_count += 1
         if self.fd is not None:

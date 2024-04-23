@@ -52,13 +52,13 @@ class Pool_Layer(Module):
 
         if self.entry_count < self.fifo_size - 1:
             # print(f"init: {self.name} {self.entry_count}, {self.col_count}")
-            self.current_time = time + 1 / self.fpga_clk_freq
+            self.current_time = time # + 1 / self.fpga_clk_freq
         else:  # FIFO is full
             if self.skip:
                 if self.col_count == self.kernel_size - 2:
                     self.skip = False
                 # print(f"skip: {self.name} {self.entry_count}, {self.col_count}")
-                self.current_time = time + 1 / self.fpga_clk_freq
+                self.current_time = time # + 1 / self.fpga_clk_freq
             else:
                 if self.col_count == self.image_size - 1:
                     # print(f"init skip: {self.name} {self.entry_count}, {self.col_count}")

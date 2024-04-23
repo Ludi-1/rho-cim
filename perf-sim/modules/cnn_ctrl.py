@@ -42,14 +42,14 @@ class CNN_Control(Control):
         # print(f"{self.name} {self.entry_count}, {self.col_count}")
         if self.entry_count < self.fifo_size - 1 and self.padding == 0:
             # print(f"init: {self.name} {self.entry_count}, {self.col_count}")
-            self.current_time = time + 1 / self.clk_freq
+            # self.current_time = time + 1 / self.clk_freq
             pass
         else:  # FIFO is full
             if self.skip and self.padding == 0:
                 if self.col_count == self.kernel_size - 2:
                     self.skip = False
                 # print(f"skip: {self.name} {self.entry_count}, {self.col_count}")
-                self.current_time = time + 1 / self.clk_freq
+                # self.current_time = time + 1 / self.clk_freq
             else:
                 if self.col_count == self.image_size - 1:
                     self.skip = True
