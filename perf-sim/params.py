@@ -211,12 +211,12 @@ fpga_module_param = {
 }
 
 param_dicts = [
-    # ("cnn-1", param_dict_cnn_1),
-    # ("cnn-2", param_dict_cnn_2),
-    # ("mlp-s", param_dict_mlp_s),
-    # ("mlp-m", param_dict_mlp_m),
-    # ("mlp-l", param_dict_mlp_l),
-    # ("lenet5", param_dict_lenet5),
-    # ("alexnet", param_dict_alexnet),
+    ("cnn-1", param_dict_cnn_1),
+    ("cnn-2", param_dict_cnn_2),
+    ("mlp-s", param_dict_mlp_s),
+    ("mlp-m", param_dict_mlp_m),
+    ("mlp-l", param_dict_mlp_l),
+    ("lenet5", param_dict_lenet5),
+    ("alexnet", param_dict_alexnet),
     ("vgg16", param_dict_vgg16)
 ]

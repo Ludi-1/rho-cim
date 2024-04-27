@@ -45,7 +45,7 @@ def main(ENABLE_OUTPUT):
                         param_dict["bus_width"] = [datatype_size]*len(param_dict["layer_list"])
                         param_dict["cim_param_dict"] = {
                             "total_energy": cim_param[technology]["energy"][sparsity][datatype_size] * 10**(-9) * (crossbar_size**2 / 256**2),
-                            "total_latency": 0 # (cim_param[technology]["latency"][sparsity][datatype_size]-256) * 10**(-9)
+                            "total_latency": (cim_param[technology]["latency"][sparsity][datatype_size]-256) / datatype_size * 10**(-9)
                             }
 
                         if ENABLE_OUTPUT:

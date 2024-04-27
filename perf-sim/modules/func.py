@@ -41,6 +41,6 @@ class Func(Module):
         )   # Time to produce a single element of one output channel
 
         self.fpga_power = param_dict["fpga_power"]
-        print(
-            f"{self.name} - Total: {self.total_latency}"
-        )
+        # print(
+        #     f"{self.name} - Total: {self.total_latency}"
+        # )

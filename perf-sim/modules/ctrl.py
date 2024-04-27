@@ -45,6 +45,6 @@ class Control(Module):
             # * (self.transfer_latency + self.ibuf_read_latency)
             / self.clk_freq / 8
         )
-        print(
-            f"{self.name} - Total: {self.total_latency}"
-        )
+        # print(
+        #     f"{self.name} - Total: {self.total_latency}"
+        # )
