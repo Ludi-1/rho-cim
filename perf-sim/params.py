@@ -7,9 +7,9 @@ cim_param = {
             50: {1: 1.7+0.8, 2: 3.5+0.8, 4: 7.6+0.8, 8: 14+0.8, 16: 28+0.8},
             75: {1: 0.8+0.8, 2: 1.7+0.8, 4: 3.3+0.8, 8: 6.8+0.8}},
         "latency": {
-            25: {1: 281, 2: 296, 4: 332, 8: 454, 16: 538},
-            50: {1: 282, 2: 296, 4: 333, 8: 455, 16: 539},
-            75: {1: 283, 2: 296, 4: 334, 8: 456, 16: 540}}},
+            25: {1: 274, 2: 296, 4: 332, 8: 454, 16: 538},
+            50: {1: 274, 2: 296, 4: 333, 8: 455, 16: 539},
+            75: {1: 274, 2: 296, 4: 334, 8: 456, 16: 540}}},
     "pcm": {
         "energy": {
             25: {1: 1.2+0.8, 2: 2.5+0.8, 4: 4.9+0.8, 8: 10.2+0.8},
@@ -59,6 +59,7 @@ fpga_param = {
         16: {128: 9.467}, # TODO
     },
     "vgg16": {
+        1: {128: 10}, # TODO
         16: {128: 62.810},
     }
 }
@@ -225,10 +226,10 @@ param_dict_vgg16: dict = {
     ],
 }
 
-technology_list = ["reram", "pcm"]
-datatype_size_list = [2, 4, 8, 16]
-crossbar_size_list = [128, 256, 512]
-sparsity_list = [25, 50, 75]
+technology_list = ["reram"] #, "pcm"]
+datatype_size_list = [1, 16] #2, 4, 8, 16]
+crossbar_size_list = [128] #, 256, 512]
+sparsity_list = [50] # [25, 50, 75]
 
 fpga_module_param = {
     "fpga_clk_freq": 1000 * 10**6,
@@ -242,12 +243,12 @@ fpga_module_param = {
 }
 
 param_dicts = [
-    ("cnn-1", param_dict_cnn_1),
-    ("cnn-2", param_dict_cnn_2),
-    ("mlp-s", param_dict_mlp_s),
-    ("mlp-m", param_dict_mlp_m),
-    ("mlp-l", param_dict_mlp_l),
-    ("lenet5", param_dict_lenet5),
-    ("alexnet", param_dict_alexnet),
+    # ("cnn-1", param_dict_cnn_1),
+    # ("cnn-2", param_dict_cnn_2),
+    # ("mlp-s", param_dict_mlp_s),
+    # ("mlp-m", param_dict_mlp_m),
+    # ("mlp-l", param_dict_mlp_l),
+    # ("lenet5", param_dict_lenet5),
+    # ("alexnet", param_dict_alexnet),
     ("vgg16", param_dict_vgg16)
 ]

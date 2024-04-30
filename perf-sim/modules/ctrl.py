@@ -34,16 +34,18 @@ class Control(Module):
             "ibuf_read_latency"
         ]  # Latency for reading from ibuf, incorporated in operation latency
 
-        self.num_writes: int = ceil(self.input_size / min(self.v_cim_tiles, self.ibuf_ports)) # Amount of writes to the RD buffers
+        # self.num_writes: int = ceil(self.input_size / min(self.v_cim_tiles, self.ibuf_ports)) # Amount of writes to the RD buffers
+
+        self.num_writes = min(self.input_size, self.crossbar_rows) / 8 * self.datatype_size
 
         self.transfer_latency: int = (
             ceil(self.datatype_size / self.bus_width) * self.bus_latency
         )
 
         self.total_latency = (
-            self.crossbar_rows
+            self.num_writes
             # * (self.transfer_latency + self.ibuf_read_latency)
-            / self.clk_freq / 8
+            / self.clk_freq
         )
         # print(
         #     f"{self.name} - Total: {self.total_latency}"
