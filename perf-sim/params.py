@@ -1,4 +1,4 @@
-num_inferences: int = 1
+num_inferences: int = 2
 
 cim_param = {
     "reram": {
@@ -165,32 +165,63 @@ param_dict_alexnet: dict = {
     ],
 }
 
+# imagenet
+# param_dict_vgg16: dict = {
+#     "start_times": [0 for i in range(224**2 * num_inferences)],
+#     "layer_list": [
+#         # conv/pool: (Layer type, image size, kernel size, input channels, output_channels, stride, padding)
+#         # image size = (prev_image_size - kernel_size + 2*padding) / stride + 1
+#         # FC: (Layer type, input neurons, output neurons, input channels)
+#         ("conv", 224, 3, 3, 64, 1, 1), # 3x3,64 (2)
+#         ("conv", 224, 3, 64, 64, 1, 1), # 3x3,64 (2)
+#         ("pool", 224, 2, 64, 64, 2), # 2x2 Pool
+#         ("conv", 112, 3, 64, 128, 1, 1), # 3x3,128 (2)
+#         ("conv", 112, 3, 128, 128, 1, 1), # 3x3,128 (2)
+#         ("pool", 112, 2, 128, 128, 2), # 2x2 Pool
+#         ("conv", 56, 3, 128, 256, 1, 1), # 3x3,256 (3)
+#         ("conv", 56, 3, 256, 256, 1, 1), # 3x3,256 (3)
+#         ("conv", 56, 3, 256, 256, 1, 1), # 3x3,256 (3)
+#         ("pool", 56, 2, 256, 256, 2), # 2x2 Pool
+#         ("conv", 28, 3, 256, 512, 1, 1), # 3x3, 512 (3)
+#         ("conv", 28, 3, 512, 512, 1, 1), # 3x3, 512 (3)
+#         ("conv", 28, 3, 512, 512, 1, 1), # 3x3, 512 (3)
+#         ("pool", 28, 2, 512, 512, 2), # 2x2 Pool
+#         ("conv", 14, 3, 512, 512, 1, 1), # 3x3, 512 (3)
+#         ("conv", 14, 3, 512, 512, 1, 1), # 3x3, 512 (3)
+#         ("conv", 14, 3, 512, 512, 1, 1), # 3x3, 512 (3)
+#         ("pool", 14, 2, 512, 512, 2), # 2x2 Pool
+#         ("fc", 7**2, 4096, 512),
+#         ("fc", 4096, 1000, 1),
+#     ],
+# }
+
+# cifar100
 param_dict_vgg16: dict = {
-    "start_times": [0 for i in range(224**2 * num_inferences)],
+    "start_times": [0 for i in range(32**2 * num_inferences)],
     "layer_list": [
         # conv/pool: (Layer type, image size, kernel size, input channels, output_channels, stride, padding)
         # image size = (prev_image_size - kernel_size + 2*padding) / stride + 1
         # FC: (Layer type, input neurons, output neurons, input channels)
-        ("conv", 224, 3, 3, 64, 1, 1), # 3x3,64 (2)
-        ("conv", 224, 3, 64, 64, 1, 1), # 3x3,64 (2)
-        ("pool", 224, 2, 64, 64, 2), # 2x2 Pool
-        ("conv", 112, 3, 64, 128, 1, 1), # 3x3,128 (2)
-        ("conv", 112, 3, 128, 128, 1, 1), # 3x3,128 (2)
-        ("pool", 112, 2, 128, 128, 2), # 2x2 Pool
-        ("conv", 56, 3, 128, 256, 1, 1), # 3x3,256 (3)
-        ("conv", 56, 3, 256, 256, 1, 1), # 3x3,256 (3)
-        ("conv", 56, 3, 256, 256, 1, 1), # 3x3,256 (3)
-        ("pool", 56, 2, 256, 256, 2), # 2x2 Pool
-        ("conv", 28, 3, 256, 512, 1, 1), # 3x3, 512 (3)
-        ("conv", 28, 3, 512, 512, 1, 1), # 3x3, 512 (3)
-        ("conv", 28, 3, 512, 512, 1, 1), # 3x3, 512 (3)
-        ("pool", 28, 2, 512, 512, 2), # 2x2 Pool
-        ("conv", 14, 3, 512, 512, 1, 1), # 3x3, 512 (3)
-        ("conv", 14, 3, 512, 512, 1, 1), # 3x3, 512 (3)
-        ("conv", 14, 3, 512, 512, 1, 1), # 3x3, 512 (3)
-        ("pool", 14, 2, 512, 512, 2), # 2x2 Pool
-        ("fc", 7**2, 4096, 512),
-        ("fc", 4096, 1000, 1),
+        ("conv", 32, 3, 3, 64, 1, 1), # 3x3,64 (2)
+        ("conv", 32, 3, 64, 64, 1, 1), # 3x3,64 (2)
+        ("pool", 32, 2, 64, 64, 2), # 2x2 Pool
+        ("conv", 16, 3, 64, 128, 1, 1), # 3x3,128 (2)
+        ("conv", 16, 3, 128, 128, 1, 1), # 3x3,128 (2)
+        ("pool", 16, 2, 128, 128, 2), # 2x2 Pool
+        ("conv", 8, 3, 128, 256, 1, 1), # 3x3,256 (3)
+        ("conv", 8, 3, 256, 256, 1, 1), # 3x3,256 (3)
+        ("conv", 8, 3, 256, 256, 1, 1), # 3x3,256 (3)
+        ("pool", 8, 2, 256, 256, 2), # 2x2 Pool
+        ("conv", 4, 3, 256, 512, 1, 1), # 3x3, 512 (3)
+        ("conv", 4, 3, 512, 512, 1, 1), # 3x3, 512 (3)
+        ("conv", 4, 3, 512, 512, 1, 1), # 3x3, 512 (3)
+        ("pool", 4, 2, 512, 512, 2), # 2x2 Pool
+        ("conv", 2, 3, 512, 512, 1, 1), # 3x3, 512 (3)
+        ("conv", 2, 3, 512, 512, 1, 1), # 3x3, 512 (3)
+        ("conv", 2, 3, 512, 512, 1, 1), # 3x3, 512 (3)
+        ("pool", 2, 2, 512, 512, 2), # 2x2 Pool
+        ("fc", 1**2, 4096, 512),
+        ("fc", 4096, 100, 1),
     ],
 }
 
