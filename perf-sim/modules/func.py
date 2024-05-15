@@ -25,7 +25,7 @@ class Func(Module):
             "ibuf_write_latency"
         ]  # Latency for writing to ibuf, incorporated in operation freq
 
-        self.num_reads = min(self.crossbar_rows / self.datatype_size, self.output_size) / 8
+        self.num_reads = 8 # min(self.crossbar_rows / self.datatype_size, self.output_size) / 8
         # self.transfer_latency: int = (
         #     ceil(self.datatype_size / self.bus_width) * self.bus_latency
         # )  # Latency for reading from output buffers

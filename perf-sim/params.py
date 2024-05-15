@@ -60,6 +60,7 @@ fpga_param = {
     },
     "vgg16": {
         1: {128: 10}, # TODO
+        8: {128: 10}, # TODO
         16: {128: 62.810},
     }
 }
@@ -227,12 +228,12 @@ param_dict_vgg16: dict = {
 }
 
 technology_list = ["reram"] #, "pcm"]
-datatype_size_list = [1, 16] #2, 4, 8, 16]
+datatype_size_list = [8] #2, 4, 8, 16]
 crossbar_size_list = [128] #, 256, 512]
 sparsity_list = [50] # [25, 50, 75]
 
 fpga_module_param = {
-    "fpga_clk_freq": 1000 * 10**6,
+    "fpga_clk_freq": 250 * 10**6,
     "bus_latency": 0,
     "bus_width": 16,
     "ibuf_ports": 2**10,
