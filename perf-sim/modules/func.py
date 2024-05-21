@@ -37,8 +37,9 @@ class Func(Module):
         # )   # Time to produce a single element of one output channel
 
         self.total_latency: float = (
-            (1 / self.clk_freq)
-            * self.num_reads
+            32e-9
+            # (1 / self.clk_freq)
+            # * self.num_reads
         )   # Time to produce a single element of one output channel
 
         self.fpga_power = param_dict["fpga_power"]
