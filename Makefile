@@ -8,12 +8,12 @@ WAVES=1
 EXTRA_ARGS += --trace-fst --trace-structs
 EXTRA_ARGS += --trace --trace-structs
 
-TOPLEVEL ?= ibuf
+TOPLEVEL ?= fc_ibuf
 $(shell rm -rf sim_build)
 
-ifeq ($(TOPLEVEL),ibuf)
-    VERILOG_SOURCES = $(shell pwd)/hdl/ibuf.sv
-    MODULE = tb.test_ibuf
+ifeq ($(TOPLEVEL),fc_ibuf)
+    VERILOG_SOURCES = $(shell pwd)/hdl/fc_ibuf.sv
+    MODULE = tb.test_fc_ibuf
     # SIM_ARGS += -gdatatype_size=8
     # SIM_ARGS += -gfifo_length=5
 else ifeq ($(TOPLEVEL),fc_ctrl)

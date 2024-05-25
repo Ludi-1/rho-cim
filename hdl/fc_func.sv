@@ -24,7 +24,7 @@ module fc_func #(
     output reg o_busy,
     input [datatype_size-1:0] i_data [v_cim_tiles-1:0][h_cim_tiles-1:0], // Data from CIM obuf to FPGA
     output reg [$clog2(xbar_size)-1:0] o_cim_addr,
-    output reg [output_datatype_size-1:0] o_data // Data from FPGA ctrl to CIM RD buffer
+    output reg [output_datatype_size-1:0] o_data // Data from FPGA func to input buffer
 );
 
 localparam count_limit = output_size;
