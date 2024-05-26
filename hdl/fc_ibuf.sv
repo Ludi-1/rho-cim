@@ -13,7 +13,7 @@ module fc_ibuf #(
     input wire clk,
     input wire i_we, // Write enable -> fifo write enable
     input wire i_se, // Shift enable -> per-element binary shift
-    input wire [$clog2(NUM_ADDR):0] i_ibuf_addr,
+    input wire [$clog2(NUM_ADDR)-1:0] i_ibuf_addr,
     input wire [DATA_SIZE-1:0] i_data [H_CIM_TILES_IN-1:0],     // Data in (write)
     output reg [BUS_WIDTH*V_CIM_TILES_OUT-1:0] o_data     // Data out (read)
 );
@@ -39,7 +39,7 @@ end
 
 localparam excess_elements = (FIFO_LENGTH*H_CIM_TILES_IN) % (BUS_WIDTH * V_CIM_TILES_OUT);
 wire [FIFO_LENGTH*H_CIM_TILES_IN+excess_elements-1:0] reorder;
-wire [BUS_WIDTH*V_CIM_TILES_OUT-1:0] reorder2 [NUM_ADDR:0];
+wire [BUS_WIDTH*V_CIM_TILES_OUT-1:0] reorder2 [NUM_ADDR-1:0];
 
 assign reorder[FIFO_LENGTH*H_CIM_TILES_IN+excess_elements-1:FIFO_LENGTH*H_CIM_TILES_IN-1] = 0;
 

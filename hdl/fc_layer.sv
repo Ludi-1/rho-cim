@@ -9,7 +9,6 @@ module fc_layer #(
     parameter H_CIM_TILES_IN = $rtoi($ceil(INPUT_NEURONS / FIFO_LENGTH)), // PREV Layer H cim tiles
     parameter V_CIM_TILES = $rtoi($ceil(INPUT_NEURONS / XBAR_SIZE)), // THIS layer V cim tiles
     parameter NUM_ADDR = $rtoi($ceil(FIFO_LENGTH*H_CIM_TILES_IN / (BUS_WIDTH * V_CIM_TILES))),
-
     parameter H_CIM_TILE = $rtoi($ceil(OUTPUT_NEURONS*DATA_SIZE/XBAR_SIZE)) // THIS LAYER H cim tiles
 ) (
     input clk,
@@ -20,7 +19,7 @@ module fc_layer #(
     input i_start, // filling ibuf done -> start ctrl
     input i_cim_ready, // CIM tiles ready -> w8 until done
     output reg o_ready, // ctrl ready consuming -> dont write to ibuf
-    output reg [$clog2(NUM_ADDR):0] o_cim_wr_addr, // addr to CIM tile
+    output reg [$clog2(NUM_ADDR)-1:0] o_cim_wr_addr, // addr to CIM tile
     output reg [BUS_WIDTH*v_cim_tiles-1:0] o_cim_data,
 
     input i_next_ready, // ctrl of next layer ready

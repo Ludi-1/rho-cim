@@ -28,7 +28,7 @@ module fc_ctrl #(
     input i_cim_ready,
     output reg o_cim_we, // RD write enable CIM tile
     output reg o_cim_start,
-    output reg [$clog2(NUM_ADDR):0] o_addr, // addr to CIM and ibuf
+    output reg [$clog2(NUM_ADDR)-1:0] o_addr, // addr to CIM and ibuf
 
     // Control signals func unit
     input i_func_ready, // this func unit ready
@@ -39,7 +39,7 @@ int unsigned addr, next_addr;
 int unsigned count, next_count;
 state ctrl_state, next_ctrl_state;
 
-assign o_addr = addr[$clog2(NUM_ADDR):0];
+assign o_addr = addr[$clog2(NUM_ADDR)-1:0];
 
 always_ff @(posedge clk) begin
     if (rst) begin
