@@ -10,10 +10,13 @@ module fc_ctrl #(
     parameter INPUT_NEURONS = 201,
     parameter XBAR_SIZE = 256,
     parameter BUS_WIDTH = 16,
+    parameter OBUF_BUS_WIDTH = 46,
+    parameter OBUF_DATA_SIZE = (DATA_SIZE == 1) ? $clog2(XBAR_SIZE) : 2*DATA_SIZE+$clog2(XBAR_SIZE),
+    parameter NUM_CHANNELS = $rtoi($floor(OBUF_BUS_WIDTH / OBUF_DATA_SIZE)),
     parameter V_CIM_TILES = (INPUT_NEURONS+XBAR_SIZE-1) / XBAR_SIZE, // THIS layer V cim tiles
-    parameter FIFO_LENGTH = $rtoi($floor(XBAR_SIZE / DATA_SIZE)), // output elements per CIM tile
+    parameter FIFO_LENGTH = $rtoi($ceil($floor(XBAR_SIZE / DATA_SIZE) / NUM_CHANNELS)), // output elements per CIM tile
     parameter H_CIM_TILES_IN = $rtoi($ceil(INPUT_NEURONS / FIFO_LENGTH)), // PREV Layer H cim tiles
-    parameter NUM_ADDR = $rtoi($ceil(FIFO_LENGTH*H_CIM_TILES_IN / (BUS_WIDTH * V_CIM_TILES)))
+    parameter NUM_ADDR = $rtoi($ceil(FIFO_LENGTH*H_CIM_TILES_IN*NUM_CHANNELS / (BUS_WIDTH * V_CIM_TILES)))
 ) (
     input clk,
     input rst,
