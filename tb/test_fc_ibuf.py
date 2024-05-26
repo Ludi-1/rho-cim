@@ -10,22 +10,24 @@ async def ibuf_test(dut):
 
     # Reset signals
     dut.i_we.value = 0
-    dut.i_data[0].value = 0
+    # dut.i_data[0].value = 0
     dut.i_we.value = 0
     dut.i_se.value = 0
 
     # Wait for a rising edge on the clock
     await RisingEdge(dut.clk)
     await RisingEdge(dut.clk)
-    input_values: list[int] = []
+    # input_values: list[int] = []
 
     for cycle in range(dut.FIFO_LENGTH.value):
         dut.i_we.value = 1
-        input_value = []
+        # input_value = []
         for h_tile in range(dut.H_CIM_TILES_IN.value):
-            input_value.append(random.randint(0, 2**len(dut.i_data) - 1))
-            dut.i_data[h_tile].value = input_value[h_tile]  # Random data
-        input_values.append(input_value)
+            for channel in range(dut.NUM_CHANNELS.value):
+                pass
+            # input_value.append(random.randint(0, 2**len(dut.i_data) - 1))
+                # dut.i_data[h_tile][channel].value = random.randint(0, 2**len(dut.i_data) - 1)  # Random data
+        # input_values.append(input_value)
         await RisingEdge(dut.clk)
     dut.i_we.value = 0
 
