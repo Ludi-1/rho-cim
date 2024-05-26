@@ -16,17 +16,19 @@ async def ibuf_test(dut):
 
     # Wait for a rising edge on the clock
     await RisingEdge(dut.clk)
-
+    await RisingEdge(dut.clk)
     input_values: list[int] = []
-    # Write and read data after 10 clock cycles
+
     for cycle in range(dut.fifo_length.value):
         dut.i_we.value = 1
-        input_value: int = random.randint(0, 2**len(dut.i_data) - 1)
+        input_value = []
+        for h_tile in range(dut.h_cim_tiles_in.value):
+            input_value.append(random.randint(0, 2**len(dut.i_data) - 1))
+            dut.i_data[h_tile].value = input_value[h_tile]  # Random data
         input_values.append(input_value)
-        dut.i_data[0].value = input_value  # Random data
         await RisingEdge(dut.clk)
     dut.i_we.value = 0
-    #print(input_values)
+
     dut.i_re.value = 1
     for i in range(dut.DATA_WIDTH.value):
         await RisingEdge(dut.clk)
