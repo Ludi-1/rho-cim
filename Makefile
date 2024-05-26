@@ -18,7 +18,7 @@ ifeq ($(TOPLEVEL),fc_ibuf)
     # SIM_ARGS += -gfifo_length=5
 else ifeq ($(TOPLEVEL),fc_ctrl)
     VERILOG_SOURCES = $(shell pwd)/hdl/fc_ctrl.sv
-    MODULE = tb.test_ctrl
+    MODULE = tb.test_fc_ctrl
 else ifeq ($(TOPLEVEL),fc_func)
     VERILOG_SOURCES = $(shell pwd)/hdl/fc_func.sv
     MODULE = tb.test_func
