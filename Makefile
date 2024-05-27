@@ -22,6 +22,9 @@ else ifeq ($(TOPLEVEL),fc_ctrl)
 else ifeq ($(TOPLEVEL),fc_func)
     VERILOG_SOURCES = $(shell pwd)/hdl/fc_func.sv
     MODULE = tb.test_fc_func
+else ifeq ($(TOPLEVEL),conv_ibuf)
+    VERILOG_SOURCES = $(shell pwd)/hdl/conv_ibuf.sv
+    MODULE = tb.test_conv_ibuf
 else
     $(error Given TOPLEVEL '$(TOPLEVEL)' not supported)
 endif

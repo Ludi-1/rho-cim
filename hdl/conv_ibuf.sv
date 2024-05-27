@@ -1,33 +1,60 @@
 module conv_ibuf #(
-    parameter datatype_size = 8,
-    parameter img_width = 28,
-    parameter kernel_dim = 3
+    parameter DATA_SIZE = 8,
+    parameter IMG_DIM = 28,
+    parameter KERNEL_DIM = 3,
+    parameter INPUT_CHANNELS = 2,
+    parameter XBAR_SIZE = 128,
+    parameter BUS_WIDTH = 16,
+    parameter V_CIM_TILES_OUT = (INPUT_CHANNELS*KERNEL_DIM**2 + XBAR_SIZE-1) / XBAR_SIZE,
+    parameter NUM_ADDR = $rtoi($ceil(INPUT_CHANNELS*KERNEL_DIM**2 / (BUS_WIDTH * V_CIM_TILES_OUT))),
+    parameter ADDR_WIDTH = (NUM_ADDR <= 1) ? 1 : $clog2(NUM_ADDR)
+    // parameter COUNT_WIDTH = (DATA_SIZE==1) ? 0 : $clog2(DATA_SIZE)
 ) (
     input clk,
-    input i_write_enable,
-    input [datatype_size-1:0] i_data,
-    output reg [datatype_size-1:0] o_data [kernel_dim**2-1:0]
+    input [INPUT_CHANNELS-1:0] i_write_enable,
+    input [DATA_SIZE-1:0] i_data [INPUT_CHANNELS-1:0],
+    output [BUS_WIDTH*V_CIM_TILES_OUT-1:0] o_data [DATA_SIZE-1:0],
+    input [ADDR_WIDTH-1:0] i_ibuf_addr
 );
 
-localparam fifo_length = img_width * (kernel_dim - 1) + kernel_dim;
-reg [datatype_size-1:0] fifo_data [fifo_length-1:0];
+localparam FIFO_LENGTH = IMG_DIM * (KERNEL_DIM - 1) + KERNEL_DIM;
+reg [DATA_SIZE-1:0] fifo_data [INPUT_CHANNELS-1:0][FIFO_LENGTH-1:0];
 
-always @(posedge clk) begin
-    if (i_write_enable) begin
-        fifo_data[0] <= i_data;
-        for (int fifo_idx = 0; fifo_idx < fifo_length - 1; fifo_idx++) begin
-            fifo_data[fifo_idx + 1] <= fifo_data[fifo_idx]; 
+// FIFO shift register
+always_ff @(posedge clk) begin
+    for (int input_channel = 0; input_channel < INPUT_CHANNELS; input_channel++) begin
+        if (i_write_enable[input_channel]) begin
+            fifo_data[input_channel][0] <= i_data[input_channel];
+            for (int fifo_idx = 0; fifo_idx < FIFO_LENGTH - 1; fifo_idx++) begin
+                fifo_data[input_channel][fifo_idx + 1] <= fifo_data[input_channel][fifo_idx]; 
+            end
         end
     end
 end
 
-always @(*) begin
-    for (int i = 0; i < kernel_dim; i++) begin
-        for (int j = 0; j < kernel_dim; j++) begin
-            o_data[i + j*kernel_dim] = fifo_data[i*img_width + j];
+wire [KERNEL_DIM**2 * INPUT_CHANNELS-1:0] reorder [DATA_SIZE-1:0];
+wire [DATA_SIZE-1:0] kernel_elements [INPUT_CHANNELS-1:0][KERNEL_DIM**2-1:0];
+
+genvar i, j, k;
+generate
+    // extract kernel elements from FIFO
+    for (i = 0; i < INPUT_CHANNELS; i++) begin
+        for (j = 0; j < KERNEL_DIM; j++) begin
+            for (k = 0; k < KERNEL_DIM; k++) begin
+                assign kernel_elements[i][j + k*KERNEL_DIM] = fifo_data[i][j*IMG_DIM + k];
+            end
         end
     end
-end
+
+    // map kernel elements to o_data
+    for (i = 0; i < INPUT_CHANNELS; i++) begin // INPUT CHANNEL
+        for (j = 0; j < KERNEL_DIM**2; j++) begin // KERNEL DIM 1
+            for (k = 0; k < DATA_SIZE; k++) begin // KERNEL DIM 2
+                assign reorder[k][i*KERNEL_DIM**2 + j] = kernel_elements[i][j][k];
+            end
+        end
+    end
+endgenerate
 
 // `ifdef COCOTB_SIM
 // initial begin
