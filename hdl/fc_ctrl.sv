@@ -25,7 +25,7 @@ module fc_ctrl #(
 
     // Control signals prev. layer
     input i_start,
-    output reg o_busy, // this ctrl unit busy
+    output reg o_ready, // this ctrl unit busy
 
     // CIM interface
     input i_cim_ready,
@@ -62,7 +62,7 @@ always_comb begin
             next_count = 0;
             next_addr = 0;
             o_cim_we = 0;
-            o_busy = 0;
+            o_ready = 1;
             o_func_start = 0;
             o_cim_start = 0;
             o_shift_enable = 0;
@@ -79,7 +79,7 @@ always_comb begin
         S1: begin // Consume IBUF, write RD BUF
             next_count = count;
             o_cim_we = 1;
-            o_busy = 1;
+            o_ready = 0;
             o_func_start = 0;
             o_cim_start = 0;
             o_shift_enable = 0;
@@ -95,7 +95,7 @@ always_comb begin
             next_count = count;
             next_addr = 0;
             o_cim_we = 0;
-            o_busy = 1;
+            o_ready = 0;
             o_func_start = 0;
             o_shift_enable = 0;
             if (!i_cim_ready) begin
@@ -109,15 +109,16 @@ always_comb begin
         S3: begin
             next_addr = 0;
             o_cim_we = 0;
-            o_busy = 1;
+            o_ready = 0;
             o_cim_start = 0;
+            o_func_start = 0;
             if (i_cim_ready) begin // CIM finished activating
                 if (count >= DATA_SIZE - 1) begin
                     o_shift_enable = 0;
                     next_count = count;
-                    o_func_start = 1; // start func
                     if (i_func_ready) begin // func ready to consume obuf
                         next_ctrl_state = S0; // go back to idle
+                        o_func_start = 1; // start func
                     end else begin // func still busy
                         next_ctrl_state = S3; // wait
                     end
@@ -129,11 +130,7 @@ always_comb begin
                 end
             end else begin // CIM still busy
                 next_count = count;
-                next_addr = 0;
-                o_cim_we = 0;
-                o_busy = 1;
                 o_func_start = 0;
-                o_cim_start = 0;
                 o_shift_enable = 0;
                 next_ctrl_state = S3; // wait
             end
@@ -142,7 +139,7 @@ always_comb begin
             next_count = 0;
             next_addr = 0;
             o_cim_we = 0;
-            o_busy = 0;
+            o_ready = 0;
             o_func_start = 0;
             o_cim_start = 0;
             o_shift_enable = 0;

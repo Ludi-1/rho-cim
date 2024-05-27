@@ -8,7 +8,6 @@ module conv_ibuf #(
     parameter V_CIM_TILES_OUT = (INPUT_CHANNELS*KERNEL_DIM**2 + XBAR_SIZE-1) / XBAR_SIZE,
     parameter NUM_ADDR = $rtoi($ceil(INPUT_CHANNELS*KERNEL_DIM**2 / (BUS_WIDTH * V_CIM_TILES_OUT))),
     parameter ADDR_WIDTH = (NUM_ADDR <= 1) ? 1 : $clog2(NUM_ADDR)
-    // parameter COUNT_WIDTH = (DATA_SIZE==1) ? 0 : $clog2(DATA_SIZE)
 ) (
     input clk,
     input [INPUT_CHANNELS-1:0] i_write_enable,

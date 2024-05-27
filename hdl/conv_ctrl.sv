@@ -1,122 +1,134 @@
 typedef enum {
-  s_conv_ctrl_reset, // Reset
   s_conv_ctrl_idle, // Idle
-  s_conv_ctrl_busy, // Busy
-  s_conv_ctrl_start_next // Start next
+  s_conv_ctrl_consume, // Consume
+  s_conv_ctrl_start, // Start CIM
+  s_conv_ctrl_wait // W8 CIM
 } t_conv_ctrl_state;
 
 module conv_ctrl #(
-    parameter datatype_size = 8,
-    parameter input_channels = 5,
-    parameter kernel_dim = 3,
-    parameter xbar_size = 256,
-    parameter input_size = input_channels*(kernel_dim**2),
-    parameter v_cim_tiles = (input_size + xbar_size - 1) / xbar_size // ceiled division
+    parameter DATA_SIZE = 8,
+    parameter INPUT_CHANNELS = 16,
+    parameter KERNEL_DIM = 3,
+    parameter XBAR_SIZE = 128,
+    parameter BUS_WIDTH = 16,
+    parameter V_CIM_TILES_OUT = (INPUT_CHANNELS*KERNEL_DIM**2 + XBAR_SIZE-1) / XBAR_SIZE,
+    parameter COUNT_WIDTH = (DATA_SIZE==1) ? 1 : $clog2(DATA_SIZE),
+    parameter NUM_ADDR = $rtoi($ceil(INPUT_CHANNELS*KERNEL_DIM**2 / (BUS_WIDTH * V_CIM_TILES_OUT))),
+    parameter ADDR_WIDTH = (NUM_ADDR <= 1) ? 1 : $clog2(NUM_ADDR)
 ) (
     input clk,
     input rst,
+
+    output reg [COUNT_WIDTH-1:0] o_count, // data bit count ibuf
+
+    // Control signals prev. layer
     input i_start,
-    input i_cim_busy,
-    output reg o_cim_we,
-    input i_func_busy,
-    output reg o_busy,
-    input [datatype_size-1:0] i_data [input_channels*(kernel_dim**2)-1:0],
-    output reg [$clog2(xbar_size)-1:0] o_cim_addr,
-    output reg [datatype_size-1:0] o_data [v_cim_tiles-1:0]
+    output reg o_ready,
+
+    // CIM interface
+    input i_cim_ready,
+    output o_cim_we,
+    output o_cim_start,
+    output [ADDR_WIDTH-1:0] o_addr, // addr to CIM and ibuf
+
+    // Control signals func unit
+    input i_func_ready,
+    output o_func_start
 );
 
-localparam count_limit = v_cim_tiles > 1 ? xbar_size : input_size;
-int unsigned cim_addr, next_cim_addr;
-int unsigned input_count, next_input_count;
+int unsigned addr, next_addr;
+int unsigned count, next_count;
 t_conv_ctrl_state ctrl_state, next_ctrl_state;
 
-assign o_cim_addr = cim_addr[$clog2(xbar_size)-1:0];
-
-genvar i;
-generate
-    for (i = 0; i < v_cim_tiles; i++) begin
-        assign o_data[i] = i_data[cim_addr + i*xbar_size];
-    end
-endgenerate
+assign o_addr = addr[ADDR_WIDTH-1:0];
+assign o_count = count[COUNT_WIDTH-1:0];
 
 always_ff @(posedge clk) begin
     if (rst) begin
-        ctrl_state <= s_conv_ctrl_reset;
-        input_count <= 0;
-        cim_addr <= 0;
+        ctrl_state <= s_conv_ctrl_idle;
+        count <= 0;
+        addr <= 0;
     end else begin
         ctrl_state <= next_ctrl_state;
-        input_count <= next_input_count;
-        cim_addr <= next_cim_addr;
+        count <= next_count;
+        addr <= next_addr;
     end
 end
 
 always_comb begin
     case (ctrl_state)
-        s_conv_ctrl_reset: begin // Reset state
-            next_input_count = 0;
-            next_cim_addr = 0;
-            o_cim_we = 0;
-            if (i_start) begin // Start signal comes in
-                o_busy = 1;
-                if (i_cim_busy) begin // If next module busy
-                    next_ctrl_state = s_conv_ctrl_idle; // Idle until not busy
-                end else begin // If next module not busy
-                    next_ctrl_state = s_conv_ctrl_busy; // Start transfer
-                end
-            end else begin // Stay in reset state
-                o_busy = 0;
-                next_ctrl_state = s_conv_ctrl_reset;
-            end
-        end
         s_conv_ctrl_idle: begin // Idle state
-            o_busy = 1;
-            next_input_count = 0;
-            next_cim_addr = 0;
-            if (!i_cim_busy) begin
-                o_cim_we = 1;
-                next_ctrl_state = s_conv_ctrl_busy;
-            end else begin
-                o_cim_we = 0;
+            next_count = 0;
+            next_addr = 0;
+            o_cim_we = 0;
+            o_ready = 1;
+            o_func_start = 0;
+            o_cim_start = 0;
+            if (i_start) begin // Start signal comes in
+                if (i_cim_ready) begin // If CIM ready
+                    next_ctrl_state = s_conv_ctrl_consume; // Start consuming ibuf
+                end else begin // If CIM not ready
+                    next_ctrl_state = s_conv_ctrl_idle; // Stay idle
+                end
+            end else begin // Stay in idle state
                 next_ctrl_state = s_conv_ctrl_idle;
             end
         end
-        s_conv_ctrl_busy: begin // Busy state
-            o_busy = 1;
-            if (input_count >= count_limit - 1) begin
-                o_cim_we = 0;
-                if (!i_func_busy) begin
-                    next_ctrl_state = s_conv_ctrl_start_next; // Start
-                    next_input_count = 0;
-                    next_cim_addr = 0;
-                end else begin
-                    next_ctrl_state = s_conv_ctrl_busy;
-                    next_input_count = input_count;
-                    next_cim_addr = cim_addr;
-                end
+        s_conv_ctrl_consume: begin // Consume IBUF, write RD BUF
+            next_count = count;
+            o_cim_we = 1;
+            o_ready = 0;
+            o_func_start = 0;
+            o_cim_start = 0;
+            if (addr >= NUM_ADDR - 1) begin
+                next_ctrl_state = s_conv_ctrl_start;
+                next_addr = addr;
             end else begin
-                o_cim_we = 1;
-                next_ctrl_state = s_conv_ctrl_busy;
-                next_input_count = input_count + 1;
-                if (cim_addr >= xbar_size - 1) begin
-                    next_cim_addr = 0;
-                end else begin
-                    next_cim_addr = cim_addr + 1;
-                end
+                next_ctrl_state = s_conv_ctrl_consume;
+                next_addr = addr + 1;
             end
         end
-        s_conv_ctrl_start_next: begin
-            o_busy = 0;
+        s_conv_ctrl_start: begin // Start CIM
+            next_count = count;
+            next_addr = 0;
             o_cim_we = 0;
-            next_cim_addr = 0;
-            next_input_count = 0;
-            if (i_cim_busy) begin
-                next_ctrl_state = s_conv_ctrl_reset;
-            end else begin
-                next_ctrl_state = s_conv_ctrl_start_next;
+            o_ready = 0;
+            o_func_start = 0;
+            if (!i_cim_ready) begin // CIM is now busy
+                next_ctrl_state = s_conv_ctrl_wait;
+                o_cim_start = 0;
+            end else begin // CIM not started yet
+                next_ctrl_state = s_conv_ctrl_start;
+                o_cim_start = 1;
             end
         end
-        default: next_ctrl_state = s_conv_ctrl_reset;
+        s_conv_ctrl_wait: begin
+            next_addr = 0;
+            o_cim_we = 0;
+            o_ready = 0;
+            o_cim_start = 0;
+            o_func_start = 0;
+            if (i_cim_ready) begin // CIM is finished
+                if (count >= DATA_SIZE-1) begin
+                    next_count = count;
+                    if (i_func_ready) begin
+                        next_ctrl_state = s_conv_ctrl_idle;
+                        o_func_start = 1;
+                    end else begin // func still busy
+                        next_ctrl_state = s_conv_ctrl_wait; // wait
+                    end
+                end else begin
+                    next_count = count + 1;
+                    next_ctrl_state = s_conv_ctrl_consume;
+                end
+            end else begin // CIM still busy
+                next_count = count;
+                o_func_start = 0;
+                next_ctrl_state = s_conv_ctrl_wait; // wait
+            end
+            
+        end
+        default: next_ctrl_state = s_conv_ctrl_idle;
     endcase
 end
 
