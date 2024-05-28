@@ -1,8 +1,8 @@
 // Func unit when next layer is MLP
 
 typedef enum {
-  s_func_idle, // Idle
-  s_func_busy // Consume obuf
+    s_func_idle, // Idle
+    s_func_busy // Consume obuf
 } t_func_state;
 
 module fc_func #(
@@ -25,15 +25,16 @@ module fc_func #(
     input i_start,
     output reg o_ready,
 
+    // CIM Interface
+    input i_cim_ready,
+    input logic [OBUF_DATA_SIZE-1:0] i_data [H_CIM_TILES-1:0][NUM_CHANNELS-1:0][V_CIM_TILES-1:0], // Data from CIM obuf to FPGA
+    output reg [$clog2(NUM_ADDR)-1:0] o_addr,
+
     // Next module interface
     output logic [DATA_SIZE-1:0] o_data [H_CIM_TILES-1:0][NUM_CHANNELS-1:0], // Data from FPGA func to input buffer
     output reg o_write_enable,
     input i_next_ready,
-
-    // CIM Interface
-    input i_cim_ready,
-    input logic [OBUF_DATA_SIZE-1:0] i_data [H_CIM_TILES-1:0][NUM_CHANNELS-1:0][V_CIM_TILES-1:0], // Data from CIM obuf to FPGA
-    output reg [$clog2(NUM_ADDR)-1:0] o_addr
+    output o_start // start next module
 );
 
 // assert property (1 == 0);
@@ -45,6 +46,7 @@ logic [OBUF_DATA_SIZE+$clog2(V_CIM_TILES)-1:0] acc_data [H_CIM_TILES-1:0][NUM_CH
 
 assign o_addr = addr[$clog2(NUM_ADDR)-1:0];
 
+// accumulate & relu & batch norm(?)
 always_comb begin
     for (int i = 0; i < H_CIM_TILES; i++) begin
         for (int j = 0; j < NUM_CHANNELS; j++) begin
@@ -76,8 +78,10 @@ always_comb begin
         s_func_idle: begin // Idle state
             next_addr = 0;
             o_ready = 1;
+            o_write_enable = 0;
+            o_start = 0;
             if (i_start) begin // Start signal comes in
-                if (i_cim_ready && i_next_ready) begin // If next module busy
+                if (i_cim_ready && i_next_ready) begin // If next module ready
                     next_func_state = s_func_busy; // start consuming obuf
                 end else begin // If next module not busy
                     next_func_state = s_func_idle; // idle
@@ -88,17 +92,23 @@ always_comb begin
         end
         s_func_busy: begin // Busy state
             o_ready = 0;
+            o_write_enable = 1;
+            o_start = 0;
+            next_addr = addr + 1;
+            next_func_state = s_func_busy;
             if (addr >= NUM_ADDR - 1) begin
                 next_func_state = s_func_idle;
-                o_write_enable = 0;
                 next_addr = 0;
-            end else begin
-                next_func_state = s_func_busy;
-                o_write_enable = 1;
-                next_addr = addr + 1;
+                o_start = 1;
             end
         end
-        default: next_func_state = s_func_idle;
+        default: begin
+            o_start = 0;
+            next_addr = 0;
+            o_ready = 0;
+            o_write_enable = 0;
+            next_func_state = s_func_idle;
+        end
     endcase
 end
 
