@@ -27,13 +27,13 @@ module conv_ctrl #(
 
     // CIM interface
     input i_cim_ready,
-    output o_cim_we,
-    output o_cim_start,
-    output [ADDR_WIDTH-1:0] o_addr, // addr to CIM and ibuf
+    output reg o_cim_we,
+    output reg o_cim_start,
+    output reg [ADDR_WIDTH-1:0] o_addr, // addr to CIM and ibuf
 
     // Control signals func unit
     input i_func_ready,
-    output o_func_start
+    output reg o_func_start
 );
 
 int unsigned addr, next_addr;

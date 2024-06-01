@@ -33,7 +33,7 @@ module conv_func #(
     input i_next_ready,
     output reg [DATA_SIZE-1:0] o_data [OUTPUT_CHANNELS-1:0],
     output reg [OUTPUT_CHANNELS-1:0] o_write_enable,
-    output o_start
+    output reg o_start
 );
 
 integer unsigned addr, next_addr;

@@ -49,6 +49,12 @@ else ifeq ($(TOPLEVEL),fc_layer)
     VERILOG_SOURCES += $(shell pwd)/hdl/fc_ibuf.sv
     VERILOG_SOURCES += $(shell pwd)/hdl/fc_func.sv
     MODULE = tb.test_fc
+else ifeq ($(TOPLEVEL),conv_layer)
+    VERILOG_SOURCES = $(shell pwd)/hdl/conv_layer.sv
+    VERILOG_SOURCES += $(shell pwd)/hdl/conv_ctrl.sv
+    VERILOG_SOURCES += $(shell pwd)/hdl/conv_ibuf.sv
+    VERILOG_SOURCES += $(shell pwd)/hdl/conv_func.sv
+    MODULE = tb.test_conv
 else
     $(error Given TOPLEVEL '$(TOPLEVEL)' not supported)
 endif

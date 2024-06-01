@@ -1,91 +1,102 @@
 module conv_layer #(
-    parameter input_channels = 256, // Number of input channels
-    parameter img_width = 13, // Input image width
-    parameter kernel_dim = 3, // kernel dim N, where kernel size is NxN
-    parameter output_size = 384, // Number of output channels
-    parameter xbar_size = 256,
-    parameter datatype_size = 4,
-    parameter output_datatype_size = 4,
-    parameter input_size = input_channels * kernel_dim**2, // Total CIM rows
-    parameter v_cim_tiles = (input_size + xbar_size - 1) / xbar_size, // ceiled division
-    parameter h_cim_tiles = (output_size*datatype_size + xbar_size - 1) / xbar_size // ceiled division
+    parameter DATA_SIZE = 8,
+    parameter IMG_DIM = 28,
+    parameter KERNEL_DIM = 3,
+    parameter INPUT_CHANNELS = 2,
+    parameter XBAR_SIZE = 128,
+    parameter BUS_WIDTH = 16,
+    parameter OUTPUT_CHANNELS = 4,
+    parameter OBUF_BUS_WIDTH = 46,
+    parameter V_CIM_TILES_OUT = (INPUT_CHANNELS*KERNEL_DIM**2 + XBAR_SIZE-1) / XBAR_SIZE,
+    parameter NUM_ADDR = $rtoi($ceil(INPUT_CHANNELS*KERNEL_DIM**2 / (BUS_WIDTH * V_CIM_TILES_OUT))),
+    parameter ADDR_WIDTH = (NUM_ADDR <= 1) ? 1 : $clog2(NUM_ADDR),
+    parameter OBUF_DATA_SIZE = (DATA_SIZE == 1) ? $clog2(XBAR_SIZE) : 2*DATA_SIZE+$clog2(XBAR_SIZE),
+    parameter H_CIM_TILES = (OUTPUT_CHANNELS * DATA_SIZE + XBAR_SIZE - 1) / XBAR_SIZE, // THIS layer H cim tiles
+    parameter V_CIM_TILES = (INPUT_CHANNELS*KERNEL_DIM**2+XBAR_SIZE-1) / XBAR_SIZE, // THIS layer V cim tiles
+    parameter ELEMENTS_PER_TILE = $rtoi($floor(XBAR_SIZE / DATA_SIZE)), // num elements in output buffer
+    parameter NUM_CHANNELS = $rtoi($floor(OBUF_BUS_WIDTH / OBUF_DATA_SIZE)), // elements read in parallel
+    parameter NUM_ADDR_OBUF = $rtoi($ceil(ELEMENTS_PER_TILE / NUM_CHANNELS)) // num addresses for obuf
 ) (
     input clk,
     input rst,
 
-    input i_ibuf_we [input_channels-1:0],
-    input [datatype_size-1:0] i_ibuf_wr_data [input_channels-1:0],
+    input [INPUT_CHANNELS-1:0] i_ibuf_we,
+    input [DATA_SIZE-1:0] i_ibuf_wr_data [INPUT_CHANNELS-1:0],
     input i_start,
-    input i_cim_busy,
-    input i_func_start,
-    output reg o_busy, // ctrl busy
-    output reg [$clog2(xbar_size)-1:0] o_cim_wr_addr,
-    output reg [datatype_size-1:0] o_cim_data [v_cim_tiles-1:0],
+    output o_ready,
 
-    input i_next_busy,
-    input [datatype_size-1:0] i_data [v_cim_tiles-1:0][h_cim_tiles-1:0], // CIM Output buffer data
-    output reg [$clog2(xbar_size)-1:0] o_cim_rd_addr,
-    output reg [output_datatype_size-1:0] o_func_data // Only one port because func reads one unit at a time
+    output [BUS_WIDTH*V_CIM_TILES_OUT-1:0] o_cim_rd_data [DATA_SIZE-1:0],
+    input i_cim_ready,
+    output o_cim_we,
+    output o_cim_start,
+    output [ADDR_WIDTH-1:0] o_cim_rd_addr, // addr to CIM and ibuf
+    input [OBUF_DATA_SIZE-1:0] i_cim_obuf_data [H_CIM_TILES-1:0][NUM_CHANNELS-1:0][V_CIM_TILES-1:0],
+    output reg [$clog2(NUM_ADDR_OBUF)-1:0] o_cim_obuf_addr,
+
+    // Next module interface
+    input i_next_ready,
+    output reg [DATA_SIZE-1:0] o_next_data [OUTPUT_CHANNELS-1:0],
+    output reg [OUTPUT_CHANNELS-1:0] o_next_we,
+    output o_next_start
+
 );
 
-logic [datatype_size-1:0] ibuf_rd_data [input_channels-1:0][kernel_dim**2-1:0];
-logic [datatype_size-1:0] ctrl_rd_data [input_channels*kernel_dim**2-1:0];
-logic func_busy;
+wire [ADDR_WIDTH-1:0] ibuf_addr;
+wire func_ready;
+wire o_func_start;
 
-generate
-  genvar i, j;
-  for (i = 0; i < input_channels; i++) begin
-    conv_ibuf #(
-      .datatype_size(datatype_size),
-      .img_width(img_width),
-      .kernel_dim(kernel_dim)
-    ) ibuf (
-      .clk(clk),
-      .i_write_enable(i_ibuf_we[i]),
-      .i_data(i_ibuf_wr_data[i]), // From prev layer func to ibuf
-      .o_data(ibuf_rd_data[i]) // From ibuf to ctrl of this layer
-    );
-    for (j = 0; j < kernel_dim**2; j++) begin
-      assign ctrl_rd_data[i * kernel_dim**2 + j] = ibuf_rd_data[i][j];
-    end
-  end
-endgenerate
+conv_ibuf #(
+    .DATA_SIZE(DATA_SIZE),
+    .IMG_DIM(IMG_DIM),
+    .KERNEL_DIM(KERNEL_DIM),
+    .INPUT_CHANNELS(INPUT_CHANNELS),
+    .XBAR_SIZE(XBAR_SIZE),
+    .BUS_WIDTH(BUS_WIDTH)
+) ibuf (
+    .clk(clk),
+    .i_write_enable(i_ibuf_we),
+    .i_data(i_ibuf_wr_data),
+    .o_data(o_cim_rd_data),
+    .i_ibuf_addr(o_cim_rd_addr)
+);
 
 // Instantiate ctrl module
 conv_ctrl #(
-    .datatype_size(datatype_size),
-    .input_channels(input_channels),
-    .kernel_dim(kernel_dim),
-    .xbar_size(xbar_size)
+    .DATA_SIZE(DATA_SIZE),
+    .INPUT_CHANNELS(INPUT_CHANNELS),
+    .KERNEL_DIM(KERNEL_DIM),
+    .XBAR_SIZE(XBAR_SIZE),
+    .BUS_WIDTH(BUS_WIDTH)
 ) ctrl (
     .clk(clk),
     .rst(rst),
     .i_start(i_start),
-    .i_cim_busy(i_cim_busy),
+    .i_cim_ready(i_cim_ready),
     .o_cim_we(o_cim_we),
-    .i_func_busy(func_busy),
-    .o_busy(o_busy),
-    .i_data(ctrl_rd_data),
-    .o_cim_addr(o_cim_wr_addr),
-    .o_data(o_cim_data)
+    .o_cim_start(o_cim_start),
+    .o_addr(o_cim_rd_addr),
+    .i_func_ready(func_ready),
+    .o_func_start(func_start)
 );
 
 conv_func #(
-    .input_size(input_size),
-    .output_size(output_size),
-    .xbar_size(xbar_size),
-    .datatype_size(datatype_size),
-    .output_datatype_size(output_datatype_size)
+    .DATA_SIZE(DATA_SIZE),
+    .INPUT_CHANNELS(INPUT_CHANNELS),
+    .KERNEL_DIM(KERNEL_DIM),
+    .OUTPUT_CHANNELS(OUTPUT_CHANNELS),
+    .XBAR_SIZE(XBAR_SIZE),
+    .OBUF_BUS_WIDTH(OBUF_BUS_WIDTH)
 ) func (
     .clk(clk),
     .rst(rst),
-    .i_start(i_func_start),
-    .i_cim_busy(i_cim_busy),
-    .o_busy(func_busy),
-    .i_next_busy(i_next_busy),
-    .i_data(i_data),
-    .o_cim_addr(o_cim_rd_addr),
-    .o_data(o_func_data)
+    .i_start(func_start),
+    .o_ready(func_ready),
+    .i_cim_ready(i_cim_ready),
+    .i_data(i_cim_obuf_data),
+    .o_addr(o_cim_obuf_addr),
+    .o_data(o_next_data),
+    .o_write_enable(o_next_we),
+    .o_start(o_next_start)
 );
 
 endmodule
