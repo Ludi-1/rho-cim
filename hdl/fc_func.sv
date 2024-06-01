@@ -34,7 +34,7 @@ module fc_func #(
     output logic [DATA_SIZE-1:0] o_data [H_CIM_TILES-1:0][NUM_CHANNELS-1:0], // Data from FPGA func to input buffer
     output reg o_write_enable,
     input i_next_ready,
-    output o_start // start next module
+    output reg o_start // start next module
 );
 
 // assert property (1 == 0);

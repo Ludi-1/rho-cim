@@ -15,12 +15,13 @@ module fc_layer #(
     input rst,
 
     input i_ibuf_we,
-    input [datatype_size-1:0] i_ibuf_wr_data,
+    input [DATA_SIZE-1:0] i_ibuf_wr_data,
     input i_start, // filling ibuf done -> start ctrl
     input i_cim_ready, // CIM tiles ready -> w8 until done
     output reg o_ready, // ctrl ready consuming -> dont write to ibuf
     output reg [$clog2(NUM_ADDR)-1:0] o_cim_wr_addr, // addr to CIM tile
     output reg [BUS_WIDTH*v_cim_tiles-1:0] o_cim_data,
+    output o_cim_we,
 
     input i_next_ready, // ctrl of next layer ready
     input [OBUF_DATA_SIZE-1:0] i_data [v_cim_tiles-1:0][h_cim_tiles-1:0], // CIM Output buffer data
@@ -30,39 +31,40 @@ module fc_layer #(
 
 logic [$clog2(input_size)-1:0] ibuf_rd_addr;
 logic [datatype_size-1:0] ibuf_rd_data;
-logic func_busy;
+logic s_func_ready;
 
 fc_ibuf #(
-    .DATA_WIDTH(datatype_size),
-    .INPUT_NEURONS(input_size),
-    .OUTPUT_NEURONS(output_size),
-    .XBAR_SIZE(xbar_size),
-    .BUS_WIDTH(BUS_WIDTH),
+    .DATA_SIZE(DATA_SIZE),
+    .INPUT_NEURONS(INPUT_NEURONS),
+    .OUTPUT_NEURONS(OUTPUT_NEURONS),
+    .XBAR_SIZE(XBAR_SIZE),
+    .BUS_WIDTH(BUS_WIDTH)
 ) ibuf (
     .clk(clk),
     .i_we(i_ibuf_we),
     .i_se(s_se),
     .i_ibuf_addr(o_cim_wr_addr),
+    .i_data(i_ibuf_wr_data),
     .o_data(o_cim_data)
 )
 
 // Instantiate ctrl module
 fc_ctrl #(
-    .datatype_size(datatype_size),
-    .input_size(input_size),
-    .xbar_size(xbar_size)
+    .DATA_SIZE(DATA_SIZE),
+    .INPUT_NEURONS(INPUT_NEURONS),
+    .XBAR_SIZE(XBAR_SIZE),
+    .BUS_WIDTH(BUS_WIDTH),
+    .OBUF_BUS_WIDTH(OBUF_BUS_WIDTH)
 ) ctrl (
     .clk(clk),
     .rst(rst),
+    .o_shift_enable(s_se),
     .i_start(i_start),
-    .i_cim_busy(i_cim_busy),
+    .o_ready(o_ready),
+    .i_cim_ready(i_cim_ready),
     .o_cim_we(o_cim_we),
-    .i_func_busy(func_busy),
-    .o_busy(o_busy),
-    .o_ibuf_addr(ibuf_rd_addr),
-    .i_data(ibuf_rd_data),
-    .o_cim_addr(o_cim_wr_addr),
-    .o_data(o_cim_data)
+    .o_addr(o_cim_wr_addr),
+    .i_func_ready(s_func_ready)
 );
 
 fc_func #(

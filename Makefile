@@ -1,12 +1,12 @@
 # Makefile
 # $(shell . .venv/bin/activate)
 
-SIM = verilator
+SIM = icarus
 PWD=$(shell pwd)
 TOPLEVEL_LANG = verilog
 WAVES=1
-EXTRA_ARGS += --trace-fst --trace-structs
-EXTRA_ARGS += --trace --trace-structs
+# EXTRA_ARGS += --trace-fst --trace-structs
+# EXTRA_ARGS += --trace --trace-structs
 
 TOPLEVEL ?= fc_ibuf
 $(shell rm -rf sim_build)
@@ -31,6 +31,18 @@ else ifeq ($(TOPLEVEL),conv_ctrl)
 else ifeq ($(TOPLEVEL),conv_func)
     VERILOG_SOURCES = $(shell pwd)/hdl/conv_func.sv
     MODULE = tb.test_conv_func
+else ifeq ($(TOPLEVEL),flatten_fc_ctrl)
+    VERILOG_SOURCES = $(shell pwd)/hdl/flatten_fc_ctrl.sv
+    MODULE = tb.test_flatten_ctrl
+else ifeq ($(TOPLEVEL),flatten_fc_ibuf)
+    VERILOG_SOURCES = $(shell pwd)/hdl/flatten_fc_ibuf.sv
+    MODULE = tb.test_flatten_ibuf
+else ifeq ($(TOPLEVEL),flatten_fc_layer)
+    VERILOG_SOURCES = $(shell pwd)/hdl/flatten_fc_layer.sv
+    VERILOG_SOURCES += $(shell pwd)/hdl/flatten_fc_ctrl.sv
+    VERILOG_SOURCES += $(shell pwd)/hdl/flatten_fc_ibuf.sv
+    VERILOG_SOURCES += $(shell pwd)/hdl/fc_func.sv
+    MODULE = tb.test_flatten
 else
     $(error Given TOPLEVEL '$(TOPLEVEL)' not supported)
 endif
