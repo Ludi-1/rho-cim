@@ -43,6 +43,12 @@ else ifeq ($(TOPLEVEL),flatten_fc_layer)
     VERILOG_SOURCES += $(shell pwd)/hdl/flatten_fc_ibuf.sv
     VERILOG_SOURCES += $(shell pwd)/hdl/fc_func.sv
     MODULE = tb.test_flatten
+else ifeq ($(TOPLEVEL),fc_layer)
+    VERILOG_SOURCES = $(shell pwd)/hdl/fc_layer.sv
+    VERILOG_SOURCES += $(shell pwd)/hdl/fc_ctrl.sv
+    VERILOG_SOURCES += $(shell pwd)/hdl/fc_ibuf.sv
+    VERILOG_SOURCES += $(shell pwd)/hdl/fc_func.sv
+    MODULE = tb.test_fc
 else
     $(error Given TOPLEVEL '$(TOPLEVEL)' not supported)
 endif
