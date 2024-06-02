@@ -1,10 +1,3 @@
-typedef enum {
-  s_conv_ctrl_idle, // Idle
-  s_conv_ctrl_consume, // Consume
-  s_conv_ctrl_start, // Start CIM
-  s_conv_ctrl_wait // W8 CIM
-} t_conv_ctrl_state;
-
 module flatten_fc_ctrl #(
     parameter DATA_SIZE = 8,
     parameter INPUT_CHANNELS = 16,

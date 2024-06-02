@@ -58,6 +58,10 @@ else ifeq ($(TOPLEVEL),conv_layer)
 else ifeq ($(TOPLEVEL),pool_layer)
     VERILOG_SOURCES = $(shell pwd)/hdl/pool_layer.sv
     MODULE = tb.test_pool
+else ifeq ($(TOPLEVEL),top_vgg16_d8_c128)
+    VERILOG_SOURCES = $(shell pwd)/hdl/*
+    VERILOG_SOURCES += $(shell pwd)/perf-sim/gen_hdl/vgg16_d8_c128.sv
+    MODULE = tb.test_vgg
 else
     $(error Given TOPLEVEL '$(TOPLEVEL)' not supported)
 endif
