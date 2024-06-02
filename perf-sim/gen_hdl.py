@@ -8,10 +8,14 @@ def gen_hdl(param_dict_tuple, datatype_size, crossbar_size, rd_bus_width, obuf_b
     modules = ""
     ports = ""
 
-    parameters += (f"\tparameter XBAR_SIZE = {crossbar_size},\n")
-    parameters += (f"\tparameter DATA_SIZE = {datatype_size},\n")
-    parameters += (f"\tparameter BUS_WIDTH = {rd_bus_width},\n")
-    parameters += (f"\tparameter OBUF_BUS_WIDTH = {obuf_bus_width},\n")
+    parameters += (
+        f'\tparameter XBAR_SIZE = {crossbar_size},\n'
+        f'\tparameter DATA_SIZE = {datatype_size},\n'
+        f'\tparameter BUS_WIDTH = {rd_bus_width},\n'
+        f'\tparameter OBUF_BUS_WIDTH = {obuf_bus_width},\n'
+        f'\tparameter NUM_CHANNELS = $rtoi($floor(OBUF_BUS_WIDTH / OBUF_DATA_SIZE)),\n'
+        f'\tparameter FIFO_LENGTH = $rtoi($ceil($floor(XBAR_SIZE / DATA_SIZE) / NUM_CHANNELS)),\n'
+    )
 
     ports += (
         f'\tinput clk,\n'
@@ -24,10 +28,17 @@ def gen_hdl(param_dict_tuple, datatype_size, crossbar_size, rd_bus_width, obuf_b
         print(prev_layer, current_layer)
         match current_layer[0]:
             case "fc":
-                parameters += (f"\tparameter L{n}_OUTPUT_NEURONS = {current_layer[2]},\n")
+                parameters += (
+                    f'\tparameter L{n}_OUTPUT_NEURONS = {current_layer[2]},\n'
+                )
                 match prev_layer[0]:
                     case None | "fc":
-                        parameters += (f"\tparameter L{n}_INPUT_NEURONS = {current_layer[1]},\n")
+                        parameters += (
+                            f'\tparameter L{n}_INPUT_NEURONS = {current_layer[1]},\n'
+                            f'\tparameter L{n}_H_CIM_TILES_IN = $rtoi($ceil(L{n}_INPUT_NEURONS / FIFO_LENGTH)),\n'
+                            f'\tparameter L{n}_V_CIM_TILES = $rtoi($ceil(L{n}_INPUT_NEURONS / XBAR_SIZE)),\n'
+                            f'\tparameter L{n}_H_CIM_TILES = $rtoi($ceil(L{n}_OUTPUT_NEURONS*DATA_SIZE/XBAR_SIZE)),\n'
+                        )
                         ports += (
                             f'\tinput L{n}_i_cim_ready,\n'
                             f'\toutput [BUS_WIDTH*L{n}_V_CIM_TILES-1:0] L{n}_o_cim_data\n'
@@ -179,7 +190,7 @@ def gen_hdl(param_dict_tuple, datatype_size, crossbar_size, rd_bus_width, obuf_b
                             f'\tinput o_next_ready,\n'
                             f'\toutput [DATA_SIZE-1:0] o_next_data [L{n-1}_H_CIM_TILES-1:0][L{n-1}_NUM_CHANNELS-1:0],\n'
                             f'\toutput o_next_we,\n'
-                            f'\toutput o_next_start\n'  
+                            f'\toutput o_next_start'  
                         )
                         modules += (
                             f'assign o_next_ready = L{n-1}_next_ready;\n'
