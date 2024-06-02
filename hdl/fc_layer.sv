@@ -11,7 +11,7 @@ module fc_layer #(
     parameter H_CIM_TILES_IN = $rtoi($ceil(INPUT_NEURONS / FIFO_LENGTH)), // PREV Layer H cim tiles
     parameter V_CIM_TILES = $rtoi($ceil(INPUT_NEURONS / XBAR_SIZE)), // THIS layer V cim tiles
     parameter NUM_ADDR = $rtoi($ceil(FIFO_LENGTH*H_CIM_TILES_IN / (BUS_WIDTH * V_CIM_TILES))),
-    parameter H_CIM_TILES = $rtoi($ceil(OUTPUT_NEURONS*DATA_SIZE/XBAR_SIZE)), // THIS LAYER H cim tiles
+    parameter H_CIM_TILES = $rtoi($ceil(OUTPUT_NEURONS / FIFO_LENGTH)), // THIS LAYER H cim tiles
     parameter ELEMENTS_PER_TILE = $rtoi($floor(XBAR_SIZE / DATA_SIZE)), // num elements in output buffer
     parameter NUM_ADDR_OBUF = $rtoi($ceil(ELEMENTS_PER_TILE / NUM_CHANNELS)) // num addresses for obuf
 ) (
