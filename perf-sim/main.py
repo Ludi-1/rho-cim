@@ -65,14 +65,14 @@ def main(ENABLE_OUTPUT):
     for param_dict_tuple in param_dicts:
         for datatype_size in datatype_size_list:
             for crossbar_size in crossbar_size_list:
-                gen_hdl(param_dict_tuple, datatype_size, crossbar_size)
+                param_dict = param_dict_tuple[1]
+                conf_name = conf_name = f"{param_dict_tuple[0]}_d{datatype_size}_c{crossbar_size}"
+                analysis_operations(param_dict, conf_name, datatype_size, crossbar_size)
 
     for param_dict_tuple in param_dicts:
         for datatype_size in datatype_size_list:
             for crossbar_size in crossbar_size_list:
-                param_dict = param_dict_tuple[1]
-                conf_name = conf_name = f"{param_dict_tuple[0]}_d{datatype_size}_c{crossbar_size}"
-                analysis_operations(param_dict, conf_name, datatype_size, crossbar_size)
+                gen_hdl(param_dict_tuple, datatype_size, crossbar_size, 16, 48)
         
 if __name__ == "__main__":
     ENABLE_OUTPUT = False

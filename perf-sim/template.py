@@ -2,7 +2,7 @@
 HDL template for top-level module
 """
 
-TEMPLATE = """module top_%LAYER_NAME% #(
+TEMPLATE = """module top_%TOP_NAME% #(
 %PARAMETERS%
 ) (
 %PORTS%
@@ -10,6 +10,6 @@ TEMPLATE = """module top_%LAYER_NAME% #(
 
 %SIGNALS%
 
-%MODULES
+%MODULES%
 
 endmodule"""
