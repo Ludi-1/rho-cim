@@ -1,5 +1,5 @@
 module pool_layer #(
-    DATA_SIZE = 8,
+    parameter DATA_SIZE = 8,
     parameter INPUT_CHANNELS = 256, // Number of input channels
     parameter IMG_DIM = 13, // Input image width
     parameter KERNEL_DIM = 3, // kernel dim N, where kernel size is NxN
@@ -13,14 +13,15 @@ module pool_layer #(
     output o_ready,
     input i_start,
 
-    output [OUTPUT_CHANNELS-1:0] o_ibuf_we,
-    output o_start,
-    output reg [DATA_SIZE-1:0] o_data [OUTPUT_CHANNELS-1:0]
+    input i_next_ready,
+    output reg [DATA_SIZE-1:0] o_next_data [OUTPUT_CHANNELS-1:0],
+    output [OUTPUT_CHANNELS-1:0] o_next_we,
+    output o_next_start
 );
 
-assign o_ready = 1;
-assign o_ibuf_we = i_ibuf_we;
-assign o_start = i_start;
+assign o_ready = i_next_ready;
+assign o_next_we = i_ibuf_we;
+assign o_next_start = i_start;
 
 localparam FIFO_LENGTH = IMG_DIM * (KERNEL_DIM - 1) + KERNEL_DIM;
 reg [DATA_SIZE-1:0] fifo_data [INPUT_CHANNELS-1:0][FIFO_LENGTH-1:0];
@@ -59,7 +60,7 @@ always_comb begin
         max_value = kernel_elements[i][j];
       end
     end
-    o_data[i] = max_value;
+    o_next_data[i] = max_value;
   end
 end
 

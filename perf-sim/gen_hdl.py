@@ -28,7 +28,6 @@ def gen_hdl(param_dict_tuple, datatype_size, crossbar_size, rd_bus_width, obuf_b
     n = 0
     param_dict_tuple[1]["layer_list"].insert(0, [None])
     for prev_layer, current_layer in zip_longest(param_dict_tuple[1]["layer_list"], param_dict_tuple[1]["layer_list"][1:], fillvalue = [None]):
-        print(prev_layer, current_layer)
         match current_layer[0]:
             case "fc":
                 parameters += (
@@ -317,7 +316,6 @@ def gen_hdl(param_dict_tuple, datatype_size, crossbar_size, rd_bus_width, obuf_b
                         )
                     case _:
                         raise Exception(f"{conf_name} Bad layer {n} {prev_layer[0]} - {current_layer[0]}")
-
         n += 1
 
     output_hdl = TEMPLATE \

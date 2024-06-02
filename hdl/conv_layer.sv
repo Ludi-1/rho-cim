@@ -7,12 +7,11 @@ module conv_layer #(
     parameter BUS_WIDTH = 16,
     parameter OUTPUT_CHANNELS = 4,
     parameter OBUF_BUS_WIDTH = 46,
-    parameter V_CIM_TILES_OUT = (INPUT_CHANNELS*KERNEL_DIM**2 + XBAR_SIZE-1) / XBAR_SIZE,
-    parameter NUM_ADDR = $rtoi($ceil(INPUT_CHANNELS*KERNEL_DIM**2 / (BUS_WIDTH * V_CIM_TILES_OUT))),
+    parameter V_CIM_TILES = (INPUT_CHANNELS*KERNEL_DIM**2+XBAR_SIZE-1) / XBAR_SIZE, // THIS layer V cim tiles
+    parameter NUM_ADDR = $rtoi($ceil(INPUT_CHANNELS*KERNEL_DIM**2 / (BUS_WIDTH * V_CIM_TILES))),
     parameter ADDR_WIDTH = (NUM_ADDR <= 1) ? 1 : $clog2(NUM_ADDR),
     parameter OBUF_DATA_SIZE = (DATA_SIZE == 1) ? $clog2(XBAR_SIZE) : 2*DATA_SIZE+$clog2(XBAR_SIZE),
     parameter H_CIM_TILES = (OUTPUT_CHANNELS * DATA_SIZE + XBAR_SIZE - 1) / XBAR_SIZE, // THIS layer H cim tiles
-    parameter V_CIM_TILES = (INPUT_CHANNELS*KERNEL_DIM**2+XBAR_SIZE-1) / XBAR_SIZE, // THIS layer V cim tiles
     parameter ELEMENTS_PER_TILE = $rtoi($floor(XBAR_SIZE / DATA_SIZE)), // num elements in output buffer
     parameter NUM_CHANNELS = $rtoi($floor(OBUF_BUS_WIDTH / OBUF_DATA_SIZE)), // elements read in parallel
     parameter NUM_ADDR_OBUF = $rtoi($ceil(ELEMENTS_PER_TILE / NUM_CHANNELS)) // num addresses for obuf
@@ -22,10 +21,10 @@ module conv_layer #(
 
     input [INPUT_CHANNELS-1:0] i_ibuf_we,
     input [DATA_SIZE-1:0] i_ibuf_wr_data [INPUT_CHANNELS-1:0],
-    input i_start,
     output o_ready,
+    input i_start,
 
-    output [BUS_WIDTH*V_CIM_TILES_OUT-1:0] o_cim_rd_data [DATA_SIZE-1:0],
+    output [BUS_WIDTH*V_CIM_TILES-1:0] o_cim_rd_data [DATA_SIZE-1:0],
     input i_cim_ready,
     output o_cim_we,
     output o_cim_start,

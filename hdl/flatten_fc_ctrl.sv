@@ -8,12 +8,12 @@ typedef enum {
 module flatten_fc_ctrl #(
     parameter DATA_SIZE = 8,
     parameter INPUT_CHANNELS = 16,
-    parameter IMG_DIM = 28,
+    parameter IMG_SIZE = 28**2,
     parameter XBAR_SIZE = 128,
     parameter BUS_WIDTH = 16,
-    parameter V_CIM_TILES_OUT = (INPUT_CHANNELS*IMG_DIM**2 + XBAR_SIZE-1) / XBAR_SIZE,
+    parameter V_CIM_TILES_OUT = (INPUT_CHANNELS*IMG_SIZE + XBAR_SIZE-1) / XBAR_SIZE,
     parameter COUNT_WIDTH = (DATA_SIZE==1) ? 1 : $clog2(DATA_SIZE),
-    parameter NUM_ADDR = $rtoi($ceil(INPUT_CHANNELS*IMG_DIM**2 / (BUS_WIDTH * V_CIM_TILES_OUT))),
+    parameter NUM_ADDR = $rtoi($ceil(INPUT_CHANNELS*IMG_SIZE / (BUS_WIDTH * V_CIM_TILES_OUT))),
     parameter ADDR_WIDTH = (NUM_ADDR <= 1) ? 1 : $clog2(NUM_ADDR)
 ) (
     input clk,
@@ -69,7 +69,7 @@ always_comb begin
             o_cim_start = 0;
             next_start_count = start_count;
             if (i_start) begin // Start signal comes in
-                if (start_count == IMG_DIM**2-1) begin
+                if (start_count == IMG_SIZE-1) begin
                     if (i_cim_ready) begin // If CIM ready
                         next_ctrl_state = s_conv_ctrl_consume; // Start consuming ibuf
                         next_start_count = 0;

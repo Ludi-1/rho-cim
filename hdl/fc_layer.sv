@@ -6,13 +6,13 @@ module fc_layer #(
     parameter BUS_WIDTH = 16, // CIM tile bus width
     parameter OBUF_BUS_WIDTH = 46,
     parameter OBUF_DATA_SIZE = (DATA_SIZE == 1) ? $clog2(XBAR_SIZE) : 2*DATA_SIZE+$clog2(XBAR_SIZE),
+    parameter NUM_CHANNELS = $rtoi($floor(OBUF_BUS_WIDTH / OBUF_DATA_SIZE)), // elements read in parallel
     parameter FIFO_LENGTH = $rtoi($ceil($floor(XBAR_SIZE / DATA_SIZE) / NUM_CHANNELS)), // output elements per CIM tile
     parameter H_CIM_TILES_IN = $rtoi($ceil(INPUT_NEURONS / FIFO_LENGTH)), // PREV Layer H cim tiles
     parameter V_CIM_TILES = $rtoi($ceil(INPUT_NEURONS / XBAR_SIZE)), // THIS layer V cim tiles
     parameter NUM_ADDR = $rtoi($ceil(FIFO_LENGTH*H_CIM_TILES_IN / (BUS_WIDTH * V_CIM_TILES))),
     parameter H_CIM_TILES = $rtoi($ceil(OUTPUT_NEURONS*DATA_SIZE/XBAR_SIZE)), // THIS LAYER H cim tiles
     parameter ELEMENTS_PER_TILE = $rtoi($floor(XBAR_SIZE / DATA_SIZE)), // num elements in output buffer
-    parameter NUM_CHANNELS = $rtoi($floor(OBUF_BUS_WIDTH / OBUF_DATA_SIZE)), // elements read in parallel
     parameter NUM_ADDR_OBUF = $rtoi($ceil(ELEMENTS_PER_TILE / NUM_CHANNELS)) // num addresses for obuf
 ) (
     input clk,
@@ -26,7 +26,6 @@ module fc_layer #(
 
     // CIM interface
     input i_cim_ready, // CIM tiles ready -> w8 until done
-    output reg [$clog2(NUM_ADDR)-1:0] o_cim_wr_addr, // addr to CIM tile
     output reg [BUS_WIDTH*V_CIM_TILES-1:0] o_cim_data,
     output o_cim_we,
     output reg [$clog2(NUM_ADDR)-1:0] o_cim_rd_addr,
@@ -75,7 +74,7 @@ fc_ctrl #(
     .o_ready(o_ready),
     .i_cim_ready(i_cim_ready),
     .o_cim_we(o_cim_we),
-    .o_addr(o_cim_wr_addr),
+    .o_addr(o_cim_rd_addr),
     .i_func_ready(func_ready),
     .o_func_start(func_start)
 );
