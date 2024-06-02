@@ -15,6 +15,8 @@ def gen_hdl(param_dict_tuple, datatype_size, crossbar_size, rd_bus_width, obuf_b
         f'\tparameter OBUF_BUS_WIDTH = {obuf_bus_width},\n'
         f'\tparameter NUM_CHANNELS = $rtoi($floor(OBUF_BUS_WIDTH / OBUF_DATA_SIZE)),\n'
         f'\tparameter FIFO_LENGTH = $rtoi($ceil($floor(XBAR_SIZE / DATA_SIZE) / NUM_CHANNELS)),\n'
+        f'\tparameter ELEMENTS_PER_TILE = $rtoi($floor(XBAR_SIZE / DATA_SIZE)),\n'
+        f'\tparameter NUM_ADDR_OBUF = $rtoi($ceil(ELEMENTS_PER_TILE / NUM_CHANNELS))\n'
     )
 
     ports += (
@@ -38,6 +40,7 @@ def gen_hdl(param_dict_tuple, datatype_size, crossbar_size, rd_bus_width, obuf_b
                             f'\tparameter L{n}_H_CIM_TILES_IN = $rtoi($ceil(L{n}_INPUT_NEURONS / FIFO_LENGTH)),\n'
                             f'\tparameter L{n}_V_CIM_TILES = $rtoi($ceil(L{n}_INPUT_NEURONS / XBAR_SIZE)),\n'
                             f'\tparameter L{n}_H_CIM_TILES = $rtoi($ceil(L{n}_OUTPUT_NEURONS*DATA_SIZE/XBAR_SIZE)),\n'
+                            f'\tparameter L{n}_NUM_ADDR = $rtoi($ceil(FIFO_LENGTH*L{n}_H_CIM_TILES_IN / (BUS_WIDTH * L{n}_V_CIM_TILES))),'
                         )
                         ports += (
                             f'\tinput L{n}_i_cim_ready,\n'
@@ -45,7 +48,7 @@ def gen_hdl(param_dict_tuple, datatype_size, crossbar_size, rd_bus_width, obuf_b
                             f'\toutput L{n}_o_cim_we,\n'
                             f'\toutput [$clog2(L{n}_NUM_ADDR)-1:0] L{n}_o_cim_rd_addr,\n'
                             f'\tinput [OBUF_DATA_SIZE-1:0] L{n}_i_cim_data [L{n}_H_CIM_TILES-1:0][L{n}_NUM_CHANNELS-1:0][L{n}_V_CIM_TILES-1:0],\n'
-                            f'\toutput [$clog2(L{n}_NUM_ADDR_OBUF)-1:0] L{n}_o_cim_obuf_addr,\n'
+                            f'\toutput [$clog2(NUM_ADDR_OBUF)-1:0] L{n}_o_cim_obuf_addr,\n'
                         )
                         if prev_layer[0] is None:
                             ports += (
@@ -122,15 +125,21 @@ def gen_hdl(param_dict_tuple, datatype_size, crossbar_size, rd_bus_width, obuf_b
                         else:
                             raise Exception(f"Bad layers {prev_layer[0]} - {current_layer[0]}")
                     case "conv" | "pool":
-                        parameters += (f"\tparameter L{n}_IMG_SIZE = {current_layer[1]},\n")
-                        parameters += (f"\tparameter L{n}_INPUT_CHANNELS = {current_layer[3]},\n")
+                        parameters += (
+                            f'\tparameter L{n}_IMG_SIZE = {current_layer[1]},\n'
+                            f'\tparameter L{n}_INPUT_CHANNELS = {current_layer[3]},\n'
+                            f'\tparameter L{n}_V_CIM_TILES = (L{n}_INPUT_CHANNELS*L{n}_IMG_SIZE + XBAR_SIZE-1) / XBAR_SIZE,\n'
+                            f'\tparameter L{n}_NUM_ADDR = $rtoi($ceil(L{n}_INPUT_CHANNELS*L{n}_IMG_SIZE / (BUS_WIDTH * L{n}_V_CIM_TILES))),\n'
+                            f'\tparameter L{n}_ADDR_WIDTH = (L{n}_NUM_ADDR <= 1) ? 1 : $clog2(L{n}_NUM_ADDR),\n'
+                            f'\tparameter L{n}_H_CIM_TILES = $rtoi($ceil(L{n}_OUTPUT_NEURONS * DATA_SIZE / XBAR_SIZE)),\n'
+                        )
                         ports += (
                             f'\tinput L{n}_i_cim_ready,\n'
-                            f'\toutput [ADDR_WIDTH-1:0] L{n}_o_cim_rd_addr,\n'
+                            f'\toutput [L{n}_ADDR_WIDTH-1:0] L{n}_o_cim_rd_addr,\n'
                             f'\toutput [BUS_WIDTH*L{n}_V_CIM_TILES-1:0] L{n}_o_cim_data\n'
                             f'\toutput L{n}_o_cim_we,\n'
-                            f'\tinput [OBUF_DATA_SIZE-1:0] L{n}_i_cim_data [L{n}_H_CIM_TILES-1:0][L{n}_NUM_CHANNELS-1:0][L{n}_V_CIM_TILES-1:0],\n'
-                            f'\toutput [$clog2(L{n}_NUM_ADDR_OBUF)-1:0] L{n}_o_cim_obuf_addr,\n'
+                            f'\tinput [OBUF_DATA_SIZE-1:0] L{n}_i_cim_data [L{n}_H_CIM_TILES-1:0][NUM_CHANNELS-1:0][L{n}_V_CIM_TILES-1:0],\n'
+                            f'\toutput [$clog2(NUM_ADDR_OBUF)-1:0] L{n}_o_cim_obuf_addr,\n'
                         )
                         signals += (
                             f'wire L{n}_next_ready;\n'
