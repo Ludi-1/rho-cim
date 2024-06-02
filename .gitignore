@@ -16,3 +16,5 @@ output/log.txt
 */gen_hdl
 iverilog_dump.v
 *.fst
+*.jou
+*.log
