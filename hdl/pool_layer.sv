@@ -52,7 +52,7 @@ endgenerate
 
 always_comb begin
     for (int i = 0; i < INPUT_CHANNELS; i++) begin
-        logic [DATA_SIZE-1:0] max_value = '1;
+        automatic logic [DATA_SIZE-1:0] max_value = '1;
         for (int j = 0; j < KERNEL_DIM**2; j++) begin
             if (kernel_elements[i][j] > max_value) begin
                 max_value = kernel_elements[i][j];
