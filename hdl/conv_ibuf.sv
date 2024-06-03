@@ -11,7 +11,7 @@ module conv_ibuf #(
     parameter ADDR_WIDTH = (NUM_ADDR <= 1) ? 1 : $clog2(NUM_ADDR)
 ) (
     input clk,
-    input i_count,
+    input [COUNT_WIDTH-1:0] i_count,
     input [INPUT_CHANNELS-1:0] i_write_enable,
     input [DATA_SIZE-1:0] i_data [INPUT_CHANNELS-1:0],
     output [BUS_WIDTH*V_CIM_TILES_OUT-1:0] o_data,
