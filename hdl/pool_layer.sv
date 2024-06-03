@@ -6,7 +6,6 @@ module pool_layer #(
     parameter OUTPUT_CHANNELS = INPUT_CHANNELS
 ) (
     input clk,
-    input rst,
 
     input [INPUT_CHANNELS-1:0] i_ibuf_we,
     input [DATA_SIZE-1:0] i_ibuf_wr_data [INPUT_CHANNELS-1:0],

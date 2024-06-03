@@ -287,7 +287,6 @@ def gen_hdl(param_dict_tuple, datatype_size, crossbar_size, rd_bus_width, obuf_b
                             f'\t.INPUT_CHANNELS(L{n}_INPUT_CHANNELS)\n'
                             f') L{n}_pool_layer (\n'
                             '\t.clk(clk),\n'
-                            '\t.rst(rst),\n'
                             f'\t.i_ibuf_we(L{n-1}_next_we),\n'
                             f'\t.i_ibuf_wr_data(L{n-1}_next_data),\n'
                             f'\t.i_start(L{n-1}_next_start),\n'

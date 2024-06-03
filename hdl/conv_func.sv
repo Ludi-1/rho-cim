@@ -66,6 +66,7 @@ always_comb begin
             end else begin
                 reorder[i][j] = acc_data[i][j][DATA_SIZE-1:0];
             end
+            reorder2[i * NUM_CHANNELS + j] = reorder[i][j];
         end
     end
 end
