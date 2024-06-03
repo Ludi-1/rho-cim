@@ -46,18 +46,16 @@ always_ff @(posedge clk) begin
     end
 end
 
-localparam excess_elements = (FIFO_LENGTH*H_CIM_TILES_IN*NUM_CHANNELS) % (BUS_WIDTH * V_CIM_TILES_OUT);
-wire [FIFO_LENGTH*H_CIM_TILES_IN*NUM_CHANNELS+excess_elements-1:0] reorder;
+localparam REORDER_WIDTH = BUS_WIDTH * V_CIM_TILES_OUT > FIFO_LENGTH*H_CIM_TILES_IN*NUM_CHANNEL ? BUS_WIDTH * V_CIM_TILES_OUT : FIFO_LENGTH*H_CIM_TILES_IN*NUM_CHANNEL + BUS_WIDTH * V_CIM_TILES_OUT;
+wire [REORDER_WIDTH-1:0] reorder;
 wire [BUS_WIDTH*V_CIM_TILES_OUT-1:0] reorder2 [NUM_ADDR-1:0];
-
-assign reorder[FIFO_LENGTH*H_CIM_TILES_IN*NUM_CHANNELS+excess_elements-1
-    : FIFO_LENGTH*H_CIM_TILES_IN*NUM_CHANNELS-1] = '0;
 
 genvar i, j, k;
 generate
     for (i = 0; i < H_CIM_TILES_IN; i++) begin
         for (j = 0; j < NUM_CHANNELS; j++) begin
             for (k = 0; k < FIFO_LENGTH; k++) begin
+                assign reorder = '0;
                 assign reorder[i+j*NUM_CHANNELS+k*FIFO_LENGTH*NUM_CHANNELS] = fifo_data[i][j][k][0];
             end
         end

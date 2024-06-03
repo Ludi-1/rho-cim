@@ -33,7 +33,6 @@ always_ff @(posedge clk) begin
     end
 end
 
-//localparam excess_elements = (INPUT_CHANNELS*KERNEL_DIM**2) % (BUS_WIDTH * V_CIM_TILES_OUT);
 localparam REORDER_WIDTH = BUS_WIDTH * V_CIM_TILES_OUT > INPUT_CHANNELS*KERNEL_DIM**2 ? BUS_WIDTH * V_CIM_TILES_OUT : INPUT_CHANNELS*KERNEL_DIM**2 + BUS_WIDTH * V_CIM_TILES_OUT;
 wire [DATA_SIZE-1:0] kernel_elements [INPUT_CHANNELS-1:0][KERNEL_DIM**2-1:0];
 wire [REORDER_WIDTH-1:0] reorder [DATA_SIZE-1:0];
