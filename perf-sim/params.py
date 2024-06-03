@@ -250,6 +250,6 @@ param_dicts = [
     # ("mlp-m", param_dict_mlp_m),
     # ("mlp-l", param_dict_mlp_l),
     # ("lenet5", param_dict_lenet5),
-    # ("alexnet", param_dict_alexnet),
+    ("alexnet", param_dict_alexnet),
     ("vgg16", param_dict_vgg16)
 ]

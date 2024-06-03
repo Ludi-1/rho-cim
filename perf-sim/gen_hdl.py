@@ -325,7 +325,7 @@ def gen_hdl(param_dict_tuple, datatype_size, crossbar_size, rd_bus_width, obuf_b
         n += 1
 
     output_hdl = TEMPLATE \
-        .replace("%TOP_NAME%", conf_name) \
+        .replace("%TOP_NAME%", conf_name.replace("-", "_")) \
         .replace("%PARAMETERS%", parameters.rstrip(",")) \
         .replace("%PORTS%", ports) \
         .replace("%SIGNALS%", signals) \
