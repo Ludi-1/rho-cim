@@ -187,14 +187,13 @@ def gen_hdl(param_dict_tuple, datatype_size, crossbar_size, rd_bus_width, obuf_b
                     f'\tparameter L{n}_ADDR_WIDTH = (L{n}_NUM_ADDR <= 1) ? 1 : $clog2(L{n}_NUM_ADDR),\n'
                 )
                 ports += (
-                    f'\toutput [BUS_WIDTH*L{n}_V_CIM_TILES-1:0] L{n}_o_cim_rd_data [DATA_SIZE-1:0],\n'
+                    f'\toutput [BUS_WIDTH*L{n}_V_CIM_TILES-1:0] L{n}_o_cim_rd_data,\n'
                     f'\tinput L{n}_i_cim_ready,\n'
                     f'\toutput L{n}_o_cim_we,\n'
                     f'\toutput L{n}_o_cim_start,\n'
                     f'\toutput [L{n}_ADDR_WIDTH-1:0] L{n}_o_cim_rd_addr,\n'
                     f'\tinput [OBUF_DATA_SIZE-1:0] L{n}_i_cim_obuf_data [L{n}_H_CIM_TILES-1:0][NUM_CHANNELS-1:0][L{n}_V_CIM_TILES-1:0],\n'
                     f'\toutput reg [$clog2(NUM_ADDR_OBUF)-1:0] L{n}_o_cim_obuf_addr,\n'
-                    f'\toutput L{n}_o_cim_start,\n'
                 )
                 match prev_layer[0]:
                     case "conv" | "pool" | None:
@@ -310,13 +309,13 @@ def gen_hdl(param_dict_tuple, datatype_size, crossbar_size, rd_bus_width, obuf_b
                 match prev_layer[0]:
                     case "fc":
                         ports += (
-                            f'\tinput o_next_ready,\n'
+                            f'\tinput i_next_ready,\n'
                             f'\toutput [DATA_SIZE-1:0] o_next_data [L{n-1}_H_CIM_TILES-1:0][NUM_CHANNELS-1:0],\n'
                             f'\toutput o_next_we,\n'
                             f'\toutput o_next_start'  
                         )
                         modules += (
-                            f'assign o_next_ready = L{n-1}_next_ready;\n'
+                            f'assign i_next_ready = L{n-1}_next_ready;\n'
                             f'assign o_next_data = L{n-1}_next_data;\n'
                             f'assign o_next_we = L{n-1}_next_we;\n'
                             f'assign o_next_start = L{n-1}_next_start;'

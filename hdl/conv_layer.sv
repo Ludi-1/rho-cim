@@ -7,6 +7,7 @@ module conv_layer #(
     parameter BUS_WIDTH = 16,
     parameter OUTPUT_CHANNELS = 4,
     parameter OBUF_BUS_WIDTH = 46,
+    parameter COUNT_WIDTH = (DATA_SIZE==1) ? 1 : $clog2(DATA_SIZE),
     parameter V_CIM_TILES = (INPUT_CHANNELS*KERNEL_DIM**2+XBAR_SIZE-1) / XBAR_SIZE, // THIS layer V cim tiles
     parameter NUM_ADDR = $rtoi($ceil(INPUT_CHANNELS*KERNEL_DIM**2 / (BUS_WIDTH * V_CIM_TILES))),
     parameter ADDR_WIDTH = (NUM_ADDR <= 1) ? 1 : $clog2(NUM_ADDR),
@@ -24,7 +25,7 @@ module conv_layer #(
     output o_ready,
     input i_start,
 
-    output [BUS_WIDTH*V_CIM_TILES-1:0] o_cim_rd_data [DATA_SIZE-1:0],
+    output [BUS_WIDTH*V_CIM_TILES-1:0] o_cim_rd_data,
     input i_cim_ready,
     output o_cim_we,
     output o_cim_start,
@@ -40,9 +41,9 @@ module conv_layer #(
 
 );
 
-wire [ADDR_WIDTH-1:0] ibuf_addr;
 wire func_ready;
-wire o_func_start;
+wire func_start;
+wire [COUNT_WIDTH-1:0] ibuf_count;
 
 conv_ibuf #(
     .DATA_SIZE(DATA_SIZE),
@@ -53,6 +54,7 @@ conv_ibuf #(
     .BUS_WIDTH(BUS_WIDTH)
 ) ibuf (
     .clk(clk),
+    .i_count(ibuf_count),
     .i_write_enable(i_ibuf_we),
     .i_data(i_ibuf_wr_data),
     .o_data(o_cim_rd_data),
@@ -69,6 +71,7 @@ conv_ctrl #(
 ) ctrl (
     .clk(clk),
     .rst(rst),
+    .o_count(ibuf_count),
     .i_start(i_start),
     .o_ready(o_ready),
     .i_cim_ready(i_cim_ready),

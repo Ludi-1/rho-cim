@@ -42,6 +42,7 @@ localparam COUNT_WIDTH = (DATA_SIZE==1) ? 1 : $clog2(DATA_SIZE);
 wire [COUNT_WIDTH-1:0] bit_count;
 
 wire func_start;
+wire func_ready;
 
 flatten_fc_ibuf #(
     .DATA_SIZE(DATA_SIZE),

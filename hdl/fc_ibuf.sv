@@ -51,7 +51,7 @@ wire [FIFO_LENGTH*H_CIM_TILES_IN*NUM_CHANNELS+excess_elements-1:0] reorder;
 wire [BUS_WIDTH*V_CIM_TILES_OUT-1:0] reorder2 [NUM_ADDR-1:0];
 
 assign reorder[FIFO_LENGTH*H_CIM_TILES_IN*NUM_CHANNELS+excess_elements-1
-    : FIFO_LENGTH*H_CIM_TILES_IN*NUM_CHANNELS-1] = 0;
+    : FIFO_LENGTH*H_CIM_TILES_IN*NUM_CHANNELS-1] = '0;
 
 genvar i, j, k;
 generate
