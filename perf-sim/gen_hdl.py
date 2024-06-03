@@ -200,7 +200,7 @@ def gen_hdl(param_dict_tuple, datatype_size, crossbar_size, rd_bus_width, obuf_b
                         signals += (
                             f'wire L{n}_next_ready;\n'
                             f'wire [DATA_SIZE-1:0] L{n}_next_data [L{n}_OUTPUT_CHANNELS-1:0];\n'
-                            f'wire L{n}_next_we;\n'
+                            f'wire [L{n}_OUTPUT_CHANNELS-1:0] L{n}_next_we;\n'
                             f'wire L{n}_next_start;\n'           
                         )
                         if prev_layer[0] is None:
