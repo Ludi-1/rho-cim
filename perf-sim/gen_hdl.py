@@ -53,14 +53,14 @@ def gen_hdl(param_dict_tuple, datatype_size, crossbar_size, rd_bus_width, obuf_b
                         )
                         signals += (
                             f'wire L{n}_next_ready;\n'
-                            f'wire [DATA_SIZE-1:0] L{n}_next_data [L{n}_H_CIM_TILES-1:0][NUM_CHANNELS-1:0];\n'
+                            f'wire [DATA_SIZE-1:0] L{n}_next_data [L{n}_H_CIM_TILES*NUM_CHANNELS-1:0];\n'
                             f'wire L{n}_next_we;\n'
                             f'wire L{n}_next_start;\n'           
                         )
                         if prev_layer[0] is None:
                             ports += (
                                 f'\tinput L{n}_i_ibuf_we,\n'
-                                f'\tinput [DATA_SIZE-1:0] L{n}_i_ibuf_wr_data [L{n}_H_CIM_TILES_IN-1:0][NUM_CHANNELS-1:0],\n'
+                                f'\tinput [DATA_SIZE-1:0] L{n}_i_ibuf_wr_data [L{n}_H_CIM_TILES_IN*NUM_CHANNELS-1:0],\n'
                                 f'\tinput L{n}_i_start,\n'
                                 f'\toutput L{n}_o_ready,\n'
                             )
@@ -310,7 +310,7 @@ def gen_hdl(param_dict_tuple, datatype_size, crossbar_size, rd_bus_width, obuf_b
                     case "fc":
                         ports += (
                             f'\tinput i_next_ready,\n'
-                            f'\toutput [DATA_SIZE-1:0] o_next_data [L{n-1}_H_CIM_TILES-1:0][NUM_CHANNELS-1:0],\n'
+                            f'\toutput [DATA_SIZE-1:0] o_next_data [L{n-1}_H_CIM_TILES*NUM_CHANNELS-1:0],\n'
                             f'\toutput o_next_we,\n'
                             f'\toutput o_next_start'  
                         )

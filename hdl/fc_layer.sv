@@ -20,7 +20,7 @@ module fc_layer #(
 
     // prev layer
     input i_ibuf_we,
-    input [DATA_SIZE-1:0] i_ibuf_wr_data [H_CIM_TILES_IN-1:0][NUM_CHANNELS-1:0],
+    input [DATA_SIZE-1:0] i_ibuf_wr_data [H_CIM_TILES_IN*NUM_CHANNELS-1:0],
     input i_start, // filling ibuf done -> start ctrl
     output reg o_ready, // ctrl ready consuming -> dont write to ibuf
 
@@ -35,7 +35,7 @@ module fc_layer #(
 
     // Next layer
     input i_next_ready, // ctrl of next layer ready
-    output [DATA_SIZE-1:0] o_next_data [H_CIM_TILES-1:0][NUM_CHANNELS-1:0], // CIM Output buffer data
+    output [DATA_SIZE-1:0] o_next_data [H_CIM_TILES*NUM_CHANNELS-1:0], // CIM Output buffer data
     output o_next_we,
     output o_next_start
 );

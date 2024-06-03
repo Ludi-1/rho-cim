@@ -17,32 +17,24 @@ module fc_ibuf #(
     input wire i_we, // Write enable -> fifo write enable
     input wire i_se, // Shift enable -> per-element binary shift
     input wire [$clog2(NUM_ADDR)-1:0] i_ibuf_addr,
-    input wire [DATA_SIZE-1:0] i_data [H_CIM_TILES_IN-1:0][NUM_CHANNELS-1:0],     // Data in (write)
+    input logic [DATA_SIZE-1:0] i_data [H_CIM_TILES_IN*NUM_CHANNELS-1:0],     // Data in (write)
     output reg [BUS_WIDTH*V_CIM_TILES_OUT-1:0] o_data     // Data out (read)
 );
 
-reg [DATA_SIZE-1:0] fifo_data [H_CIM_TILES_IN-1:0][NUM_CHANNELS-1:0][FIFO_LENGTH-1:0];
+reg [DATA_SIZE-1:0] fifo_data [FIFO_LENGTH-1:0][H_CIM_TILES_IN*NUM_CHANNELS-1:0];
 
 always_ff @(posedge clk) begin
-    if (i_we) begin // write enable -> shift down
-        for (int i = 0; i < H_CIM_TILES_IN; i++) begin
-            for(int j = 0; j < NUM_CHANNELS; j++) begin
-                fifo_data[i][j][0] <= i_data[i][j];
-                for (int fifo_idx = 0; fifo_idx < FIFO_LENGTH - 1; fifo_idx++) begin
-                    fifo_data[i][j][fifo_idx + 1] <= fifo_data[i][j][fifo_idx]; 
-                end
+    if (i_we) begin
+        fifo_data[0] <= i_data;
+        for (int fifo_idx = FIFO_LENGTH-1; fifo_idx > 0; fifo_idx--) begin
+            fifo_data[fifo_idx] <= fifo_data[fifo_idx-1];
+        end
+    end else if (i_se) begin
+        for (int fifo_idx = 0; fifo_idx < FIFO_LENGTH; fifo_idx++) begin
+            for(int i = 0; i < H_CIM_TILES_IN*NUM_CHANNELS; i++) begin
+                fifo_data[fifo_idx][i] <= fifo_data[fifo_idx][i] >> 1;
             end
         end
-    end else if (i_se) begin // read enable -> shift right
-        for (int i = 0; i < H_CIM_TILES_IN; i++) begin
-            for(int j = 0; j < NUM_CHANNELS; j++) begin
-                for (int fifo_idx = 0; fifo_idx < FIFO_LENGTH; fifo_idx++) begin
-                    fifo_data[i][j][fifo_idx] <= fifo_data[i][j][fifo_idx] >> 1; 
-                end
-            end
-        end
-    end else begin
-        fifo_data <= fifo_data;
     end
 end
 
@@ -52,12 +44,9 @@ wire [BUS_WIDTH*V_CIM_TILES_OUT-1:0] reorder2 [NUM_ADDR-1:0];
 
 genvar i, j, k;
 generate
-    for (i = 0; i < H_CIM_TILES_IN; i++) begin
-        for (j = 0; j < NUM_CHANNELS; j++) begin
-            for (k = 0; k < FIFO_LENGTH; k++) begin
-                assign reorder = '0;
-                assign reorder[i+j*NUM_CHANNELS+k*FIFO_LENGTH*NUM_CHANNELS] = fifo_data[i][j][k][0];
-            end
+    for (i = 0; i < FIFO_LENGTH; i++) begin
+        for (j = 0; j < H_CIM_TILES_IN*NUM_CHANNELS; j++) begin
+            assign reorder[i*H_CIM_TILES_IN*NUM_CHANNELS+j] = fifo_data[i][j][0];
         end
     end
     for (k = 0; k < NUM_ADDR; k++) begin
@@ -65,6 +54,8 @@ generate
     end
 endgenerate
 
-assign o_data = reorder2[i_ibuf_addr];
+always_comb begin
+    o_data <= reorder2[i_ibuf_addr];
+end
 
 endmodule

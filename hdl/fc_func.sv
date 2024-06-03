@@ -28,11 +28,11 @@ module fc_func #(
 
     // CIM Interface
     input i_cim_ready,
-    input [OBUF_DATA_SIZE-1:0] i_data [H_CIM_TILES-1:0][NUM_CHANNELS-1:0][V_CIM_TILES-1:0], // Data from CIM obuf to FPGA
+    input logic [OBUF_DATA_SIZE-1:0] i_data [H_CIM_TILES-1:0][NUM_CHANNELS-1:0][V_CIM_TILES-1:0], // Data from CIM obuf to FPGA
     output reg [$clog2(NUM_ADDR)-1:0] o_addr,
 
     // Next module interface
-    output reg [DATA_SIZE-1:0] o_data [H_CIM_TILES-1:0][NUM_CHANNELS-1:0], // Data from FPGA func to input buffer
+    output reg [DATA_SIZE-1:0] o_data [H_CIM_TILES*NUM_CHANNELS-1:0], // Data from FPGA func to input buffer
     output reg o_write_enable,
     input i_next_ready,
     output reg o_start // start next module
@@ -50,14 +50,14 @@ assign o_addr = addr[$clog2(NUM_ADDR)-1:0];
 always_comb begin
     for (int i = 0; i < H_CIM_TILES; i++) begin
         for (int j = 0; j < NUM_CHANNELS; j++) begin
-            acc_data[i][j] = 0;
+            acc_data[i][j] = '0;
             for (int k = 0; k < V_CIM_TILES; k++) begin
                 acc_data[i][j] += i_data[i][j][k];
             end
-            if (acc_data[i][j][OBUF_DATA_SIZE+$clog2(V_CIM_TILES)-1]) begin // ReLU
-                o_data[i][j] = 0;
+            if (acc_data[i][j] > 0) begin // ReLU
+                o_data[i*NUM_CHANNELS+j] = acc_data[i][j][DATA_SIZE-1:0];
             end else begin
-                o_data[i][j] = acc_data[i][j][DATA_SIZE-1:0];
+                o_data[i*NUM_CHANNELS+j] = 0;
             end
         end
     end
