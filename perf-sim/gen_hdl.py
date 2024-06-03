@@ -315,7 +315,7 @@ def gen_hdl(param_dict_tuple, datatype_size, crossbar_size, rd_bus_width, obuf_b
                             f'\toutput o_next_start'  
                         )
                         modules += (
-                            f'assign i_next_ready = L{n-1}_next_ready;\n'
+                            f'assign L{n-1}_next_ready = i_next_ready;\n'
                             f'assign o_next_data = L{n-1}_next_data;\n'
                             f'assign o_next_we = L{n-1}_next_we;\n'
                             f'assign o_next_start = L{n-1}_next_start;'

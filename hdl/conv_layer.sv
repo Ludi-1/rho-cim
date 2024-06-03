@@ -99,6 +99,7 @@ conv_func #(
     .o_addr(o_cim_obuf_addr),
     .o_data(o_next_data),
     .o_write_enable(o_next_we),
+    .i_next_ready(i_next_ready),
     .o_start(o_next_start)
 );
 

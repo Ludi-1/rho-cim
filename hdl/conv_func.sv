@@ -26,7 +26,7 @@ module conv_func #(
 
     // CIM interface
     input i_cim_ready,
-    input [OBUF_DATA_SIZE-1:0] i_data [H_CIM_TILES-1:0][NUM_CHANNELS-1:0][V_CIM_TILES-1:0],
+    input logic [OBUF_DATA_SIZE-1:0] i_data [H_CIM_TILES-1:0][NUM_CHANNELS-1:0][V_CIM_TILES-1:0],
     output reg [$clog2(NUM_ADDR)-1:0] o_addr,
 
     // Next module interface
@@ -57,16 +57,23 @@ endgenerate
 always_comb begin
     for (int i = 0; i < H_CIM_TILES; i++) begin
         for(int j = 0; j < NUM_CHANNELS; j++) begin
-            acc_data[i][j] = 0;
+            acc_data[i][j] = '0;
             for (int k = 0; k < V_CIM_TILES; k++) begin
                 acc_data[i][j] += i_data[i][j][k];
             end
-            if (acc_data[i][j][OBUF_DATA_SIZE+$clog2(V_CIM_TILES)-1]) begin // RELU & batchnorm
-                reorder[i][j] = 0;
+            // reorder2[i * NUM_CHANNELS + j] = reorder[i][j];
+        end
+    end
+end
+
+always_comb begin
+    for (int i = 0; i < H_CIM_TILES; i++) begin
+        for(int j = 0; j < NUM_CHANNELS; j++) begin
+            if (acc_data[i][j] > 0) begin // RELU
+                reorder2[i * NUM_CHANNELS + j] = acc_data[i][j][DATA_SIZE-1:0];
             end else begin
-                reorder[i][j] = acc_data[i][j][DATA_SIZE-1:0];
+                reorder2[i * NUM_CHANNELS + j] = 0;
             end
-            reorder2[i * NUM_CHANNELS + j] = reorder[i][j];
         end
     end
 end
