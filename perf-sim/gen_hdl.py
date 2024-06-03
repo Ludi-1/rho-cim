@@ -49,6 +49,7 @@ def gen_hdl(param_dict_tuple, datatype_size, crossbar_size, rd_bus_width, obuf_b
                             f'\toutput [$clog2(L{n}_NUM_ADDR)-1:0] L{n}_o_cim_rd_addr,\n'
                             f'\tinput [OBUF_DATA_SIZE-1:0] L{n}_i_cim_data [L{n}_H_CIM_TILES-1:0][NUM_CHANNELS-1:0][L{n}_V_CIM_TILES-1:0],\n'
                             f'\toutput [$clog2(NUM_ADDR_OBUF)-1:0] L{n}_o_cim_obuf_addr,\n'
+                            f'\toutput L{n}_o_cim_start,\n'
                         )
                         signals += (
                             f'wire L{n}_next_ready;\n'
@@ -84,6 +85,7 @@ def gen_hdl(param_dict_tuple, datatype_size, crossbar_size, rd_bus_width, obuf_b
                                 f'\t.o_cim_rd_addr(L{n}_o_cim_rd_addr),\n'
                                 f'\t.i_cim_data(L{n}_i_cim_data),\n'
                                 f'\t.o_cim_obuf_addr(L{n}_o_cim_obuf_addr),\n'
+                                f'\t.o_cim_start(L{n}_o_cim_start),\n'
                                 f'\t.i_next_ready(L{n}_next_ready),\n'
                                 f'\t.o_next_data(L{n}_next_data),\n'
                                 f'\t.o_next_we(L{n}_next_we),\n'
@@ -111,6 +113,7 @@ def gen_hdl(param_dict_tuple, datatype_size, crossbar_size, rd_bus_width, obuf_b
                                 f'\t.o_cim_rd_addr(L{n}_o_cim_rd_addr),\n'
                                 f'\t.i_cim_data(L{n}_i_cim_data),\n'
                                 f'\t.o_cim_obuf_addr(L{n}_o_cim_obuf_addr),\n'
+                                f'\t.o_cim_start(L{n}_o_cim_start),\n'
                                 f'\t.i_next_ready(L{n}_next_ready),\n'
                                 f'\t.o_next_data(L{n}_next_data),\n'
                                 f'\t.o_next_we(L{n}_next_we),\n'
@@ -134,6 +137,7 @@ def gen_hdl(param_dict_tuple, datatype_size, crossbar_size, rd_bus_width, obuf_b
                             f'\toutput L{n}_o_cim_we,\n'
                             f'\tinput [OBUF_DATA_SIZE-1:0] L{n}_i_cim_data [L{n}_H_CIM_TILES-1:0][NUM_CHANNELS-1:0][L{n}_V_CIM_TILES-1:0],\n'
                             f'\toutput [$clog2(NUM_ADDR_OBUF)-1:0] L{n}_o_cim_obuf_addr,\n'
+                            f'\toutput L{n}_o_cim_start,\n'
                         )
                         signals += (
                             f'wire L{n}_next_ready;\n'
@@ -163,6 +167,7 @@ def gen_hdl(param_dict_tuple, datatype_size, crossbar_size, rd_bus_width, obuf_b
                             f'\t.o_cim_rd_addr(L{n}_o_cim_rd_addr),\n'
                             f'\t.i_cim_data(L{n}_i_cim_data),\n'
                             f'\t.o_cim_obuf_addr(L{n}_o_cim_obuf_addr),\n'
+                            f'\t.o_cim_start(L{n}_o_cim_start),\n'
                             f'\t.i_next_ready(L{n}_next_ready),\n'
                             f'\t.o_next_data(L{n}_next_data),\n'
                             f'\t.o_next_we(L{n}_next_we),\n'
@@ -189,6 +194,7 @@ def gen_hdl(param_dict_tuple, datatype_size, crossbar_size, rd_bus_width, obuf_b
                     f'\toutput [L{n}_ADDR_WIDTH-1:0] L{n}_o_cim_rd_addr,\n'
                     f'\tinput [OBUF_DATA_SIZE-1:0] L{n}_i_cim_obuf_data [L{n}_H_CIM_TILES-1:0][NUM_CHANNELS-1:0][L{n}_V_CIM_TILES-1:0],\n'
                     f'\toutput reg [$clog2(NUM_ADDR_OBUF)-1:0] L{n}_o_cim_obuf_addr,\n'
+                    f'\toutput L{n}_o_cim_start,\n'
                 )
                 match prev_layer[0]:
                     case "conv" | "pool" | None:
@@ -228,6 +234,7 @@ def gen_hdl(param_dict_tuple, datatype_size, crossbar_size, rd_bus_width, obuf_b
                                 f'\t.o_cim_rd_addr(L{n}_o_cim_rd_addr),\n'
                                 f'\t.i_cim_obuf_data(L{n}_i_cim_obuf_data),\n'
                                 f'\t.o_cim_obuf_addr(L{n}_o_cim_obuf_addr),\n'
+                                f'\t.o_cim_start(L{n}_o_cim_start),\n'
                                 f'\t.i_next_ready(L{n}_next_ready),\n'
                                 f'\t.o_next_data(L{n}_next_data),\n'
                                 f'\t.o_next_we(L{n}_next_we),\n'
@@ -257,6 +264,7 @@ def gen_hdl(param_dict_tuple, datatype_size, crossbar_size, rd_bus_width, obuf_b
                                 f'\t.o_cim_rd_addr(L{n}_o_cim_rd_addr),\n'
                                 f'\t.i_cim_obuf_data(L{n}_i_cim_obuf_data),\n'
                                 f'\t.o_cim_obuf_addr(L{n}_o_cim_obuf_addr),\n'
+                                f'\t.o_cim_start(L{n}_o_cim_start),\n'
                                 f'\t.i_next_ready(L{n}_next_ready),\n'
                                 f'\t.o_next_data(L{n}_next_data),\n'
                                 f'\t.o_next_we(L{n}_next_we),\n'

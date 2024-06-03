@@ -41,6 +41,8 @@ always_ff @(posedge clk) begin
                 end
             end
         end
+    end else begin
+        fifo_data <= fifo_data;
     end
 end
 

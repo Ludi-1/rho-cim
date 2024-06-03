@@ -31,6 +31,7 @@ module fc_layer #(
     output reg [$clog2(NUM_ADDR)-1:0] o_cim_rd_addr,
     input logic [OBUF_DATA_SIZE-1:0] i_cim_data [H_CIM_TILES-1:0][NUM_CHANNELS-1:0][V_CIM_TILES-1:0],
     output reg [$clog2(NUM_ADDR_OBUF)-1:0] o_cim_obuf_addr,
+    output o_cim_start,
 
     // Next layer
     input i_next_ready, // ctrl of next layer ready
@@ -54,7 +55,7 @@ fc_ibuf #(
     .clk(clk),
     .i_we(i_ibuf_we),
     .i_se(s_se),
-    .i_ibuf_addr(o_cim_wr_addr),
+    .i_ibuf_addr(o_cim_rd_addr),
     .i_data(i_ibuf_wr_data),
     .o_data(o_cim_data)
 );
@@ -73,6 +74,7 @@ fc_ctrl #(
     .i_start(i_start),
     .o_ready(o_ready),
     .i_cim_ready(i_cim_ready),
+    .o_cim_start(o_cim_start),
     .o_cim_we(o_cim_we),
     .o_addr(o_cim_rd_addr),
     .i_func_ready(func_ready),
@@ -89,6 +91,7 @@ fc_func #(
     .clk(clk),
     .rst(rst),
     .i_start(func_start),
+    .o_ready(func_ready),
     .i_cim_ready(i_cim_ready),
     .i_data(i_cim_data),
     .o_addr(o_cim_obuf_addr),

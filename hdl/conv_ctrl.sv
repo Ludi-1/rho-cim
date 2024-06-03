@@ -108,9 +108,9 @@ always_comb begin
             o_ready = 0;
             o_cim_start = 0;
             o_func_start = 0;
+            next_count = count;
             if (i_cim_ready) begin // CIM is finished
                 if (count >= DATA_SIZE-1) begin
-                    next_count = count;
                     if (i_func_ready) begin
                         next_ctrl_state = s_conv_ctrl_idle;
                         o_func_start = 1;
@@ -122,13 +122,21 @@ always_comb begin
                     next_ctrl_state = s_conv_ctrl_consume;
                 end
             end else begin // CIM still busy
-                next_count = count;
                 o_func_start = 0;
                 next_ctrl_state = s_conv_ctrl_wait; // wait
             end
             
         end
-        default: next_ctrl_state = s_conv_ctrl_idle;
+        default: begin
+            next_ctrl_state = s_conv_ctrl_idle;
+            next_addr = 0;
+            o_cim_we = 0;
+            o_ready = 0;
+            o_cim_start = 0;
+            o_func_start = 0;
+            next_count = 0;
+            o_func_start = 0;
+        end
     endcase
 end
 

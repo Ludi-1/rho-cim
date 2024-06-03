@@ -70,6 +70,7 @@ conv_ctrl #(
     .clk(clk),
     .rst(rst),
     .i_start(i_start),
+    .o_ready(o_ready),
     .i_cim_ready(i_cim_ready),
     .o_cim_we(o_cim_we),
     .o_cim_start(o_cim_start),

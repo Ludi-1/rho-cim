@@ -39,7 +39,6 @@ module flatten_fc_layer #(
 );
 
 localparam COUNT_WIDTH = (DATA_SIZE==1) ? 1 : $clog2(DATA_SIZE);
-wire [ADDR_WIDTH-1:0] ibuf_addr;
 wire [COUNT_WIDTH-1:0] bit_count;
 
 wire func_start;
@@ -55,7 +54,7 @@ flatten_fc_ibuf #(
     .i_write_enable(i_ibuf_we),
     .i_data(i_ibuf_data),
     .o_data(o_cim_data),
-    .i_ibuf_addr(ibuf_addr),
+    .i_ibuf_addr(o_cim_rd_addr),
     .i_count(bit_count)
 );
 
