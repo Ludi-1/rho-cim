@@ -38,7 +38,7 @@ def gen_hdl(param_dict_tuple, datatype_size, crossbar_size, rd_bus_width, obuf_b
                         parameters += (
                             f'\tparameter L{n}_INPUT_NEURONS = {current_layer[1]},\n'
                             f'\tparameter L{n}_H_CIM_TILES_IN = $rtoi($ceil(L{n}_INPUT_NEURONS / FIFO_LENGTH)),\n'
-                            f'\tparameter L{n}_V_CIM_TILES = $rtoi($ceil(L{n}_INPUT_NEURONS / XBAR_SIZE)),\n'
+                            f'\tparameter L{n}_V_CIM_TILES = (L{n}_INPUT_NEURONS + XBAR_SIZE-1) / XBAR_SIZE,\n'
                             f'\tparameter L{n}_H_CIM_TILES = $rtoi($ceil(L{n}_OUTPUT_NEURONS / FIFO_LENGTH)),\n'
                             f'\tparameter L{n}_NUM_ADDR = $rtoi($ceil(FIFO_LENGTH*L{n}_H_CIM_TILES_IN / (BUS_WIDTH * L{n}_V_CIM_TILES))),'
                         )
@@ -141,7 +141,7 @@ def gen_hdl(param_dict_tuple, datatype_size, crossbar_size, rd_bus_width, obuf_b
                         )
                         signals += (
                             f'wire L{n}_next_ready;\n'
-                            f'wire [DATA_SIZE-1:0] L{n}_next_data [L{n}_H_CIM_TILES-1:0][NUM_CHANNELS-1:0];\n'
+                            f'wire [DATA_SIZE-1:0] L{n}_next_data [L{n}_H_CIM_TILES*NUM_CHANNELS-1:0];\n'
                             f'wire L{n}_next_we;\n'
                             f'wire L{n}_next_start;\n'           
                         )

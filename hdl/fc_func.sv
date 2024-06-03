@@ -15,7 +15,7 @@ module fc_func #(
     parameter NUM_CHANNELS = $rtoi($floor(OBUF_BUS_WIDTH / OBUF_DATA_SIZE)), // elements read in parallel
     parameter FIFO_LENGTH = $rtoi($ceil($floor(XBAR_SIZE / DATA_SIZE) / NUM_CHANNELS)),
     parameter H_CIM_TILES = $rtoi($ceil(OUTPUT_NEURONS / FIFO_LENGTH)), // THIS layer H cim tiles
-    parameter V_CIM_TILES = $rtoi($ceil(INPUT_NEURONS / XBAR_SIZE)), // THIS layer V cim tiles
+    parameter V_CIM_TILES = (INPUT_NEURONS + XBAR_SIZE-1) / XBAR_SIZE, // THIS layer V cim tiles
     parameter ELEMENTS_PER_TILE = $rtoi($floor(XBAR_SIZE / DATA_SIZE)), // num elements in output buffer
     parameter NUM_ADDR = $rtoi($ceil(ELEMENTS_PER_TILE / NUM_CHANNELS)) // num addresses for obuf
 ) (

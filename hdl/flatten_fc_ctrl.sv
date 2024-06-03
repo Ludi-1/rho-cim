@@ -4,9 +4,9 @@ module flatten_fc_ctrl #(
     parameter IMG_SIZE = 28**2,
     parameter XBAR_SIZE = 128,
     parameter BUS_WIDTH = 16,
-    parameter V_CIM_TILES_OUT = (INPUT_CHANNELS*IMG_SIZE + XBAR_SIZE-1) / XBAR_SIZE,
+    parameter V_CIM_TILES = (INPUT_CHANNELS*IMG_SIZE + XBAR_SIZE-1) / XBAR_SIZE,
     parameter COUNT_WIDTH = (DATA_SIZE==1) ? 1 : $clog2(DATA_SIZE),
-    parameter NUM_ADDR = $rtoi($ceil(INPUT_CHANNELS*IMG_SIZE / (BUS_WIDTH * V_CIM_TILES_OUT))),
+    parameter NUM_ADDR = $rtoi($ceil(INPUT_CHANNELS*IMG_SIZE / (BUS_WIDTH * V_CIM_TILES))),
     parameter ADDR_WIDTH = (NUM_ADDR <= 1) ? 1 : $clog2(NUM_ADDR)
 ) (
     input clk,

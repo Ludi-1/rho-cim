@@ -29,7 +29,7 @@ wire [DATA_SIZE-1:0] kernel_elements [INPUT_CHANNELS-1:0][KERNEL_DIM**2-1:0];
 // FIFO shift register
 always_ff @(posedge clk) begin
     for (int input_channel = 0; input_channel < INPUT_CHANNELS; input_channel++) begin
-        if (i_ibuf_we[input_channel]) begin
+        if (i_ibuf_we[input_channel] == 1) begin
             fifo_data[input_channel][0] <= i_ibuf_wr_data[input_channel];
             for (int fifo_idx = 0; fifo_idx < FIFO_LENGTH - 1; fifo_idx++) begin
                 fifo_data[input_channel][fifo_idx + 1] <= fifo_data[input_channel][fifo_idx]; 

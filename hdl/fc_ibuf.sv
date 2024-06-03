@@ -9,8 +9,8 @@ module fc_ibuf #(
     parameter NUM_CHANNELS = $rtoi($floor(OBUF_BUS_WIDTH / OBUF_DATA_SIZE)),
     parameter FIFO_LENGTH = $rtoi($ceil($floor(XBAR_SIZE / DATA_SIZE) / NUM_CHANNELS)), // output elements per CIM tile
     parameter H_CIM_TILES_IN = $rtoi($ceil(INPUT_NEURONS / FIFO_LENGTH)), // PREV Layer H cim tiles
-    parameter V_CIM_TILES_OUT = $rtoi($ceil(INPUT_NEURONS / XBAR_SIZE)), // THIS layer V cim tiles
-    parameter NUM_ADDR = $rtoi($ceil(FIFO_LENGTH*H_CIM_TILES_IN*NUM_CHANNELS / (BUS_WIDTH * V_CIM_TILES_OUT)))
+    parameter V_CIM_TILES = (INPUT_NEURONS + XBAR_SIZE-1) / XBAR_SIZE, // THIS layer V cim tiles
+    parameter NUM_ADDR = $rtoi($ceil(FIFO_LENGTH*H_CIM_TILES_IN*NUM_CHANNELS / (BUS_WIDTH * V_CIM_TILES)))
 )
 (
     input wire clk,
@@ -18,7 +18,7 @@ module fc_ibuf #(
     input wire i_se, // Shift enable -> per-element binary shift
     input wire [$clog2(NUM_ADDR)-1:0] i_ibuf_addr,
     input logic [DATA_SIZE-1:0] i_data [H_CIM_TILES_IN*NUM_CHANNELS-1:0],     // Data in (write)
-    output reg [BUS_WIDTH*V_CIM_TILES_OUT-1:0] o_data     // Data out (read)
+    output reg [BUS_WIDTH*V_CIM_TILES-1:0] o_data     // Data out (read)
 );
 
 reg [DATA_SIZE-1:0] fifo_data [FIFO_LENGTH-1:0][H_CIM_TILES_IN*NUM_CHANNELS-1:0];
@@ -38,9 +38,9 @@ always_ff @(posedge clk) begin
     end
 end
 
-localparam REORDER_WIDTH = BUS_WIDTH * V_CIM_TILES_OUT > FIFO_LENGTH*H_CIM_TILES_IN*NUM_CHANNELS ? BUS_WIDTH * V_CIM_TILES_OUT : FIFO_LENGTH*H_CIM_TILES_IN*NUM_CHANNELS + BUS_WIDTH * V_CIM_TILES_OUT;
+localparam REORDER_WIDTH = BUS_WIDTH * V_CIM_TILES > FIFO_LENGTH*H_CIM_TILES_IN*NUM_CHANNELS ? BUS_WIDTH * V_CIM_TILES : FIFO_LENGTH*H_CIM_TILES_IN*NUM_CHANNELS + BUS_WIDTH * V_CIM_TILES;
 wire [REORDER_WIDTH-1:0] reorder;
-wire [BUS_WIDTH*V_CIM_TILES_OUT-1:0] reorder2 [NUM_ADDR-1:0];
+wire [BUS_WIDTH*V_CIM_TILES-1:0] reorder2 [NUM_ADDR-1:0];
 
 genvar i, j, k;
 generate
@@ -50,7 +50,7 @@ generate
         end
     end
     for (k = 0; k < NUM_ADDR; k++) begin
-        assign reorder2[k] = reorder[(k+1)*BUS_WIDTH*V_CIM_TILES_OUT-1:k*BUS_WIDTH*V_CIM_TILES_OUT];
+        assign reorder2[k] = reorder[(k+1)*BUS_WIDTH*V_CIM_TILES-1:k*BUS_WIDTH*V_CIM_TILES];
     end
 endgenerate
 

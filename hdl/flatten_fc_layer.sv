@@ -32,7 +32,7 @@ module flatten_fc_layer #(
     input [OBUF_DATA_SIZE-1:0] i_cim_data [H_CIM_TILES-1:0][NUM_CHANNELS-1:0][V_CIM_TILES-1:0],
     output [$clog2(NUM_ADDR_OBUF)-1:0] o_cim_obuf_addr,
 
-    output [DATA_SIZE-1:0] o_next_data [H_CIM_TILES-1:0][NUM_CHANNELS-1:0],
+    output [DATA_SIZE-1:0] o_next_data [H_CIM_TILES*NUM_CHANNELS-1:0],
     output o_next_we,
     input i_next_ready,
     output o_next_start

@@ -9,7 +9,7 @@ module fc_layer #(
     parameter NUM_CHANNELS = $rtoi($floor(OBUF_BUS_WIDTH / OBUF_DATA_SIZE)), // elements read in parallel
     parameter FIFO_LENGTH = $rtoi($ceil($floor(XBAR_SIZE / DATA_SIZE) / NUM_CHANNELS)), // output elements per CIM tile
     parameter H_CIM_TILES_IN = $rtoi($ceil(INPUT_NEURONS / FIFO_LENGTH)), // PREV Layer H cim tiles
-    parameter V_CIM_TILES = $rtoi($ceil(INPUT_NEURONS / XBAR_SIZE)), // THIS layer V cim tiles
+    parameter V_CIM_TILES = (INPUT_NEURONS + XBAR_SIZE-1) / XBAR_SIZE, // THIS layer V cim tiles
     parameter NUM_ADDR = $rtoi($ceil(FIFO_LENGTH*H_CIM_TILES_IN / (BUS_WIDTH * V_CIM_TILES))),
     parameter H_CIM_TILES = $rtoi($ceil(OUTPUT_NEURONS / FIFO_LENGTH)), // THIS LAYER H cim tiles
     parameter ELEMENTS_PER_TILE = $rtoi($floor(XBAR_SIZE / DATA_SIZE)), // num elements in output buffer
@@ -66,7 +66,8 @@ fc_ctrl #(
     .INPUT_NEURONS(INPUT_NEURONS),
     .XBAR_SIZE(XBAR_SIZE),
     .BUS_WIDTH(BUS_WIDTH),
-    .OBUF_BUS_WIDTH(OBUF_BUS_WIDTH)
+    .OBUF_BUS_WIDTH(OBUF_BUS_WIDTH),
+    .V_CIM_TILES(V_CIM_TILES)
 ) ctrl (
     .clk(clk),
     .rst(rst),
