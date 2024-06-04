@@ -1,8 +1,8 @@
 module pool_layer #(
     parameter DATA_SIZE = 8,
-    parameter INPUT_CHANNELS = 256, // Number of input channels
-    parameter IMG_DIM = 13, // Input image width
-    parameter KERNEL_DIM = 3, // kernel dim N, where kernel size is NxN
+    parameter INPUT_CHANNELS = 4, // Number of input channels
+    parameter IMG_DIM = 4, // Input image width
+    parameter KERNEL_DIM = 2, // kernel dim N, where kernel size is NxN
     parameter OUTPUT_CHANNELS = INPUT_CHANNELS
 ) (
     input clk,
@@ -24,7 +24,7 @@ assign o_next_start = i_start;
 
 localparam FIFO_LENGTH = IMG_DIM * (KERNEL_DIM - 1) + KERNEL_DIM;
 reg [DATA_SIZE-1:0] fifo_data [INPUT_CHANNELS-1:0][FIFO_LENGTH-1:0];
-wire [DATA_SIZE-1:0] kernel_elements [INPUT_CHANNELS-1:0][KERNEL_DIM**2-1:0];
+logic signed [DATA_SIZE-1:0] kernel_elements [INPUT_CHANNELS-1:0][KERNEL_DIM**2-1:0];
 
 // FIFO shift register
 always_ff @(posedge clk) begin
@@ -52,7 +52,7 @@ endgenerate
 
 always_comb begin
     for (int i = 0; i < INPUT_CHANNELS; i++) begin
-        automatic logic [DATA_SIZE-1:0] max_value = '1;
+        automatic logic signed [DATA_SIZE-1:0] max_value = '1;
         for (int j = 0; j < KERNEL_DIM**2; j++) begin
             if (kernel_elements[i][j] > max_value) begin
                 max_value = kernel_elements[i][j];
