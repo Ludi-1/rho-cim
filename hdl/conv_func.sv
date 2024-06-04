@@ -5,7 +5,7 @@ typedef enum {
 
 module conv_func #(
     parameter DATA_SIZE = 8,
-    parameter INPUT_CHANNELS = 2,
+    parameter INPUT_CHANNELS = 64,
     parameter KERNEL_DIM = 3,
     parameter OUTPUT_CHANNELS = 4,
     parameter XBAR_SIZE = 128,
@@ -26,7 +26,8 @@ module conv_func #(
 
     // CIM interface
     input i_cim_ready,
-    input logic [OBUF_DATA_SIZE-1:0] i_data [H_CIM_TILES-1:0][NUM_CHANNELS-1:0][V_CIM_TILES-1:0],
+    // input [OBUF_DATA_SIZE-1:0] i_data [H_CIM_TILES*NUM_CHANNELS*V_CIM_TILES-1:0],
+    input [OBUF_DATA_SIZE-1:0] i_data [H_CIM_TILES-1:0][NUM_CHANNELS-1:0][V_CIM_TILES-1:0],
     output reg [$clog2(NUM_ADDR)-1:0] o_addr,
 
     // Next module interface
@@ -40,41 +41,25 @@ integer unsigned addr, next_addr;
 t_conv_func_state func_state, next_func_state;
 reg [OUTPUT_CHANNELS-1:0] next_write_enable;
 
-reg [OBUF_DATA_SIZE+$clog2(V_CIM_TILES)-1:0] acc_data [H_CIM_TILES-1:0][NUM_CHANNELS-1:0];
-reg [DATA_SIZE-1:0] reorder [H_CIM_TILES-1:0][NUM_CHANNELS-1:0];
-reg [DATA_SIZE-1:0] reorder2 [H_CIM_TILES*NUM_CHANNELS-1:0];
+reg [OBUF_DATA_SIZE-1:0] acc_data [H_CIM_TILES-1:0][NUM_CHANNELS-1:0];
+reg [DATA_SIZE-1:0] reorder [H_CIM_TILES*NUM_CHANNELS-1:0];
 
 assign o_addr = addr[$clog2(NUM_ADDR)-1:0];
-
-genvar i, j, k;
-generate
-    for (i = 0; i < OUTPUT_CHANNELS; i++) begin
-        assign o_data[i] = reorder2[i % (H_CIM_TILES*NUM_CHANNELS)];
-    end
-endgenerate
 
 // accumulate & relu func & batch norm(?)
 always_comb begin
     for (int i = 0; i < H_CIM_TILES; i++) begin
         for(int j = 0; j < NUM_CHANNELS; j++) begin
-            acc_data[i][j] = '0;
+            acc_data[i][j] = 0;
             for (int k = 0; k < V_CIM_TILES; k++) begin
+                // acc_data[i][j] += i_data[i*NUM_CHANNELS*V_CIM_TILES+j*V_CIM_TILES+k];
                 acc_data[i][j] += i_data[i][j][k];
             end
-            // reorder2[i * NUM_CHANNELS + j] = reorder[i][j];
+            reorder[i * NUM_CHANNELS + j] = acc_data[i][j] > 0 ? acc_data[i][j][DATA_SIZE-1:0] : 0;
         end
     end
-end
-
-always_comb begin
-    for (int i = 0; i < H_CIM_TILES; i++) begin
-        for(int j = 0; j < NUM_CHANNELS; j++) begin
-            if (acc_data[i][j] > 0) begin // RELU
-                reorder2[i * NUM_CHANNELS + j] = acc_data[i][j][DATA_SIZE-1:0];
-            end else begin
-                reorder2[i * NUM_CHANNELS + j] = 0;
-            end
-        end
+    for (int i = 0; i < OUTPUT_CHANNELS; i++) begin
+        o_data[i] = reorder[i % (H_CIM_TILES*NUM_CHANNELS)];
     end
 end
 
@@ -132,5 +117,32 @@ always_comb begin
         end
     endcase
 end
+
+// genvar h, c, v;
+// generate
+//     for (h = 0; h < H_CIM_TILES; h++) begin
+//         for (c = 0; c < NUM_CHANNELS; c++) begin
+//             for (v = 0; v < V_CIM_TILES; v++) begin
+//                 wire [DATA_SIZE-1:0] tmp;
+//                 assign tmp = i_data[h*NUM_CHANNELS+c][v];
+//             end
+//         end
+//     end
+// endgenerate
+
+// initial begin
+//     $dumpfile("dump_conv_func.fst");
+//     $dumpvars(0, conv_func);
+//     for (int i = 0; i < OUTPUT_CHANNELS; i++) begin
+//         $dumpvars(0, o_data[i]);
+//     end
+//     for (int h = 0; h < H_CIM_TILES; h++) begin
+//         for (int c = 0; c < NUM_CHANNELS; c++) begin
+//             for (int v = 0; v < V_CIM_TILES; v++) begin
+//                 $dumpvars(0, i_data[h][c][v]);
+//             end
+//         end
+//     end
+// end
 
 endmodule

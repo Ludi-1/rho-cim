@@ -18,3 +18,4 @@ iverilog_dump.v
 *.fst
 *.jou
 *.log
+*.saif

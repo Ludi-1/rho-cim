@@ -1,12 +1,12 @@
 # Makefile
 # $(shell . .venv/bin/activate)
 
-SIM = icarus
+SIM = verilator
 PWD=$(shell pwd)
 TOPLEVEL_LANG = verilog
 WAVES=1
-# EXTRA_ARGS += --trace-fst --trace-structs
-# EXTRA_ARGS += --trace --trace-structs
+EXTRA_ARGS += --trace-fst --trace-structs
+EXTRA_ARGS += --trace --trace-structs
 
 TOPLEVEL ?= fc_ibuf
 $(shell rm -rf sim_build)
