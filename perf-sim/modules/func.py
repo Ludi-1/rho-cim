@@ -1,5 +1,5 @@
 from modules.module import Module
-from math import ceil
+from math import ceil, log2
 
 
 class Func(Module):
@@ -14,7 +14,7 @@ class Func(Module):
         self.datatype_size: int = param_dict[
             "datatype_size"
         ]  # Datatype size of output buffers
-        self.bus_width: int = param_dict["bus_width"]  # Bus width
+        self.obuf_bus_width: int = param_dict["obuf_bus_width"]  # Bus width
         self.bus_latency: int = param_dict[
             "bus_latency"
         ]  # Latency to transfer data from obuf->fpga in cycles
@@ -25,22 +25,16 @@ class Func(Module):
             "ibuf_write_latency"
         ]  # Latency for writing to ibuf, incorporated in operation freq
 
-        self.num_reads = 8 # min(self.crossbar_rows / self.datatype_size, self.output_size) / 8
-        # self.transfer_latency: int = (
-        #     ceil(self.datatype_size / self.bus_width) * self.bus_latency
-        # )  # Latency for reading from output buffers
-        # self.obuf_reads: int =  ceil(ceil(self.input_size / self.crossbar_rows) / self.func_ports) # Num of reads from obuf
+        num_elements = min(self.crossbar_rows / self.datatype_size, self.output_size) # Output elements to read per tile
+        obuf_data_size = 2*self.datatype_size + ceil(log2(self.crossbar_rows)) # Datatype size of obuf element
+        total_obuf_data = num_elements * obuf_data_size # Total data to be read from obuf
 
-        # self.total_latency: float = (
-        #     (1 / self.clk_freq)
-        #     * (((self.operation_latency + self.transfer_latency) * self.obuf_reads) + 1) * self.output_size
-        # )   # Time to produce a single element of one output channel
+        self.num_reads = ceil(total_obuf_data / self.obuf_bus_width)
 
         self.total_latency: float = (
-            32e-9
-            # (1 / self.clk_freq)
-            # * self.num_reads
-        )   # Time to produce a single element of one output channel
+            self.num_reads
+            / self.clk_freq
+        )
 
         self.fpga_power = param_dict["fpga_power"]
         # print(

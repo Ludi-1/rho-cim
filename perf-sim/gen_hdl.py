@@ -26,8 +26,9 @@ def gen_hdl(param_dict_tuple, datatype_size, crossbar_size, rd_bus_width, obuf_b
     )
 
     n = 0
-    param_dict_tuple[1]["layer_list"].insert(0, [None])
-    for prev_layer, current_layer in zip_longest(param_dict_tuple[1]["layer_list"], param_dict_tuple[1]["layer_list"][1:], fillvalue = [None]):
+    layer_list = param_dict_tuple[1]["layer_list"].copy()
+    layer_list.insert(0, [None])
+    for prev_layer, current_layer in zip_longest(layer_list, layer_list[1:], fillvalue = [None]):
         match current_layer[0]:
             case "fc":
                 parameters += (

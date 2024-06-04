@@ -36,17 +36,16 @@ class Control(Module):
 
         # self.num_writes: int = ceil(self.input_size / min(self.v_cim_tiles, self.ibuf_ports)) # Amount of writes to the RD buffers
 
-        self.num_writes = 8 # min(self.input_size, self.crossbar_rows) / 16 * self.datatype_size
+        self.num_writes = self.datatype_size # min(self.input_size, self.crossbar_rows) / 16 * self.datatype_size
 
-        self.transfer_latency: int = (
-            ceil(self.datatype_size / self.bus_width) * self.bus_latency
-        )
+        self.transfer_cycles: int = (
+            ceil(min(self.crossbar_rows, self.input_size) / self.bus_width)
+        ) # Cycles needed for filling RD buffer
 
         self.total_latency = (
-            32e-9 * self.datatype_size
-            # self.num_writes * 8 # num acts
-            # # * (self.transfer_latency + self.ibuf_read_latency)
-            # / self.clk_freq
+            self.num_writes
+            * self.transfer_cycles
+            / self.clk_freq
         )
         # print(
         #     f"{self.name} - Total: {self.total_latency}"

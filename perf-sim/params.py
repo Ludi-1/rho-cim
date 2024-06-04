@@ -228,14 +228,15 @@ param_dict_vgg16: dict = {
 }
 
 technology_list = ["reram"] #, "pcm"]
-datatype_size_list = [8] #2, 4, 8, 16]
-crossbar_size_list = [128] #, 256, 512]
+datatype_size_list = [1, 2, 4, 8] #2, 4, 8, 16]
+crossbar_size_list = [128, 256, 512] #, 256, 512]
 sparsity_list = [50] # [25, 50, 75]
 
 fpga_module_param = {
     "fpga_clk_freq": 250 * 10**6,
     "bus_latency": 0,
     "bus_width": 16,
+    "obuf_bus_width": 48,
     "ibuf_ports": 2**10,
     "ibuf_read_latency": 1,
     "func_ports": 2**10,  # Number of input operands for functional unit
@@ -244,12 +245,12 @@ fpga_module_param = {
 }
 
 param_dicts = [
-    ("cnn-1", param_dict_cnn_1),
+    # ("cnn-1", param_dict_cnn_1),
     # ("cnn-2", param_dict_cnn_2),
-    ("mlp-s", param_dict_mlp_s),
+    # ("mlp-s", param_dict_mlp_s),
     # ("mlp-m", param_dict_mlp_m),
-    # ("mlp-l", param_dict_mlp_l),
-    # ("lenet5", param_dict_lenet5),
+    ("mlp-l", param_dict_mlp_l),
+    ("lenet5", param_dict_lenet5),
     ("alexnet", param_dict_alexnet),
     ("vgg16", param_dict_vgg16)
 ]
