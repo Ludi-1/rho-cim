@@ -19,3 +19,4 @@ iverilog_dump.v
 *.jou
 *.log
 *.saif
+cnn_tb

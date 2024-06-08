@@ -1,4 +1,4 @@
-num_inferences: int = 2
+num_inferences: int = 1
 
 cim_param = {
     "reram": {
@@ -23,45 +23,46 @@ cim_param = {
 
 fpga_param = {
     "cnn-1": {
-        2: {256: 0.036},
-        4: {256: 0.065},
-        8: {128: 0.119, 256: 0.117, 512: 0.116},
+        2: {256: None},
+        4: {256: None},
+        8: {128: None, 256: None, 512: None},
     },
     "cnn-2": {
-        2: {256: 0.036},
-        4: {256: 0.065},
-        8: {128: 0.119, 256: 0.117, 512: 0.116},      
+        2: {256: None},
+        4: {256: None},
+        8: {128: None, 256: None, 512: None},      
     },
     "mlp-l": {
-        2: {256: 0.018},
-        4: {256: 0.02},
-        8: {128: 0.038, 256: 0.024, 512: 0.019},   
+        2: {256: None},
+        4: {256: None},
+        8: {128: 1.709, 256: None, 512: None},   
     },
     "mlp-m": {
-        2: {256: 0.016},
-        4: {256: 0.018},
-        8: {128: 0.036, 256: 0.021, 512: 0.019},
+        2: {256: None},
+        4: {256: None},
+        8: {128: None, 256: None, 512: None},
     },
     "mlp-s": {
-        2: {256: 0.012},
-        4: {256: 0.014},
-        8: {128: 0.024, 256: 0.016, 512: 0.015},
+        2: {256: None},
+        4: {256: None},
+        8: {128: None, 256: None, 512: None},
     },
     "lenet5": {
-        2: {256: 0.033},
-        4: {256: 0.055},
-        8: {128: 0.084, 256: 0.082, 512: 0.082},
+        2: {256: None},
+        4: {256: None},
+        8: {128: 0.206, 256: None, 512: None},
     },
     "alexnet": {
-        2: {256: 1.426},
-        4: {256: 3.310},
-        8: {128: 9.537, 256: 6.251, 512: 4.727},
-        16: {128: 9.467}, # TODO
+        2: {256: None},
+        4: {256: None},
+        8: {128: 21.5, 256: None, 512: None},
+        16: {128: None},
     },
     "vgg16": {
-        1: {128: 10}, # TODO
-        8: {128: 10}, # TODO
-        16: {128: 62.810},
+        1: {128: 0.552},
+        4: {128: 2.997},
+        8: {128: 5.545, 256: 3.635, 512: 2.817},
+        16: {128: None},
     }
 }
 
@@ -146,7 +147,8 @@ param_dict_lenet5: dict = {
     ],
 }
 
-param_dict_alexnet: dict = {
+# imagenet
+param_dict_alexnet_imagenet: dict = {
     "start_times": [0 for i in range(227**2 * num_inferences)],
     "layer_list": [
         # (Layer type, image size, kernel size, input channels, output_channels, stride, padding)
@@ -167,38 +169,60 @@ param_dict_alexnet: dict = {
     ],
 }
 
+#cifar 10
+param_dict_alexnet_cifar10: dict = {
+    "start_times": [0 for i in range(34**2 * num_inferences)],
+    "layer_list": [
+        # (Layer type, image size, kernel size, input channels, output_channels, stride, padding)
+        ("conv", 32, 3, 3, 64, 1, 0), # L0 conv 1
+        # image size = (prev_image_size - kernel_size + 2*padding) / stride + 1
+        # (Layer type, image size, kernel size, input channels, output_channels, stride, padding)
+        ("pool", 30, 2, 64, 64, 2), # L1
+        ("conv", 15, 5, 64, 192, 1, 2), # L2 conv 2
+        ("pool", 15, 3, 192, 192, 2), # L3
+        ("conv", 7, 3, 192, 384, 1, 1), # L4 conv 3
+        ("conv", 7, 3, 384, 256, 1, 1), # L5 conv 4
+        ("conv", 7, 3, 256, 256, 1, 1), # L6 conv 5
+        ("pool", 7, 3, 256, 256, 2), # L7
+        # (Layer type, input neurons, output neurons, input channels)
+        ("fc", 3**2, 4096, 256),  # (13-3)/2+1 = 6
+        ("fc", 4096, 4096, 1),
+        ("fc", 4096, 10, 1),
+    ],
+}
+
 # imagenet
-# param_dict_vgg16: dict = {
-#     "start_times": [0 for i in range(224**2 * num_inferences)],
-#     "layer_list": [
-#         # conv/pool: (Layer type, image size, kernel size, input channels, output_channels, stride, padding)
-#         # image size = (prev_image_size - kernel_size + 2*padding) / stride + 1
-#         # FC: (Layer type, input neurons, output neurons, input channels)
-#         ("conv", 224, 3, 3, 64, 1, 1), # 3x3,64 (2)
-#         ("conv", 224, 3, 64, 64, 1, 1), # 3x3,64 (2)
-#         ("pool", 224, 2, 64, 64, 2), # 2x2 Pool
-#         ("conv", 112, 3, 64, 128, 1, 1), # 3x3,128 (2)
-#         ("conv", 112, 3, 128, 128, 1, 1), # 3x3,128 (2)
-#         ("pool", 112, 2, 128, 128, 2), # 2x2 Pool
-#         ("conv", 56, 3, 128, 256, 1, 1), # 3x3,256 (3)
-#         ("conv", 56, 3, 256, 256, 1, 1), # 3x3,256 (3)
-#         ("conv", 56, 3, 256, 256, 1, 1), # 3x3,256 (3)
-#         ("pool", 56, 2, 256, 256, 2), # 2x2 Pool
-#         ("conv", 28, 3, 256, 512, 1, 1), # 3x3, 512 (3)
-#         ("conv", 28, 3, 512, 512, 1, 1), # 3x3, 512 (3)
-#         ("conv", 28, 3, 512, 512, 1, 1), # 3x3, 512 (3)
-#         ("pool", 28, 2, 512, 512, 2), # 2x2 Pool
-#         ("conv", 14, 3, 512, 512, 1, 1), # 3x3, 512 (3)
-#         ("conv", 14, 3, 512, 512, 1, 1), # 3x3, 512 (3)
-#         ("conv", 14, 3, 512, 512, 1, 1), # 3x3, 512 (3)
-#         ("pool", 14, 2, 512, 512, 2), # 2x2 Pool
-#         ("fc", 7**2, 4096, 512),
-#         ("fc", 4096, 1000, 1),
-#     ],
-# }
+param_dict_vgg16_imagenet: dict = {
+    "start_times": [0 for i in range(224**2 * num_inferences)],
+    "layer_list": [
+        # conv/pool: (Layer type, image size, kernel size, input channels, output_channels, stride, padding)
+        # image size = (prev_image_size - kernel_size + 2*padding) / stride + 1
+        # FC: (Layer type, input neurons, output neurons, input channels)
+        ("conv", 224, 3, 3, 64, 1, 1), # 3x3,64 (2)
+        ("conv", 224, 3, 64, 64, 1, 1), # 3x3,64 (2)
+        ("pool", 224, 2, 64, 64, 2), # 2x2 Pool
+        ("conv", 112, 3, 64, 128, 1, 1), # 3x3,128 (2)
+        ("conv", 112, 3, 128, 128, 1, 1), # 3x3,128 (2)
+        ("pool", 112, 2, 128, 128, 2), # 2x2 Pool
+        ("conv", 56, 3, 128, 256, 1, 1), # 3x3,256 (3)
+        ("conv", 56, 3, 256, 256, 1, 1), # 3x3,256 (3)
+        ("conv", 56, 3, 256, 256, 1, 1), # 3x3,256 (3)
+        ("pool", 56, 2, 256, 256, 2), # 2x2 Pool
+        ("conv", 28, 3, 256, 512, 1, 1), # 3x3, 512 (3)
+        ("conv", 28, 3, 512, 512, 1, 1), # 3x3, 512 (3)
+        ("conv", 28, 3, 512, 512, 1, 1), # 3x3, 512 (3)
+        ("pool", 28, 2, 512, 512, 2), # 2x2 Pool
+        ("conv", 14, 3, 512, 512, 1, 1), # 3x3, 512 (3)
+        ("conv", 14, 3, 512, 512, 1, 1), # 3x3, 512 (3)
+        ("conv", 14, 3, 512, 512, 1, 1), # 3x3, 512 (3)
+        ("pool", 14, 2, 512, 512, 2), # 2x2 Pool
+        ("fc", 7**2, 4096, 512),
+        ("fc", 4096, 1000, 1),
+    ],
+}
 
 # cifar100
-param_dict_vgg16: dict = {
+param_dict_vgg16_cifar100: dict = {
     "start_times": [0 for i in range(32**2 * num_inferences)],
     "layer_list": [
         # conv/pool: (Layer type, image size, kernel size, input channels, output_channels, stride, padding)
@@ -227,9 +251,39 @@ param_dict_vgg16: dict = {
     ],
 }
 
+# cifar10
+param_dict_vgg16_cifar10: dict = {
+    "start_times": [0 for i in range(32**2 * num_inferences)],
+    "layer_list": [
+        # conv/pool: (Layer type, image size, kernel size, input channels, output_channels, stride, padding)
+        # image size = (prev_image_size - kernel_size + 2*padding) / stride + 1
+        # FC: (Layer type, input neurons, output neurons, input channels)
+        ("conv", 32, 3, 3, 64, 1, 1), # 3x3,64 (2)
+        ("conv", 32, 3, 64, 64, 1, 1), # 3x3,64 (2)
+        ("pool", 32, 2, 64, 64, 2), # 2x2 Pool
+        ("conv", 16, 3, 64, 128, 1, 1), # 3x3,128 (2)
+        ("conv", 16, 3, 128, 128, 1, 1), # 3x3,128 (2)
+        ("pool", 16, 2, 128, 128, 2), # 2x2 Pool
+        ("conv", 8, 3, 128, 256, 1, 1), # 3x3,256 (3)
+        ("conv", 8, 3, 256, 256, 1, 1), # 3x3,256 (3)
+        ("conv", 8, 3, 256, 256, 1, 1), # 3x3,256 (3)
+        ("pool", 8, 2, 256, 256, 2), # 2x2 Pool
+        ("conv", 4, 3, 256, 512, 1, 1), # 3x3, 512 (3)
+        ("conv", 4, 3, 512, 512, 1, 1), # 3x3, 512 (3)
+        ("conv", 4, 3, 512, 512, 1, 1), # 3x3, 512 (3)
+        ("pool", 4, 2, 512, 512, 2), # 2x2 Pool
+        ("conv", 2, 3, 512, 512, 1, 1), # 3x3, 512 (3)
+        ("conv", 2, 3, 512, 512, 1, 1), # 3x3, 512 (3)
+        ("conv", 2, 3, 512, 512, 1, 1), # 3x3, 512 (3)
+        ("pool", 2, 2, 512, 512, 2), # 2x2 Pool
+        ("fc", 1**2, 4096, 512),
+        ("fc", 4096, 10, 1),
+    ],
+}
+
 technology_list = ["reram"] #, "pcm"]
-datatype_size_list = [1, 2, 4, 8] #2, 4, 8, 16]
-crossbar_size_list = [128, 256, 512] #, 256, 512]
+datatype_size_list = [1, 4, 8] #2, 4, 8, 16]
+crossbar_size_list = [128] #, 256, 512]
 sparsity_list = [50] # [25, 50, 75]
 
 fpga_module_param = {
@@ -249,8 +303,10 @@ param_dicts = [
     # ("cnn-2", param_dict_cnn_2),
     # ("mlp-s", param_dict_mlp_s),
     # ("mlp-m", param_dict_mlp_m),
-    ("mlp-l", param_dict_mlp_l),
-    ("lenet5", param_dict_lenet5),
-    ("alexnet", param_dict_alexnet),
-    ("vgg16", param_dict_vgg16)
+    # ("mlp-l", param_dict_mlp_l),
+    # ("lenet5", param_dict_lenet5),
+    # ("alexnet", param_dict_alexnet_imagenet),
+    ("alexnet_cifar10", param_dict_alexnet_cifar10),
+    ("vgg16_cifar10", param_dict_vgg16_cifar10)
+    # ("vgg16_imagenet", param_dict_vgg16_imagenet)
 ]

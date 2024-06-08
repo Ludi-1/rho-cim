@@ -56,11 +56,11 @@ def main(ENABLE_OUTPUT):
     #                     conf.start()
     #                     analysis_conf(conf, conf_name, param_dict["fpga_power"])
 
-    # #     for datatype_size in datatype_size_list:
-    # #         for crossbar_size in crossbar_size_list:
-    # #             for conv_dt in [1, 2, 4, 8]:
-    # #                 conf_name = f"{param_dict_tuple[0]}_d{datatype_size}_c{crossbar_size}_a{conv_dt}"
-    # #                 analysis(conf_name, param_dict, datatype_size, crossbar_size, conv_dt)
+    #     for datatype_size in datatype_size_list:
+    #         for crossbar_size in crossbar_size_list:
+    #             for conv_dt in [1, 2, 4, 8]:
+    #                 conf_name = f"{param_dict_tuple[0]}_d{datatype_size}_c{crossbar_size}_a{conv_dt}"
+    #                 analysis(conf_name, param_dict, datatype_size, crossbar_size, conv_dt)
 
     # for param_dict_tuple in param_dicts:
     #     for datatype_size in datatype_size_list:
