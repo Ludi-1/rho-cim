@@ -52,17 +52,19 @@ fpga_param = {
         4: {256: None},
         8: {128: 0.206, 256: None, 512: None},
     },
-    "alexnet": {
+    "alexnet_imagenet": {
         2: {256: None},
         4: {256: None},
         8: {128: 21.5, 256: None, 512: None},
         16: {128: None},
     },
-    "vgg16": {
-        1: {128: 0.552},
-        4: {128: 2.997},
-        8: {128: 5.545, 256: 3.635, 512: 2.817},
-        16: {128: None},
+    "alexnet_cifar10": {
+        8: {128: 12.132},
+    },
+    "vgg16_cifar10": {
+        1: {128: 2.499},
+        4: {128: 5.824},
+        8: {128: 12.37, 256: 5.456, 512: 3.045},
     }
 }
 
@@ -171,7 +173,7 @@ param_dict_alexnet_imagenet: dict = {
 
 #cifar 10
 param_dict_alexnet_cifar10: dict = {
-    "start_times": [0 for i in range(34**2 * num_inferences)],
+    "start_times": [0 for i in range(32**2 * num_inferences)],
     "layer_list": [
         # (Layer type, image size, kernel size, input channels, output_channels, stride, padding)
         ("conv", 32, 3, 3, 64, 1, 0), # L0 conv 1
@@ -217,6 +219,7 @@ param_dict_vgg16_imagenet: dict = {
         ("conv", 14, 3, 512, 512, 1, 1), # 3x3, 512 (3)
         ("pool", 14, 2, 512, 512, 2), # 2x2 Pool
         ("fc", 7**2, 4096, 512),
+        ("fc", 4096, 4096, 1),
         ("fc", 4096, 1000, 1),
     ],
 }
@@ -247,6 +250,7 @@ param_dict_vgg16_cifar100: dict = {
         ("conv", 2, 3, 512, 512, 1, 1), # 3x3, 512 (3)
         ("pool", 2, 2, 512, 512, 2), # 2x2 Pool
         ("fc", 1**2, 4096, 512),
+        ("fc", 4096, 4096, 1),
         ("fc", 4096, 100, 1),
     ],
 }
@@ -277,13 +281,14 @@ param_dict_vgg16_cifar10: dict = {
         ("conv", 2, 3, 512, 512, 1, 1), # 3x3, 512 (3)
         ("pool", 2, 2, 512, 512, 2), # 2x2 Pool
         ("fc", 1**2, 4096, 512),
+        ("fc", 4096, 4096, 1),
         ("fc", 4096, 10, 1),
     ],
 }
 
 technology_list = ["reram"] #, "pcm"]
-datatype_size_list = [1, 4, 8] #2, 4, 8, 16]
-crossbar_size_list = [128] #, 256, 512]
+datatype_size_list = [8, 4, 1]
+crossbar_size_list = [128]#, 256, 512]
 sparsity_list = [50] # [25, 50, 75]
 
 fpga_module_param = {
@@ -303,10 +308,10 @@ param_dicts = [
     # ("cnn-2", param_dict_cnn_2),
     # ("mlp-s", param_dict_mlp_s),
     # ("mlp-m", param_dict_mlp_m),
+    # ("alexnet", param_dict_alexnet_imagenet),
+    # ("vgg16_imagenet", param_dict_vgg16_imagenet),
     # ("mlp-l", param_dict_mlp_l),
     # ("lenet5", param_dict_lenet5),
-    # ("alexnet", param_dict_alexnet_imagenet),
-    ("alexnet_cifar10", param_dict_alexnet_cifar10),
+    # ("alexnet_cifar10", param_dict_alexnet_cifar10),
     ("vgg16_cifar10", param_dict_vgg16_cifar10)
-    # ("vgg16_imagenet", param_dict_vgg16_imagenet)
 ]
