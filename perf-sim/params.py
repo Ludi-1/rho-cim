@@ -172,22 +172,42 @@ param_dict_alexnet_imagenet: dict = {
 }
 
 #cifar 10
+# param_dict_alexnet_cifar10: dict = {
+#     "start_times": [0 for i in range(34**2 * num_inferences)],
+#     "layer_list": [
+#         # (Layer type, image size, kernel size, input channels, output_channels, stride, padding)
+#         ("conv", 32, 3, 3, 64, 1, 0), # L0 conv 1
+#         # image size = (prev_image_size - kernel_size + 2*padding) / stride + 1
+#         # (Layer type, image size, kernel size, input channels, output_channels, stride, padding)
+#         ("pool", 30, 2, 64, 64, 2), # L1
+#         ("conv", 15, 5, 64, 192, 1, 2), # L2 conv 2
+#         ("pool", 15, 3, 192, 192, 2), # L3
+#         ("conv", 7, 3, 192, 384, 1, 1), # L4 conv 3
+#         ("conv", 7, 3, 384, 256, 1, 1), # L5 conv 4
+#         ("conv", 7, 3, 256, 256, 1, 1), # L6 conv 5
+#         ("pool", 7, 3, 256, 256, 2), # L7
+#         # (Layer type, input neurons, output neurons, input channels)
+#         ("fc", 3**2, 4096, 256),  # (13-3)/2+1 = 6
+#         ("fc", 4096, 4096, 1),
+#         ("fc", 4096, 10, 1),
+#     ],
+# }
 param_dict_alexnet_cifar10: dict = {
     "start_times": [0 for i in range(32**2 * num_inferences)],
     "layer_list": [
         # (Layer type, image size, kernel size, input channels, output_channels, stride, padding)
-        ("conv", 32, 3, 3, 64, 1, 0), # L0 conv 1
+        ("conv", 32, 11, 3, 64, 1, 1), # L0 conv 1
         # image size = (prev_image_size - kernel_size + 2*padding) / stride + 1
         # (Layer type, image size, kernel size, input channels, output_channels, stride, padding)
-        ("pool", 30, 2, 64, 64, 2), # L1
-        ("conv", 15, 5, 64, 192, 1, 2), # L2 conv 2
-        ("pool", 15, 3, 192, 192, 2), # L3
-        ("conv", 7, 3, 192, 384, 1, 1), # L4 conv 3
-        ("conv", 7, 3, 384, 256, 1, 1), # L5 conv 4
-        ("conv", 7, 3, 256, 256, 1, 1), # L6 conv 5
-        ("pool", 7, 3, 256, 256, 2), # L7
+        ("pool", 8, 2, 64, 64, 2), # L1
+        ("conv", 8, 5, 64, 192, 1, 2), # L2 conv 2
+        ("pool", 4, 2, 192, 192, 2), # L3
+        ("conv", 2, 3, 192, 384, 1, 1), # L4 conv 3
+        ("conv", 2, 3, 384, 256, 1, 1), # L5 conv 4
+        ("conv", 2, 3, 256, 256, 1, 1), # L6 conv 5
+        ("pool", 2, 2, 256, 256, 2), # L7
         # (Layer type, input neurons, output neurons, input channels)
-        ("fc", 3**2, 4096, 256),  # (13-3)/2+1 = 6
+        ("fc", 1**2, 4096, 256),  # (13-3)/2+1 = 6
         ("fc", 4096, 4096, 1),
         ("fc", 4096, 10, 1),
     ],
@@ -287,7 +307,7 @@ param_dict_vgg16_cifar10: dict = {
 }
 
 technology_list = ["reram"] #, "pcm"]
-datatype_size_list = [8, 4, 1]
+datatype_size_list = [8]
 crossbar_size_list = [128]#, 256, 512]
 sparsity_list = [50] # [25, 50, 75]
 
@@ -311,7 +331,7 @@ param_dicts = [
     # ("alexnet", param_dict_alexnet_imagenet),
     # ("vgg16_imagenet", param_dict_vgg16_imagenet),
     # ("mlp-l", param_dict_mlp_l),
-    # ("lenet5", param_dict_lenet5),
-    # ("alexnet_cifar10", param_dict_alexnet_cifar10),
+    # ("lenet5", param_dict_lenet5)
+    ("alexnet_cifar10", param_dict_alexnet_cifar10),
     ("vgg16_cifar10", param_dict_vgg16_cifar10)
 ]

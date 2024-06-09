@@ -24,4 +24,5 @@ class CIM(Module):
         super().start(time)
 
     def get_energy(self):
+        print(f"{self.name} - {self.start_count}")
         return self.total_energy*self.start_count*self.num_tiles
