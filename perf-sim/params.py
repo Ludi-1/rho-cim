@@ -59,7 +59,7 @@ fpga_param = {
         16: {128: None},
     },
     "alexnet_cifar10": {
-        8: {128: 12.132},
+        8: {128: 7.861},
     },
     "vgg16_cifar10": {
         1: {128: 2.499},
@@ -137,7 +137,6 @@ param_dict_lenet5: dict = {
     "layer_list": [
         # (Layer type, image size, kernel size, input channels, output_channels, stride)
         ("conv", 28, 5, 1, 6, 1, 0),
-        # image size = (prev_image_size - kernel_size + 2*padding) / stride + 1
         # (Layer type, image size, kernel size, input channels, output_channels, stride)
         ("pool", 24, 2, 6, 6, 2, 0), # padding = 0
         ("conv", 12, 5, 6, 16, 1, 0),
@@ -331,7 +330,7 @@ param_dicts = [
     # ("alexnet", param_dict_alexnet_imagenet),
     # ("vgg16_imagenet", param_dict_vgg16_imagenet),
     # ("mlp-l", param_dict_mlp_l),
-    # ("lenet5", param_dict_lenet5)
+    ("lenet5", param_dict_lenet5),
     ("alexnet_cifar10", param_dict_alexnet_cifar10),
     ("vgg16_cifar10", param_dict_vgg16_cifar10)
 ]

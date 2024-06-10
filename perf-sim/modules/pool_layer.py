@@ -74,6 +74,7 @@ class Pool_Layer(Module):
                         if self.entry_count == self.image_size ** 2 - 1:
                             super().start(time)
                             self.entry_count = 0
+                            self.skip = False
                     
 
         if self.entry_count == self.image_size ** 2 - 1:
