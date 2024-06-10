@@ -18,6 +18,6 @@ class Agent(Module):
         if type(self.next_module) is CNN_Layer:
             for start_time in self.start_times:
                 self.current_time = start_time / self.clk_freq
-                super().start(start_time)
+                super().start(start_time / self.clk_freq)
         elif type(self.next_module) is MLP_Layer:
             super().start(self.start_times[-1] / self.clk_freq)

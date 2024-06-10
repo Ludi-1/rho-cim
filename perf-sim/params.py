@@ -69,7 +69,7 @@ fpga_param = {
 }
 
 param_dict_cnn_1: dict = {
-    "start_times": [0 for i in range(28 ** 2 * num_inferences)],
+    "start_times": [i for i in range(28 ** 2 * num_inferences)],
     "layer_list": [
         # (Layer type, image size, kernel size, input channels, output_channels, stride)
         ("conv", 28, 5, 1, 5, 1, 0),
@@ -83,7 +83,7 @@ param_dict_cnn_1: dict = {
 }
 
 param_dict_cnn_2: dict = {
-    "start_times": [0 for i in range(28**2 * num_inferences)],
+    "start_times": [i for i in range(28**2 * num_inferences)],
     "layer_list": [
         # (Layer type, image size, kernel size, input channels, output_channels, stride)
         ("conv", 28, 7, 1, 10, 1, 0),
@@ -98,7 +98,7 @@ param_dict_cnn_2: dict = {
 }
 
 param_dict_mlp_s: dict = {
-    "start_times": [0 for i in range(28**2 * num_inferences)],
+    "start_times": [i for i in range(28**2 * num_inferences)],
     "layer_list": [
         # (Layer type, input size, output_size, input channels)
         ("fc", 784, 784, 1),
@@ -109,7 +109,7 @@ param_dict_mlp_s: dict = {
 }
 
 param_dict_mlp_m: dict = {
-    "start_times": [0 for i in range(28**2 * num_inferences)],
+    "start_times": [i for i in range(28**2 * num_inferences)],
     "layer_list": [
         # (Layer type, input size, output_size, input channels)
         ("fc", 784, 784, 1),
@@ -121,7 +121,7 @@ param_dict_mlp_m: dict = {
 }
 
 param_dict_mlp_l: dict = {
-    "start_times": [0 for i in range(28**2 * num_inferences)],
+    "start_times": [i for i in range(28**2 * num_inferences)],
     "layer_list": [
         # (Layer type, input size, output_size, input channels)
         ("fc", 784, 784, 1), # FC(784)
@@ -133,16 +133,16 @@ param_dict_mlp_l: dict = {
 }
 
 param_dict_lenet5: dict = {
-    "start_times": [0 for i in range(28**2 * num_inferences)],
+    "start_times": [i for i in range(28**2 * num_inferences)],
     "layer_list": [
         # (Layer type, image size, kernel size, input channels, output_channels, stride)
-        ("conv", 28, 5, 1, 6, 1, 0),
+        ("conv", 28, 5, 1, 6, 1, 2),
         # (Layer type, image size, kernel size, input channels, output_channels, stride)
-        ("pool", 24, 2, 6, 6, 2, 0), # padding = 0
-        ("conv", 12, 5, 6, 16, 1, 0),
-        ("pool", 8, 2, 16, 16, 2, 0), # padding = 0
+        ("pool", 28, 2, 6, 6, 2, 0), # padding = 0
+        ("conv", 14, 5, 6, 16, 1, 0),
+        ("pool", 10, 2, 16, 16, 2, 0), # padding = 0
         # (Layer type, input neurons, output neurons, input channels)
-        ("fc", 4**2, 120, 16),  # (8-2)/2 = 4
+        ("fc", 5**2, 120, 16),  # (8-2)/2 = 4
         ("fc", 120, 84, 1),
         ("fc", 84, 10, 1),
     ],
@@ -150,7 +150,7 @@ param_dict_lenet5: dict = {
 
 # imagenet
 param_dict_alexnet_imagenet: dict = {
-    "start_times": [0 for i in range(227**2 * num_inferences)],
+    "start_times": [i for i in range(227**2 * num_inferences)],
     "layer_list": [
         # (Layer type, image size, kernel size, input channels, output_channels, stride, padding)
         ("conv", 227, 11, 3, 96, 4, 0), # L0 conv 1
@@ -172,7 +172,7 @@ param_dict_alexnet_imagenet: dict = {
 
 #cifar 10
 # param_dict_alexnet_cifar10: dict = {
-#     "start_times": [0 for i in range(34**2 * num_inferences)],
+#     "start_times": [i for i in range(34**2 * num_inferences)],
 #     "layer_list": [
 #         # (Layer type, image size, kernel size, input channels, output_channels, stride, padding)
 #         ("conv", 32, 3, 3, 64, 1, 0), # L0 conv 1
@@ -192,10 +192,10 @@ param_dict_alexnet_imagenet: dict = {
 #     ],
 # }
 param_dict_alexnet_cifar10: dict = {
-    "start_times": [0 for i in range(32**2 * num_inferences)],
+    "start_times": [i for i in range(32**2 * num_inferences)],
     "layer_list": [
         # (Layer type, image size, kernel size, input channels, output_channels, stride, padding)
-        ("conv", 32, 11, 3, 64, 1, 1), # L0 conv 1
+        ("conv", 32, 11, 3, 64, 3, 0), # L0 conv 1
         # image size = (prev_image_size - kernel_size + 2*padding) / stride + 1
         # (Layer type, image size, kernel size, input channels, output_channels, stride, padding)
         ("pool", 8, 2, 64, 64, 2), # L1
@@ -214,7 +214,7 @@ param_dict_alexnet_cifar10: dict = {
 
 # imagenet
 param_dict_vgg16_imagenet: dict = {
-    "start_times": [0 for i in range(224**2 * num_inferences)],
+    "start_times": [i for i in range(224**2 * num_inferences)],
     "layer_list": [
         # conv/pool: (Layer type, image size, kernel size, input channels, output_channels, stride, padding)
         # image size = (prev_image_size - kernel_size + 2*padding) / stride + 1
@@ -245,7 +245,7 @@ param_dict_vgg16_imagenet: dict = {
 
 # cifar100
 param_dict_vgg16_cifar100: dict = {
-    "start_times": [0 for i in range(32**2 * num_inferences)],
+    "start_times": [i for i in range(32**2 * num_inferences)],
     "layer_list": [
         # conv/pool: (Layer type, image size, kernel size, input channels, output_channels, stride, padding)
         # image size = (prev_image_size - kernel_size + 2*padding) / stride + 1
@@ -276,7 +276,7 @@ param_dict_vgg16_cifar100: dict = {
 
 # cifar10
 param_dict_vgg16_cifar10: dict = {
-    "start_times": [0 for i in range(32**2 * num_inferences)],
+    "start_times": [i for i in range(32**2 * num_inferences)],
     "layer_list": [
         # conv/pool: (Layer type, image size, kernel size, input channels, output_channels, stride, padding)
         # image size = (prev_image_size - kernel_size + 2*padding) / stride + 1
@@ -331,6 +331,6 @@ param_dicts = [
     # ("vgg16_imagenet", param_dict_vgg16_imagenet),
     # ("mlp-l", param_dict_mlp_l),
     ("lenet5", param_dict_lenet5),
-    ("alexnet_cifar10", param_dict_alexnet_cifar10),
-    ("vgg16_cifar10", param_dict_vgg16_cifar10)
+    ("alexnet_cifar10", param_dict_alexnet_cifar10)
+    # ("vgg16_cifar10", param_dict_vgg16_cifar10)
 ]
